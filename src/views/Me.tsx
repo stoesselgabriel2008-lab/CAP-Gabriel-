@@ -706,12 +706,15 @@ function SettingsView() {
           label="Style visuel"
           value={state.settings.appearance}
           onChange={v => update(s => ({ ...s, settings: { ...s.settings, appearance: v } }))}
-          options={[{ value: 'sobre', label: 'Sobre' }, { value: 'glass', label: 'Liquid Glass' }]}
+          options={[
+            { value: 'sobre', label: 'Sombre' },
+            { value: 'clair', label: 'Clair' },
+            { value: 'glass', label: 'Liquid Glass' }
+          ]}
         />
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
-          Liquid Glass : fond teinté en profondeur, cartes translucides avec flou.
-          Superbe sur iPhone récent ; si ça rame ou consomme trop, repasse en Sobre
-          ou active « Réduire la transparence » ci-dessous.
+          Clair : palette officielle iOS, comme les apps Apple en mode jour.
+          Liquid Glass : barres flottantes en verre et cartes profondes, façon Apple Music.
         </p>
       </div>
 

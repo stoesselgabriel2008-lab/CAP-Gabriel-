@@ -964,55 +964,42 @@ input[type="range"] {
   min-height: 100dvh;
 }
 
-@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
-  /* Surfaces de contenu en verre */
-  .theme-glass .card,
-  .theme-glass .list-group,
-  .theme-glass .shortcut,
-  .theme-glass .now-card,
-  .theme-glass .toast,
-  .theme-glass .update-banner {
-    background:
-      linear-gradient(118deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 42%),
-      rgba(255, 255, 255, 0.045);
-    border: none;
-    border-radius: 24px;
-    box-shadow:
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.22),
-      inset 1.8px 2.4px 1px -1.5px rgba(255, 255, 255, 0.6),
-      inset -1.5px -1.5px 1px -1.5px rgba(255, 255, 255, 0.3),
-      inset 0 -12px 24px -14px rgba(0, 0, 0, 0.5),
-      0 12px 32px rgba(0, 0, 0, 0.45);
-    -webkit-backdrop-filter: blur(26px) saturate(1.85) brightness(1.1);
-    backdrop-filter: blur(26px) saturate(1.85) brightness(1.1);
-  }
-  .theme-glass .now-card { border-radius: 26px; }
-  .theme-glass .now-card::before { display: none; }
-  .theme-glass .shortcut { border-radius: 20px; }
+/* Cartes : opaques, profondes et précises (le verre est réservé aux couches
+   flottantes — c'est ce que fait Apple : une carte statique n'a rien à réfracter). */
+.theme-glass .card,
+.theme-glass .list-group,
+.theme-glass .shortcut,
+.theme-glass .now-card,
+.theme-glass .toast,
+.theme-glass .update-banner {
+  background: linear-gradient(180deg, #1e1e21, #151518);
+  border: none;
+  border-radius: 22px;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.3),
+    0 10px 28px rgba(0, 0, 0, 0.45);
+}
+.theme-glass .now-card { border-radius: 24px; }
+.theme-glass .now-card::before { display: none; }
+.theme-glass .shortcut { border-radius: 20px; }
 
-  /* Contrôles */
-  .theme-glass .segmented,
-  .theme-glass .field,
-  .theme-glass .chip {
-    background: rgba(255, 255, 255, 0.07);
-    box-shadow:
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
-      inset 1px 1.4px 0.5px -1px rgba(255, 255, 255, 0.4);
-  }
-  .theme-glass .segmented button[aria-pressed="true"] {
-    background: rgba(255, 255, 255, 0.22);
-    box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.25), 0 1px 4px rgba(0, 0, 0, 0.3);
-  }
-  .theme-glass .chip[aria-pressed="true"] { background: var(--tint); box-shadow: none; }
-  .theme-glass .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow:
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.18),
-      inset 1.2px 1.6px 0.5px -1px rgba(255, 255, 255, 0.5);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6);
-    backdrop-filter: blur(16px) saturate(1.6);
-  }
-  .theme-glass .check-circle { border-color: rgba(255, 255, 255, 0.4); }
+/* Contrôles : relief discret */
+.theme-glass .segmented,
+.theme-glass .field,
+.theme-glass .chip {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.09);
+  border: none;
+}
+.theme-glass .segmented button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.2), 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.theme-glass .chip[aria-pressed="true"] { background: var(--tint); box-shadow: none; }
+.theme-glass .check-circle { border-color: rgba(255, 255, 255, 0.4); }
+
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
 
   /* Sheets : verre épais */
   .theme-glass .sheet {
@@ -1100,3 +1087,101 @@ input[type="range"] {
     border: 0.5px solid var(--glass-stroke);
   }
 }
+
+/* ─── Thème clair — palette officielle iOS (UIKit semantic colors) ── */
+.theme-light {
+  color-scheme: light;
+
+  --system-background: #f2f2f7;
+  --secondary-system-background: #ffffff;
+  --tertiary-system-background: rgba(118, 118, 128, 0.12);
+  --system-grouped-background: #f2f2f7;
+  --secondary-system-grouped-background: #ffffff;
+  --tertiary-system-grouped-background: #f2f2f7;
+
+  --label: #000000;
+  --secondary-label: rgba(60, 60, 67, 0.6);
+  --tertiary-label: rgba(60, 60, 67, 0.3);
+  --separator: rgba(60, 60, 67, 0.29);
+  --opaque-separator: #c6c6c8;
+
+  --tint: #007aff;
+  --tint-pressed: #0a84ff;
+  --success: #34c759;
+  --warning: #ffcc00;
+  --danger: #ff3b30;
+
+  --glass-fill: rgba(249, 249, 249, 0.82);
+  --glass-stroke: rgba(0, 0, 0, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.65);
+
+  color: var(--label);
+  background: var(--system-background);
+  min-height: 100dvh;
+}
+
+.theme-light .card,
+.theme-light .list-group,
+.theme-light .shortcut {
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+.theme-light .now-card {
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+.theme-light .now-card::before { display: none; }
+
+.theme-light .segmented { background: rgba(118, 118, 128, 0.12); }
+.theme-light .segmented button[aria-pressed="true"] {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+.theme-light .chip {
+  background: rgba(118, 118, 128, 0.12);
+  border: none;
+  color: var(--label);
+}
+.theme-light .chip[aria-pressed="true"] { background: var(--tint); color: #fff; }
+.theme-light .field { background: rgba(118, 118, 128, 0.12); }
+.theme-light .btn-secondary { background: rgba(118, 118, 128, 0.12); color: var(--label); }
+
+.theme-light .sheet {
+  background: #f2f2f7;
+  border: none;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.theme-light .sheet::before { display: none; }
+.theme-light .sheet-grabber { background: rgba(0, 0, 0, 0.2); }
+.theme-light .sheet-backdrop { background: rgba(0, 0, 0, 0.25); }
+
+.theme-light .tab-bar { border-top-color: rgba(0, 0, 0, 0.1); }
+.theme-light .tab-bar::before { display: none; }
+.theme-light .action-bar {
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+.theme-light .action-bar::after { display: none; }
+.theme-light .action-bar-add { color: #fff; }
+
+.theme-light .toast,
+.theme-light .update-banner {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+}
+.theme-light mark { background: rgba(0, 122, 255, 0.18); }
+.theme-light .sos-progress span { background: rgba(118, 118, 128, 0.16); }
+.theme-light .breath-circle {
+  background: radial-gradient(circle at 40% 35%, rgba(0, 122, 255, 0.4), rgba(0, 122, 255, 0.1));
+}
+.theme-light .cal-head button:active { background: rgba(118, 118, 128, 0.12); }
+.theme-light .evidence-solide { background: rgba(52, 199, 89, 0.15); color: #248a3d; }
+.theme-light .evidence-probable { background: rgba(0, 122, 255, 0.12); color: #0066d6; }
+.theme-light .evidence-limite { background: rgba(255, 204, 0, 0.2); color: #997404; }
+.theme-light .evidence-non { background: rgba(255, 59, 48, 0.12); color: #d70015; }

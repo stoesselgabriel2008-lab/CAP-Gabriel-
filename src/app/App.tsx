@@ -22,10 +22,9 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Liquid Glass épuré : fond noir profond neutre, sans halos colorés — dans l\'esprit d\'Apple Music en mode sombre',
-  'Verre neutre avec reflets lumineux et liserés fins sur toutes les surfaces',
-  'Barre d\'onglets en capsule flottante quand le thème verre est actif',
-  'La couleur reste réservée aux actions (boutons, sélections)'
+  'Nouveau mode Clair : la palette officielle iOS, fidèle aux apps Apple en mode jour (Moi → Réglages → Apparence)',
+  'Liquid Glass affiné : cartes opaques profondes façon Apple Music, le verre est réservé aux barres flottantes et fenêtres — comme le fait Apple',
+  'Trois styles au choix : Sombre, Clair, Liquid Glass'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -137,6 +136,7 @@ export default function App() {
   const cls = 'app-shell'
     + (state.settings.reducedTransparency ? ' reduced-transparency' : '')
     + (state.settings.appearance === 'glass' && !state.settings.reducedTransparency ? ' theme-glass' : '')
+    + (state.settings.appearance === 'clair' ? ' theme-light' : '')
   const dueCount = computeDueQueue(state, today).length
   const inboxCount = state.captures.filter(c => !c.processedAt).length
   const tabBadges: Partial<Record<TabId, number>> = { review: dueCount, plan: inboxCount }
