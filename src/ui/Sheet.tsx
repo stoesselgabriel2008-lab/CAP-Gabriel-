@@ -3,6 +3,10 @@
 
 import React, { useEffect, useRef } from 'react'
 
+// Pile des sheets ouvertes : seule celle du dessus réagit à Escape/Tab,
+// et le scroll du fond n'est restauré que quand la dernière se ferme.
+const sheetStack: symbol[] = []
+
 export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }: {
   title: string
   onClose: () => void
@@ -14,6 +18,9 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
   const previouslyFocused = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
+    const token = Symbol('sheet')
+    sheetStack.push(token)
+    const isTop = () => sheetStack[sheetStack.length - 1] === token
     previouslyFocused.current = document.activeElement as HTMLElement
     const el = ref.current
     if (el) {
@@ -23,6 +30,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
       ;(focusable ?? el).focus()
     }
     const onKey = (e: KeyboardEvent) => {
+      if (!isTop()) return
       if (e.key === 'Escape') { e.stopPropagation(); onClose() }
       if (e.key === 'Tab' && ref.current) {
         const items = Array.from(ref.current.querySelectorAll<HTMLElement>(
@@ -38,7 +46,9 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKey, true)
-      document.body.style.overflow = ''
+      const i = sheetStack.indexOf(token)
+      if (i >= 0) sheetStack.splice(i, 1)
+      if (sheetStack.length === 0) document.body.style.overflow = ''
       previouslyFocused.current?.focus?.()
     }
   }, [onClose])

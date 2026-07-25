@@ -4,8 +4,10 @@ import React, { useRef, useState } from 'react'
 import { useApp } from '../state/store'
 import { isValidCivil } from '../lib/dates'
 import { Segmented } from './Sheet'
+import { DateField, TimeField } from './pickers'
 import { validateImport, mergeStates } from '../domain/backup'
 import type { Profile } from '../domain/types'
+import { APP_VERSION } from '../domain/types'
 
 export function Onboarding() {
   const { state, update, toast } = useApp()
@@ -25,7 +27,7 @@ export function Onboarding() {
       ...s,
       profile: { ...s.profile, firstName: firstName.trim() || 'Gabriel', birthDate, priority, wakeTarget },
       commitment: { ...s.commitment, startDate, originalStart: startDate },
-      settings: { ...s.settings, onboardingDone: true }
+      settings: { ...s.settings, onboardingDone: true, lastSeenVersion: APP_VERSION }
     }))
   }
 
@@ -70,8 +72,7 @@ export function Onboarding() {
       <p style={{ color: 'var(--secondary-label)', marginBottom: 8 }}>Tout est prérempli, corrige si besoin.</p>
       <label className="field-label" htmlFor="ob-name">Prénom</label>
       <input id="ob-name" className="field" value={firstName} onChange={e => setFirstName(e.target.value)} autoComplete="given-name" />
-      <label className="field-label" htmlFor="ob-birth">Date de naissance</label>
-      <input id="ob-birth" className="field" type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} />
+      <DateField label="Date de naissance" value={birthDate} onChange={setBirthDate} allowNone={false} quick={false} />
       <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 8 }}>Fuseau horaire : Europe/Paris</p>
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 24 }} onClick={() => setStep(2)}>Continuer</button>
     </div>,
@@ -79,8 +80,7 @@ export function Onboarding() {
     // 2 — engagement + priorité
     <div key="2">
       <h1 style={{ fontSize: 28, marginBottom: 4 }}>Ton cap</h1>
-      <label className="field-label" htmlFor="ob-start">Départ de ton engagement personnel</label>
-      <input id="ob-start" className="field" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+      <DateField label="Départ de ton engagement personnel" value={startDate} onChange={setStartDate} allowNone={false} quick={false} />
       <label className="field-label">Priorité actuelle</label>
       <Segmented
         label="Priorité actuelle"
@@ -94,8 +94,7 @@ export function Onboarding() {
           { value: 'social', label: 'Social' }
         ]}
       />
-      <label className="field-label" htmlFor="ob-wake">Heure de lever cible</label>
-      <input id="ob-wake" className="field" type="time" value={wakeTarget} onChange={e => setWakeTarget(e.target.value)} />
+      <TimeField label="Heure de lever cible" value={wakeTarget} onChange={setWakeTarget} allowNone={false} />
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 24 }} onClick={() => setStep(3)}>Continuer</button>
     </div>,
 

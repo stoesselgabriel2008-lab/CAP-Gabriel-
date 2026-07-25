@@ -7,6 +7,7 @@ import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader } from './Plan'
+import { DateField, TimeField } from '../ui/pickers'
 import { computeInsights, notEnoughDataMessage } from '../domain/insights'
 import { exportBackup, validateImport, mergeStates, type ImportPreview } from '../domain/backup'
 import { defaultState, APP_VERSION } from '../domain/types'
@@ -494,12 +495,9 @@ function SettingsView() {
       <div className="card">
         <label className="field-label" htmlFor="st-name" style={{ marginTop: 0 }}>Prénom</label>
         <input id="st-name" className="field" value={firstName} onChange={e => setFirstName(e.target.value)} />
-        <label className="field-label" htmlFor="st-birth">Date de naissance</label>
-        <input id="st-birth" className="field" type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} />
-        <label className="field-label" htmlFor="st-wake">Heure de lever cible</label>
-        <input id="st-wake" className="field" type="time" value={wakeTarget} onChange={e => setWakeTarget(e.target.value)} />
-        <label className="field-label" htmlFor="st-start">Départ de l'engagement</label>
-        <input id="st-start" className="field" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+        <DateField label="Date de naissance" value={birthDate} onChange={setBirthDate} allowNone={false} quick={false} />
+        <TimeField label="Heure de lever cible" value={wakeTarget} onChange={setWakeTarget} allowNone={false} />
+        <DateField label="Départ de l'engagement" value={startDate} onChange={setStartDate} allowNone={false} quick={false} />
         <button className="btn btn-primary btn-block" style={{ marginTop: 16 }} onClick={save}>Enregistrer</button>
       </div>
 

@@ -6,6 +6,7 @@ import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
+import { TimeField } from '../ui/pickers'
 import { BackHeader } from './Plan'
 import { currentStreak, bestStreak, alignedDaysLast30, afterLapse } from '../domain/streak'
 import { todayCheckIn } from '../domain/recommend'
@@ -391,10 +392,8 @@ function SleepLogSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet title="Nuit dernière" onClose={onClose}>
-      <label className="field-label" htmlFor="sl-bed">Heure au lit</label>
-      <input id="sl-bed" className="field" type="time" value={bedTime} onChange={e => setBedTime(e.target.value)} />
-      <label className="field-label" htmlFor="sl-wake">Heure de lever</label>
-      <input id="sl-wake" className="field" type="time" value={wakeTime} onChange={e => setWakeTime(e.target.value)} />
+      <TimeField label="Heure au lit" value={bedTime} onChange={setBedTime} />
+      <TimeField label="Heure de lever" value={wakeTime} onChange={setWakeTime} />
       <label className="field-label">Qualité ressentie</label>
       <Segmented label="Qualité" value={quality} onChange={setQuality}
         options={[{ value: 'mauvais', label: 'Mauvais' }, { value: 'moyen', label: 'Moyen' }, { value: 'bon', label: 'Bon' }]} />

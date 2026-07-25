@@ -6,6 +6,7 @@ import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/Sheet'
+import { DateField } from '../ui/pickers'
 import { BackHeader } from './Plan'
 import { computeDueQueue, todayCheckIn } from '../domain/recommend'
 import { createPlan, J_SEQUENCE } from '../domain/srs'
@@ -177,8 +178,7 @@ function SubjectEditor({ subject, onClose }: { subject: Subject | null; onClose:
     <Sheet title={subject ? 'Matière' : 'Nouvelle matière'} onClose={onClose}>
       <label className="field-label" htmlFor="se-name">Nom</label>
       <input id="se-name" className="field" value={name} onChange={e => setName(e.target.value)} autoFocus placeholder="ex. Anatomie" />
-      <label className="field-label" htmlFor="se-exam">Date d'examen (facultatif)</label>
-      <input id="se-exam" className="field" type="date" value={examDate} onChange={e => setExamDate(e.target.value)} />
+      <DateField label="Date d'examen (facultatif)" value={examDate} onChange={setExamDate} />
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>Enregistrer</button>
     </Sheet>
   )
@@ -476,8 +476,7 @@ function ErrorEditor({ error, onClose }: { error: ErrorLog | null; onClose: () =
       <label className="field-label" htmlFor="ee-rule">La règle correcte</label>
       <textarea id="ee-rule" className="field" rows={2} value={rule} onChange={e => setRule(e.target.value)}
         placeholder="La bonne version, formulée pour t'en souvenir" />
-      <label className="field-label" htmlFor="ee-retest">Date de retest</label>
-      <input id="ee-retest" className="field" type="date" value={retestOn ?? ''} onChange={e => setRetestOn(e.target.value)} />
+      <DateField label="Date de retest" value={retestOn ?? ''} onChange={setRetestOn} />
       {state.subjects.length > 0 && (
         <>
           <span className="field-label">Matière</span>

@@ -17,6 +17,17 @@ import { SOSFlow } from '../ui/SOS'
 import { TimerStartSheet, TimerScreen } from '../ui/FocusTimer'
 import { EveningSheet } from '../ui/Evening'
 import { Onboarding } from '../ui/Onboarding'
+import { Sheet } from '../ui/Sheet'
+import { APP_VERSION } from '../domain/types'
+
+// Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
+const WHATS_NEW: string[] = [
+  'Fenêtres de saisie redessinées : cartes flottantes en verre, détachées des bords',
+  'Nouveaux sélecteurs de date et d\'heure intégrés — fini les popups système',
+  'Choix par pastilles pour les matières, projets et types de chapitre',
+  'Listes corrigées sur iPhone : titres et descriptions bien séparés',
+  'Cap t\'annoncera désormais chaque mise à jour dans cette fenêtre'
+]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
   { id: 'today', label: "Aujourd'hui", icon: 'today' },
@@ -62,6 +73,18 @@ export default function App() {
     window.addEventListener('cap-update-available', onUpdate)
     return () => window.removeEventListener('cap-update-available', onUpdate)
   }, [])
+
+  // Popup « Quoi de neuf » après une mise à jour
+  const [showWhatsNew, setShowWhatsNew] = useState(false)
+  useEffect(() => {
+    if (ready && state.settings.onboardingDone && state.settings.lastSeenVersion !== APP_VERSION) {
+      setShowWhatsNew(true)
+    }
+  }, [ready, state.settings.onboardingDone, state.settings.lastSeenVersion])
+  const dismissWhatsNew = useCallback(() => {
+    setShowWhatsNew(false)
+    update(s => ({ ...s, settings: { ...s.settings, lastSeenVersion: APP_VERSION } }))
+  }, [update])
 
   const setTab = useCallback((t: TabId) => {
     setTabRaw(prev => {
@@ -248,6 +271,17 @@ export default function App() {
         )}
         {overlay === 'timer' && <TimerScreen onClose={() => setOverlay(null)} />}
         {overlay === 'evening' && <EveningSheet onClose={() => setOverlay(null)} />}
+
+        {showWhatsNew && (
+          <Sheet title={`Nouveautés — Cap ${APP_VERSION}`} onClose={dismissWhatsNew} closeLabel="OK">
+            <ul style={{ paddingLeft: 20, lineHeight: 1.8, fontSize: 16, color: 'var(--label)' }}>
+              {WHATS_NEW.map(item => <li key={item} style={{ marginBottom: 6 }}>{item}</li>)}
+            </ul>
+            <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 16 }} onClick={dismissWhatsNew}>
+              Compris
+            </button>
+          </Sheet>
+        )}
       </div>
     </UiContext.Provider>
   )

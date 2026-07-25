@@ -787,6 +787,90 @@ mark {
   }
 }
 
+/* ─── Sélecteurs date / heure intégrés ───────────────────────────── */
+.picker-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: var(--sp-2);
+}
+.cal-head button {
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tint);
+  border-radius: 10px;
+}
+.cal-head button:active { background: var(--tertiary-system-background); }
+.cal-title {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  justify-items: center;
+}
+.cal-dow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tertiary-label);
+  padding: 6px 0;
+}
+.cal-day {
+  width: 100%;
+  max-width: 44px;
+  aspect-ratio: 1;
+  min-height: 40px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+  transition: background 140ms, transform 140ms var(--ease-spring);
+}
+.cal-day:active { transform: scale(0.9); }
+.cal-day.today { color: var(--tint); font-weight: 700; }
+.cal-day.selected {
+  background: var(--tint);
+  color: #fff;
+  font-weight: 700;
+}
+
+.time-preview {
+  text-align: center;
+  font-size: 40px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  margin: var(--sp-2) 0;
+}
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+.time-chip {
+  padding: 0;
+  min-height: 42px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  border-radius: 12px;
+}
+
 /* ─── Slider d'intensité ─────────────────────────────────────────── */
 input[type="range"] {
   width: 100%;

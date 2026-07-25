@@ -6,6 +6,7 @@ import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/Sheet'
+import { DateField, TimeField } from '../ui/pickers'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Task, Capture, Project, Goal } from '../domain/types'
@@ -188,14 +189,9 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       <label className="field-label" htmlFor="te-title">Titre</label>
       <input id="te-title" className="field" value={title} onChange={e => setTitle(e.target.value)} autoFocus={!task} />
 
-      <label className="field-label" htmlFor="te-planned">Je veux la faire le… (facultatif)</label>
-      <input id="te-planned" className="field" type="date" value={plannedDate} onChange={e => setPlannedDate(e.target.value)} />
-
-      <label className="field-label" htmlFor="te-time">Heure (facultatif, pour la timeline)</label>
-      <input id="te-time" className="field" type="time" value={plannedTime} onChange={e => setPlannedTime(e.target.value)} />
-
-      <label className="field-label" htmlFor="te-deadline">Échéance réelle — doit être fini avant (facultatif)</label>
-      <input id="te-deadline" className="field" type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+      <DateField label="Je veux la faire le… (facultatif)" value={plannedDate} onChange={setPlannedDate} />
+      <TimeField label="Heure (facultatif, pour la timeline)" value={plannedTime} onChange={setPlannedTime} />
+      <DateField label="Échéance réelle — doit être fini avant (facultatif)" value={deadline} onChange={setDeadline} />
 
       <label className="field-label">Priorité</label>
       <Segmented label="Priorité" value={priority} onChange={setPriority}
@@ -434,8 +430,7 @@ function ProjectEditor({ project, onClose }: { project: Project | null; onClose:
       <label className="field-label" htmlFor="pe-next">Prochaine action</label>
       <input id="pe-next" className="field" value={nextAction} onChange={e => setNextAction(e.target.value)}
         placeholder="La toute prochaine étape concrète" />
-      <label className="field-label" htmlFor="pe-deadline">Échéance (facultatif)</label>
-      <input id="pe-deadline" className="field" type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+      <DateField label="Échéance (facultatif)" value={deadline} onChange={setDeadline} />
       <label className="field-label" htmlFor="pe-notes">Notes et ressources</label>
       <textarea id="pe-notes" className="field" rows={3} value={notes} onChange={e => setNotes(e.target.value)} />
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>Enregistrer</button>
@@ -514,8 +509,7 @@ function GoalEditor({ goal, onClose }: { goal: Goal | null; onClose: () => void 
       <label className="field-label" htmlFor="ge-indicator">Indicateur concret</label>
       <input id="ge-indicator" className="field" value={indicator} onChange={e => setIndicator(e.target.value)}
         placeholder="ex. % de QCM réussis par chapitre" />
-      <label className="field-label" htmlFor="ge-horizon">Horizon (facultatif)</label>
-      <input id="ge-horizon" className="field" type="date" value={horizon} onChange={e => setHorizon(e.target.value)} />
+      <DateField label="Horizon (facultatif)" value={horizon} onChange={setHorizon} />
       <label className="field-label" htmlFor="ge-next">Prochaine action</label>
       <input id="ge-next" className="field" value={nextAction} onChange={e => setNextAction(e.target.value)} />
       <label className="field-label" htmlFor="ge-obstacles">Obstacles probables</label>
