@@ -22,6 +22,7 @@ export function Me() {
   if (sub === 'science') return <ScienceView />
   if (sub === 'data') return <DataView />
   if (sub === 'settings') return <SettingsView />
+  if (sub === 'guide') return <GuideView />
   return <MeHome />
 }
 
@@ -39,6 +40,12 @@ function MeHome() {
       </p>
 
       <div className="list-group">
+        <button className="list-row" onClick={() => ui.setSub('me', 'guide')}>
+          <Icon name="book" size={22} className="chevron" />
+          <span className="row-main"><span className="row-title">Guide d'utilisation</span>
+            <span className="row-sub">Tout ce que Cap sait faire, expliqué pas à pas</span></span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'weekly')}>
           <Icon name="plan" size={22} className="chevron" />
           <span className="row-main"><span className="row-title">Revue de la semaine</span>
@@ -96,6 +103,198 @@ function MeHome() {
       <p style={{ color: 'var(--tertiary-label)', fontSize: 13, textAlign: 'center', marginTop: 24 }}>
         Cap {APP_VERSION} · données locales uniquement · aucun compte, aucun tracker
       </p>
+    </div>
+  )
+}
+
+/* ─── Guide d'utilisation ──────────────────────────────────────────── */
+
+interface GuideSection {
+  id: string
+  title: string
+  intro: string
+  steps: string[]
+  action?: { label: string; run: (ui: ReturnType<typeof useUi>) => void }
+}
+
+const GUIDE: GuideSection[] = [
+  {
+    id: 'day', title: 'Démarrer ta journée',
+    intro: 'L\'onglet Aujourd\'hui te dit toujours quoi faire maintenant.',
+    steps: [
+      'Ouvre l\'app → fais le Check-in (15 secondes : énergie, stress, sommeil, envie)',
+      'La carte « Maintenant » s\'adapte à ton état et t\'explique pourquoi',
+      'Touche « Choisir » à côté de Top 3 pour fixer tes 1 à 3 priorités du jour',
+      'Coche une priorité terminée : elle disparaît (bouton Annuler si erreur)'
+    ],
+    action: { label: 'Faire un check-in', run: ui => ui.openCheckIn() }
+  },
+  {
+    id: 'capture', title: 'Capturer une idée ou une tâche',
+    intro: 'Tout ce qui te passe par la tête va dans Cap, pas dans ta mémoire.',
+    steps: [
+      'Touche le bouton + (en bas à droite, toujours visible)',
+      'Écris ce que tu as en tête — c\'est tout, le reste est facultatif',
+      'Si tu choisis « Tâche », tu peux la planifier direct (Aujourd\'hui / Demain)',
+      'Sinon, ça part dans l\'Inbox : tu trieras plus tard, un élément à la fois',
+      'L\'Inbox est dans Plan → Inbox (badge = nombre d\'éléments à trier)'
+    ],
+    action: { label: 'Capturer maintenant', run: ui => ui.openCapture() }
+  },
+  {
+    id: 'plan', title: 'Planifier tes tâches',
+    intro: 'Cap distingue deux dates : « je veux le faire ce jour-là » et « ça doit être fini avant ».',
+    steps: [
+      'Plan → Nouvelle tâche : le titre suffit, le reste est facultatif',
+      '« Je veux la faire le… » = ton intention, elle apparaît dans Aujourd\'hui ce jour-là',
+      '« Échéance réelle » = la vraie deadline (examen, rendu…), affichée en retard si dépassée',
+      'Ajoute une heure pour voir la tâche dans la timeline du jour',
+      'Les onglets Aujourd\'hui / À venir / Un jour / Faites filtrent tes tâches',
+      '« Un jour » garde les idées sans encombrer ta semaine'
+    ],
+    action: { label: 'Ouvrir le Plan', run: ui => ui.navigate('plan', null) }
+  },
+  {
+    id: 'review', title: 'Réviser efficacement (Méthode des J)',
+    intro: 'Cap programme tes révisions aux bons moments : J0, J1, J3, J7, J14, J30.',
+    steps: [
+      'Réviser → crée une Matière (ex. Anatomie), avec sa date d\'examen si connue',
+      'Dans la matière, crée un Chapitre quand tu viens de l\'apprendre',
+      'Choisis son type (factuel, conceptuel, procédural, spatial…) : Cap te suggère la bonne méthode de rappel',
+      'Le plan de révision se lance tout seul : le chapitre apparaîtra dans « À revoir » aux dates J',
+      'Après chaque session, note ton rappel : Facile allonge l\'intervalle, Difficile le raccourcit, Oublié → demain',
+      'Le badge sur l\'onglet Réviser = nombre de révisions dues aujourd\'hui'
+    ],
+    action: { label: 'Ouvrir Réviser', run: ui => ui.navigate('review', null) }
+  },
+  {
+    id: 'timer', title: 'Le minuteur de focus',
+    intro: 'Trois formats : 25 min (démarrage), 50 min (standard), 90 min (profondeur).',
+    steps: [
+      'Lance depuis Aujourd\'hui (raccourci Focus), Réviser (sur un chapitre dû) ou la recherche',
+      'Fixe un objectif précis avant de lancer — ça change tout',
+      'Le minuteur reste exact même si tu verrouilles l\'iPhone ou changes d\'app',
+      '« J\'ai été interrompu » : note la distraction, elle part dans l\'Inbox, tu reprends',
+      'À la fin : résultat, qualité du focus, une preuve de travail (une phrase suffit)',
+      'Si le chapitre était lié, ta note de rappel programme la prochaine révision'
+    ],
+    action: { label: 'Lancer une session', run: ui => ui.openTimerStart() }
+  },
+  {
+    id: 'errors', title: 'Le journal d\'erreurs',
+    intro: 'Le circuit qui rapporte le plus : erreur → cause → règle correcte → retest.',
+    steps: [
+      'Réviser → Journal d\'erreurs → Nouvelle',
+      'Note l\'erreur, sa cause probable et la règle correcte reformulée',
+      'Cap propose un retest 2 jours plus tard',
+      'Avant un examen, si des erreurs ne sont pas retestées, Cap te le rappelle en priorité'
+    ],
+    action: { label: 'Ouvrir le journal', run: ui => ui.navigate('review', 'errors') }
+  },
+  {
+    id: 'sos', title: 'Gérer une envie (SOS)',
+    intro: 'Le SOS traverse la vague en 5 étapes, sans rien te demander de décider.',
+    steps: [
+      'Accessible partout : raccourci SOS sur Aujourd\'hui, bouton rouge dans Coach',
+      'Étapes : couper le contexte → respirer → nommer → surfer la vague → une action',
+      'Si tu notes une envie ≥ 8 au check-in, Cap te propose le SOS direct dans la barre du bas',
+      'Coach → Contrôle : crée des plans « si… alors… » pour décider à l\'avance tes réponses',
+      'Un écart ? Déclare-le honnêtement : contexte, une leçon, une action protectrice — le record et ce que tu as appris restent'
+    ],
+    action: { label: 'Voir le module Contrôle', run: ui => ui.navigate('coach', 'control') }
+  },
+  {
+    id: 'sleep', title: 'Mieux dormir',
+    intro: 'Une heure de lever stable vaut mieux que tous les gadgets.',
+    steps: [
+      'Le soir (dès 21 h), Cap te propose la Fermeture du soir : vider la tête, choisir la première action de demain, poser le téléphone',
+      'Le matin, note ta nuit en 30 secondes (Coach → Sommeil → Journal)',
+      '« Je n\'arrive pas à dormir » : un protocole simple pour les nuits difficiles',
+      'Regarde les tendances sur 7-14 jours, jamais une seule nuit'
+    ],
+    action: { label: 'Ouvrir Sommeil', run: ui => ui.navigate('coach', 'sleep') }
+  },
+  {
+    id: 'coach-rest', title: 'Mental, Corps, Social',
+    intro: 'Trois modules légers pour le reste de la vie.',
+    steps: [
+      'Mental : respiration 1 min, décharger une pensée, journal en une phrase',
+      'Corps : note tes séances (type, durée, effort) — bouger aide le sommeil et le focus',
+      'Social : une échelle de 7 niveaux progressifs (sourire → conversation → proposer une activité), on mesure les essais, jamais la « réussite »'
+    ],
+    action: { label: 'Ouvrir le Coach', run: ui => ui.navigate('coach', null) }
+  },
+  {
+    id: 'search', title: 'Tout retrouver en 2 secondes',
+    intro: 'La barre « Rechercher ou agir » en bas est le raccourci universel.',
+    steps: [
+      'Touche-la : recherche floue sur tes tâches, chapitres, projets, notes, erreurs',
+      'Elle liste aussi toutes les actions : lancer un minuteur, SOS, fermeture du soir…',
+      'Quand un minuteur tourne, la barre l\'affiche avec pause/reprise intégrées'
+    ],
+    action: { label: 'Ouvrir la recherche', run: ui => ui.openCommand() }
+  },
+  {
+    id: 'weekly', title: 'La revue hebdomadaire',
+    intro: '10 minutes le dimanche pour cadrer la semaine.',
+    steps: [
+      'Moi → Revue de la semaine : 5 étapes guidées',
+      'Vider l\'Inbox → voir ce qui est fait → traiter les retards → vérifier projets et révisions → choisir 3 priorités',
+      'Tes 3 priorités s\'affichent ensuite dans Moi toute la semaine'
+    ],
+    action: { label: 'Lancer la revue', run: ui => ui.navigate('me', 'weekly') }
+  },
+  {
+    id: 'data', title: 'Tes données et sauvegardes',
+    intro: 'Tout est local : ni compte, ni serveur, ni tracker.',
+    steps: [
+      'Moi → Données → Exporter : télécharge un fichier de sauvegarde (fais-le régulièrement)',
+      'Importer : aperçu complet avant toute modification, fusion ou remplacement au choix',
+      'Attention : effacer les données de Safari efface aussi Cap',
+      'Pour changer d\'appareil : exporte ici, importe là-bas'
+    ],
+    action: { label: 'Ouvrir Données', run: ui => ui.navigate('me', 'data') }
+  }
+]
+
+function GuideView() {
+  const ui = useUi()
+  const [open, setOpen] = useState<string | null>(null)
+  return (
+    <div className="screen">
+      <BackHeader title="Guide" onBack={() => ui.setSub('me', null)} />
+      <p className="subtitle-context">
+        Tout ce que Cap sait faire, section par section. Touche un titre pour dérouler.
+      </p>
+      <div className="list-group">
+        {GUIDE.map(g => (
+          <div key={g.id}>
+            <button className="list-row" aria-expanded={open === g.id}
+              onClick={() => setOpen(open === g.id ? null : g.id)}>
+              <span className="row-main">
+                <span className="row-title" style={{ fontWeight: 600 }}>{g.title}</span>
+              </span>
+              <Icon name={open === g.id ? 'up' : 'down'} size={16} className="chevron" />
+            </button>
+            {open === g.id && (
+              <div style={{ padding: '0 16px 16px' }}>
+                <p style={{ color: 'var(--secondary-label)', fontSize: 15, marginBottom: 8, lineHeight: 1.5 }}>
+                  {g.intro}
+                </p>
+                <ol style={{ paddingLeft: 20, color: 'var(--label)', fontSize: 15, lineHeight: 1.7 }}>
+                  {g.steps.map((s, i) => <li key={i} style={{ marginBottom: 4 }}>{s}</li>)}
+                </ol>
+                {g.action && (
+                  <button className="btn btn-secondary btn-block" style={{ marginTop: 10 }}
+                    onClick={() => g.action!.run(ui)}>
+                    {g.action.label}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -501,7 +700,22 @@ function SettingsView() {
         <button className="btn btn-primary btn-block" style={{ marginTop: 16 }} onClick={save}>Enregistrer</button>
       </div>
 
-      <SectionHeader>Apparence et confidentialité</SectionHeader>
+      <SectionHeader>Apparence</SectionHeader>
+      <div className="card">
+        <Segmented
+          label="Style visuel"
+          value={state.settings.appearance}
+          onChange={v => update(s => ({ ...s, settings: { ...s.settings, appearance: v } }))}
+          options={[{ value: 'sobre', label: 'Sobre' }, { value: 'glass', label: 'Liquid Glass' }]}
+        />
+        <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
+          Liquid Glass : fond teinté en profondeur, cartes translucides avec flou.
+          Superbe sur iPhone récent ; si ça rame ou consomme trop, repasse en Sobre
+          ou active « Réduire la transparence » ci-dessous.
+        </p>
+      </div>
+
+      <SectionHeader>Confidentialité et confort</SectionHeader>
       <div className="list-group">
         <button className="list-row" aria-pressed={state.settings.reducedTransparency}
           onClick={() => update(s => ({ ...s, settings: { ...s.settings, reducedTransparency: !s.settings.reducedTransparency } }))}>

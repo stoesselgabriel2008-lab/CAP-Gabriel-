@@ -4,7 +4,7 @@ import { UiContext, type TabId, type TimerStartOpts } from './ui-context'
 import { Icon } from '../ui/Icon'
 import { remainingMs } from '../domain/timer'
 import { formatDuration, todayISO } from '../lib/dates'
-import { todayCheckIn } from '../domain/recommend'
+import { todayCheckIn, computeDueQueue } from '../domain/recommend'
 import { Today } from '../views/Today'
 import { Plan } from '../views/Plan'
 import { Review } from '../views/Review'
@@ -22,11 +22,11 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Fenêtres de saisie redessinées : cartes flottantes en verre, détachées des bords',
-  'Nouveaux sélecteurs de date et d\'heure intégrés — fini les popups système',
-  'Choix par pastilles pour les matières, projets et types de chapitre',
-  'Listes corrigées sur iPhone : titres et descriptions bien séparés',
-  'Cap t\'annoncera désormais chaque mise à jour dans cette fenêtre'
+  'Nouveau style « Liquid Glass » : active-le dans Moi → Profil et réglages → Apparence',
+  'Guide d\'utilisation complet dans Moi → Guide : chaque fonction expliquée pas à pas',
+  'Les textes des listes s\'affichent désormais en entier (sur deux lignes)',
+  'Badges sur les onglets : révisions dues sur Réviser, éléments à trier sur Plan',
+  'Sélecteurs de date et d\'heure intégrés — fini les popups système'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -135,7 +135,12 @@ export default function App() {
   const today = todayISO(state.profile.timezone)
   const checkIn = todayCheckIn(state, today)
   const timer = state.activeTimer
-  const cls = state.settings.reducedTransparency ? 'app-shell reduced-transparency' : 'app-shell'
+  const cls = 'app-shell'
+    + (state.settings.reducedTransparency ? ' reduced-transparency' : '')
+    + (state.settings.appearance === 'glass' && !state.settings.reducedTransparency ? ' theme-glass' : '')
+  const dueCount = computeDueQueue(state, today).length
+  const inboxCount = state.captures.filter(c => !c.processedAt).length
+  const tabBadges: Partial<Record<TabId, number>> = { review: dueCount, plan: inboxCount }
 
   return (
     <UiContext.Provider value={ui}>
@@ -229,17 +234,24 @@ export default function App() {
         {/* Tab bar */}
         <nav className="tab-bar" aria-label="Navigation principale">
           <div className="tab-bar-inner">
-            {TABS.map(t => (
-              <button
-                key={t.id}
-                className="tab-item"
-                aria-current={tab === t.id ? 'page' : undefined}
-                onClick={() => { setTab(t.id); setOverlay(null) }}
-              >
-                <Icon name={t.icon} size={24} filled={false} />
-                <span>{t.label}</span>
-              </button>
-            ))}
+            {TABS.map(t => {
+              const badge = tabBadges[t.id] ?? 0
+              return (
+                <button
+                  key={t.id}
+                  className="tab-item"
+                  aria-current={tab === t.id ? 'page' : undefined}
+                  aria-label={badge > 0 ? `${t.label}, ${badge} en attente` : undefined}
+                  onClick={() => { setTab(t.id); setOverlay(null) }}
+                >
+                  <span style={{ position: 'relative', display: 'flex' }}>
+                    <Icon name={t.icon} size={24} filled={false} />
+                    {badge > 0 && <span className="tab-badge" aria-hidden="true">{badge > 9 ? '9+' : badge}</span>}
+                  </span>
+                  <span>{t.label}</span>
+                </button>
+              )
+            })}
           </div>
         </nav>
 

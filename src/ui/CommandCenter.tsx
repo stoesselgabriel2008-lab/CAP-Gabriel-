@@ -58,6 +58,7 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
       { id: 'p-control', group: 'Pages', title: 'Contrôle et engagement', icon: 'sos', run: go(() => ui.navigate('coach', 'control')) },
       { id: 'p-weekly', group: 'Pages', title: 'Revue hebdomadaire', icon: 'plan', run: go(() => ui.navigate('me', 'weekly')) },
       { id: 'p-science', group: 'Pages', title: 'Science et mythes', icon: 'info', run: go(() => ui.navigate('me', 'science')) },
+      { id: 'p-guide', group: 'Pages', title: 'Guide d\'utilisation', icon: 'book', run: go(() => ui.navigate('me', 'guide')) },
       { id: 'p-data', group: 'Pages', title: 'Export / import des données', icon: 'export', run: go(() => ui.navigate('me', 'data')) }
     ]
     for (const t of state.tasks.filter(t => !t.done && !t.deletedAt).slice(-60)) {

@@ -95,6 +95,7 @@ export function sanitizeState(partial: Partial<AppState>): AppState {
     if (typeof partial.settings.lastBackupAt === 'string') out.settings.lastBackupAt = partial.settings.lastBackupAt
     if (Array.isArray(partial.settings.hintsDismissed)) out.settings.hintsDismissed = partial.settings.hintsDismissed.filter(x => typeof x === 'string')
     if (typeof partial.settings.lastSeenVersion === 'string') out.settings.lastSeenVersion = partial.settings.lastSeenVersion
+    if (partial.settings.appearance === 'glass' || partial.settings.appearance === 'sobre') out.settings.appearance = partial.settings.appearance
   }
   if (partial.commitment && typeof partial.commitment === 'object') {
     const c = partial.commitment

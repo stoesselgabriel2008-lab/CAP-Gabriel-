@@ -17,6 +17,7 @@ export interface Settings {
   lastBackupAt: string | null // instant
   hintsDismissed: string[]
   lastSeenVersion: string // dernière version dont les nouveautés ont été vues
+  appearance: 'sobre' | 'glass' // style visuel : sobre (défaut) ou Liquid Glass
 }
 
 export type CaptureKind = 'task' | 'note' | 'idea' | 'question' | 'error' | 'trigger' | 'event'
@@ -312,7 +313,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '1.1.0'
+export const APP_VERSION = '1.2.0'
 
 export function defaultState(): AppState {
   return {
@@ -330,7 +331,8 @@ export function defaultState(): AppState {
       hideSensitivePreviews: false,
       lastBackupAt: null,
       hintsDismissed: [],
-      lastSeenVersion: ''
+      lastSeenVersion: '',
+      appearance: 'sobre'
     },
     captures: [],
     tasks: [],
