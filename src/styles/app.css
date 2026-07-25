@@ -954,12 +954,12 @@ input[type="range"] {
    film translucide clair, flou saturé et éclairci, liseré de bord,
    reflet spéculaire haut-gauche, profondeur interne basse, ombre portée. */
 
+/* Fond neutre profond, à la manière d'Apple Music en mode sombre :
+   aucun halo coloré — la couleur reste réservée aux actions. */
 .theme-glass {
   background:
-    radial-gradient(130% 85% at 85% -10%, rgba(30, 110, 210, 0.35), transparent 58%),
-    radial-gradient(120% 95% at -15% 108%, rgba(120, 60, 200, 0.28), transparent 58%),
-    radial-gradient(80% 55% at 55% 45%, rgba(30, 70, 120, 0.18), transparent 72%),
-    linear-gradient(180deg, #05070c, #000308);
+    radial-gradient(120% 60% at 50% -15%, rgba(255, 255, 255, 0.045), transparent 60%),
+    linear-gradient(180deg, #0c0c0e, #000);
   background-attachment: fixed;
   min-height: 100dvh;
 }

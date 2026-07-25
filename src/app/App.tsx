@@ -22,10 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Liquid Glass entièrement refait : surfaces de verre clair avec reflets, liserés lumineux et profondeur — active-le dans Moi → Profil et réglages → Apparence',
+  'Liquid Glass épuré : fond noir profond neutre, sans halos colorés — dans l\'esprit d\'Apple Music en mode sombre',
+  'Verre neutre avec reflets lumineux et liserés fins sur toutes les surfaces',
   'Barre d\'onglets en capsule flottante quand le thème verre est actif',
-  'Guide d\'utilisation complet dans Moi → Guide (12 sections pas à pas)',
-  'Textes des listes affichés en entier, badges sur les onglets Réviser et Plan'
+  'La couleur reste réservée aux actions (boutons, sélections)'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
