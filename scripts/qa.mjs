@@ -4,7 +4,7 @@ import { chromium } from 'playwright-core'
 import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
 
-const BASE = 'http://localhost:4173/cap-gabriel-/'
+const BASE = 'http://localhost:4173/CAP-Gabriel-/'
 const SHOTS = 'qa-shots'
 mkdirSync(SHOTS, { recursive: true })
 

@@ -13,7 +13,7 @@ npm install
 npm run dev        # développement
 npm test           # tests unitaires (vitest)
 npm run build      # typecheck + build de production (dist/)
-npm run preview    # sert dist/ sur http://localhost:4173/cap-gabriel-/
+npm run preview    # sert dist/ sur http://localhost:4173/CAP-Gabriel-/
 node scripts/qa.mjs  # QA automatisée : parcours complets + captures (qa-shots/)
 ```
 
@@ -24,9 +24,9 @@ Le workflow `.github/workflows/deploy.yml` construit et publie `dist/` sur GitHu
 
 **Activation à faire une fois** : dépôt GitHub → Settings → Pages → Source :
 **GitHub Actions**. L'app sera servie sur
-`https://<utilisateur>.github.io/cap-gabriel-/`.
+`https://<utilisateur>.github.io/CAP-Gabriel-/`.
 
-Le chemin de base est `/cap-gabriel-/` (voir `vite.config.ts`). Pour un autre
+Le chemin de base est `/CAP-Gabriel-/` (voir `vite.config.ts`). Pour un autre
 hébergement, surcharger : `VITE_BASE=/ npm run build`.
 
 ## Installation iPhone

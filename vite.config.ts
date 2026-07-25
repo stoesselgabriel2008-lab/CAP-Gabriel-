@@ -2,9 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Base path pour GitHub Pages : https://<user>.github.io/cap-gabriel-/
+// Base path pour GitHub Pages : https://<user>.github.io/CAP-Gabriel-/
+// (la casse doit correspondre exactement au nom du dépôt — Pages est sensible à la casse).
 // Surchargez avec VITE_BASE=/ pour un domaine racine.
-const base = process.env.VITE_BASE ?? '/cap-gabriel-/'
+const base = process.env.VITE_BASE ?? '/CAP-Gabriel-/'
 
 export default defineConfig({
   base,
