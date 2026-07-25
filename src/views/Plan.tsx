@@ -7,6 +7,8 @@ import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/Sheet'
 import { DateField, TimeField } from '../ui/pickers'
+import { HabitsView } from './Habits'
+import { NotesView } from './Notes'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Task, Capture, Project, Goal } from '../domain/types'
@@ -20,6 +22,8 @@ export function Plan() {
   if (sub === 'inbox') return <InboxView />
   if (sub === 'projects') return <ProjectsView />
   if (sub === 'goals') return <GoalsView />
+  if (sub === 'habits') return <HabitsView />
+  if (sub === 'notes') return <NotesView />
 
   return <PlanHome inboxCount={inboxCount} />
 }
@@ -55,6 +59,24 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           <Icon name="inbox" size={22} className="chevron" />
           <span className="row-main"><span className="row-title">Inbox</span></span>
           {inboxCount > 0 && <span className="badge-count">{inboxCount}</span>}
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
+        <button className="list-row" onClick={() => ui.setSub('plan', 'habits')}>
+          <Icon name="check" size={22} className="chevron" />
+          <span className="row-main">
+            <span className="row-title">Habitudes</span>
+            <span className="row-sub">Suivi quotidien, séries et graphiques</span>
+          </span>
+          <span className="row-detail">{state.routines.filter(r => !r.archived).length || ''}</span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
+        <button className="list-row" onClick={() => ui.setSub('plan', 'notes')}>
+          <Icon name="book" size={22} className="chevron" />
+          <span className="row-main">
+            <span className="row-title">Notes</span>
+            <span className="row-sub">Fiches et idées durables</span>
+          </span>
+          <span className="row-detail">{state.notes.filter(n => !n.deletedAt).length || ''}</span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'projects')}>

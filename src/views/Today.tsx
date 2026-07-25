@@ -11,6 +11,7 @@ import { todayISO, formatCivilLong, localHour, ageAt, addDays } from '../lib/dat
 import { newId } from '../lib/id'
 import { nowISO } from '../lib/dates'
 import type { Task } from '../domain/types'
+import { isScheduled, isDone } from '../domain/habits'
 
 export function Today() {
   const { state, update, updateUndoable } = useApp()
@@ -157,6 +158,9 @@ export function Today() {
         </>
       )}
 
+      {/* Habitudes du jour */}
+      <TodayHabits />
+
       {/* Timeline */}
       <SectionHeader>Ta journée</SectionHeader>
       <div className="card timeline" aria-label="Timeline du jour">
@@ -209,6 +213,52 @@ export function Today() {
 
       {pickerOpen && <Top3Picker onClose={() => setPickerOpen(false)} />}
     </div>
+  )
+}
+
+/** Habitudes prévues aujourd'hui : coche rapide, détail dans Plan → Habitudes. */
+function TodayHabits() {
+  const { state, update } = useApp()
+  const ui = useUi()
+  const today = todayISO(state.profile.timezone)
+  const due = state.routines.filter(r => !r.archived && isScheduled(r, today))
+  if (due.length === 0) return null
+  const doneCount = due.filter(r => isDone(state.routineLogs, r.id, today)).length
+
+  const toggle = (id: string) => {
+    update(s => {
+      const existing = s.routineLogs.find(l => l.routineId === id && l.date === today)
+      return {
+        ...s,
+        routineLogs: existing
+          ? s.routineLogs.map(l => l.id === existing.id ? { ...l, done: !l.done } : l)
+          : [...s.routineLogs, { id: newId('rl'), routineId: id, date: today, done: true }]
+      }
+    })
+  }
+
+  return (
+    <>
+      <SectionHeader action="Détails" onAction={() => ui.navigate('plan', 'habits')}>
+        Habitudes · {doneCount}/{due.length}
+      </SectionHeader>
+      <div className="list-group">
+        {due.map(r => {
+          const done = isDone(state.routineLogs, r.id, today)
+          return (
+            <button key={r.id} className="list-row" onClick={() => toggle(r.id)}
+              aria-pressed={done} aria-label={`${done ? 'Décocher' : 'Cocher'} « ${r.name} »`}>
+              <span className={`check-circle${done ? ' checked' : ''}`}><Icon name="check" size={14} /></span>
+              <span className="row-main">
+                <span className="row-title" style={done ? { color: 'var(--secondary-label)' } : undefined}>
+                  {r.negative ? `Éviter : ${r.name}` : r.name}
+                </span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </>
   )
 }
 

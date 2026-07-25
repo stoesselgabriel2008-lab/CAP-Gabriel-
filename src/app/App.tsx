@@ -22,10 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Liquid Glass enrichi : fond profond aux teintes subtiles, lueurs d\'accent sur les boutons et la carte Maintenant, animations d\'entrée en cascade',
-  '« Bien démarrer » : une checklist guidée sur l\'accueil pour tes premiers pas (se masque toute seule)',
-  '« Cette semaine » : tes sessions, minutes de focus et révisions en trois chiffres sur l\'accueil',
-  '« Reporter à demain » en un bouton dans chaque tâche'
+  'Habitudes : suivi quotidien avec graphiques — séries, taux sur 30 jours, grille des 4 dernières semaines, barres hebdo (Plan → Habitudes, coche rapide sur l\'accueil)',
+  'Notes : fiches durables, épinglables, liées à une matière, recherchables (Plan → Notes)',
+  'Nouveau thème « Verre clair » : Apple Music en mode jour — surfaces blanches translucides, capsule flottante (Moi → Réglages → Apparence)',
+  'Graphique du focus : tes minutes par jour sur 7 jours dans Moi'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -134,10 +134,13 @@ export default function App() {
   const today = todayISO(state.profile.timezone)
   const checkIn = todayCheckIn(state, today)
   const timer = state.activeTimer
+  const reduced = state.settings.reducedTransparency
+  const appearance = state.settings.appearance
   const cls = 'app-shell'
-    + (state.settings.reducedTransparency ? ' reduced-transparency' : '')
-    + (state.settings.appearance === 'glass' && !state.settings.reducedTransparency ? ' theme-glass' : '')
-    + (state.settings.appearance === 'clair' ? ' theme-light' : '')
+    + (reduced ? ' reduced-transparency' : '')
+    + (appearance === 'glass' && !reduced ? ' theme-glass theme-capsule' : '')
+    + (appearance === 'clair' ? ' theme-light' : '')
+    + (appearance === 'glass-clair' ? (reduced ? ' theme-light' : ' theme-light theme-glass-light theme-capsule') : '')
   const dueCount = computeDueQueue(state, today).length
   const inboxCount = state.captures.filter(c => !c.processedAt).length
   const tabBadges: Partial<Record<TabId, number>> = { review: dueCount, plan: inboxCount }

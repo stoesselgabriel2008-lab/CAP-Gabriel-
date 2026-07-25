@@ -39,7 +39,7 @@ const ARRAY_KEYS: (keyof AppState)[] = [
   'subjects', 'studyUnits', 'reviewPlans', 'reviewLogs', 'focusSessions',
   'errorLogs', 'checkIns', 'urgeEvents', 'lapseEvents', 'ifThenPlans',
   'sleepLogs', 'bodyLogs', 'journalEntries', 'socialExercises', 'ankiLogs',
-  'weeklyReviews'
+  'weeklyReviews', 'notes'
 ]
 
 /** Valide un fichier importé et produit un aperçu. Ne modifie rien. */
@@ -95,7 +95,7 @@ export function sanitizeState(partial: Partial<AppState>): AppState {
     if (typeof partial.settings.lastBackupAt === 'string') out.settings.lastBackupAt = partial.settings.lastBackupAt
     if (Array.isArray(partial.settings.hintsDismissed)) out.settings.hintsDismissed = partial.settings.hintsDismissed.filter(x => typeof x === 'string')
     if (typeof partial.settings.lastSeenVersion === 'string') out.settings.lastSeenVersion = partial.settings.lastSeenVersion
-    if ((['sobre', 'clair', 'glass'] as const).includes(partial.settings.appearance as any)) out.settings.appearance = partial.settings.appearance as 'sobre' | 'clair' | 'glass'
+    if ((['sobre', 'clair', 'glass', 'glass-clair'] as const).includes(partial.settings.appearance as any)) out.settings.appearance = partial.settings.appearance as AppState['settings']['appearance']
   }
   if (partial.commitment && typeof partial.commitment === 'object') {
     const c = partial.commitment

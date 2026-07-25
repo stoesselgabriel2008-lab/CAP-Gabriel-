@@ -8,6 +8,7 @@ import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader } from './Plan'
 import { DateField, TimeField } from '../ui/pickers'
+import { BarChart } from '../ui/charts'
 import { computeInsights, notEnoughDataMessage } from '../domain/insights'
 import { exportBackup, validateImport, mergeStates, type ImportPreview } from '../domain/backup'
 import { defaultState, APP_VERSION } from '../domain/types'
@@ -86,6 +87,8 @@ function MeHome() {
         )
       })()}
 
+      <FocusChart />
+
       <SectionHeader>Tendances</SectionHeader>
       {insights.length === 0 ? (
         <div className="card">
@@ -104,6 +107,39 @@ function MeHome() {
         Cap {APP_VERSION} · données locales uniquement · aucun compte, aucun tracker
       </p>
     </div>
+  )
+}
+
+/** Minutes de focus par jour, 7 derniers jours. */
+function FocusChart() {
+  const { state } = useApp()
+  const today = todayISO(state.profile.timezone)
+  const days: Array<{ label: string; value: number | null; highlight?: boolean }> = []
+  const letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+  let total = 0
+  for (let i = 6; i >= 0; i--) {
+    const date = addDays(today, -i)
+    const minutes = state.focusSessions
+      .filter(s => s.endedAt && s.startedAt.slice(0, 10) === date)
+      .reduce((a, s) => a + (s.workedMin ?? s.plannedMin), 0)
+    total += minutes
+    days.push({
+      label: letters[isoWeekday(date) - 1],
+      value: minutes,
+      highlight: date === today
+    })
+  }
+  if (total === 0) return null
+  return (
+    <>
+      <SectionHeader>Focus — 7 derniers jours</SectionHeader>
+      <div className="card">
+        <BarChart data={days} formatValue={v => `${v} min`} />
+        <p style={{ color: 'var(--tertiary-label)', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
+          {total >= 60 ? `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, '0')}` : `${total} min`} de focus cette semaine
+        </p>
+      </div>
+    </>
   )
 }
 
@@ -709,12 +745,14 @@ function SettingsView() {
           options={[
             { value: 'sobre', label: 'Sombre' },
             { value: 'clair', label: 'Clair' },
-            { value: 'glass', label: 'Liquid Glass' }
+            { value: 'glass', label: 'Verre sombre' },
+            { value: 'glass-clair', label: 'Verre clair' }
           ]}
         />
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
-          Clair : palette officielle iOS, comme les apps Apple en mode jour.
-          Liquid Glass : barres flottantes en verre et cartes profondes, façon Apple Music.
+          Clair : palette officielle iOS. Verre sombre : cartes profondes et capsule
+          flottante façon Apple Music de nuit. Verre clair : la même chose en mode jour,
+          surfaces blanches translucides.
         </p>
       </div>
 

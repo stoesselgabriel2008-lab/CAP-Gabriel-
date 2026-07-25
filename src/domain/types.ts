@@ -17,7 +17,7 @@ export interface Settings {
   lastBackupAt: string | null // instant
   hintsDismissed: string[]
   lastSeenVersion: string // dernière version dont les nouveautés ont été vues
-  appearance: 'sobre' | 'clair' | 'glass' // sombre (défaut), clair (palette iOS), Liquid Glass
+  appearance: 'sobre' | 'clair' | 'glass' | 'glass-clair' // sombre, clair iOS, verre sombre, verre clair
 }
 
 export type CaptureKind = 'task' | 'note' | 'idea' | 'question' | 'error' | 'trigger' | 'event'
@@ -275,6 +275,18 @@ export interface AnkiLog {
   createdAt: string
 }
 
+export interface Note {
+  id: ID
+  title: string
+  body: string
+  pinned: boolean
+  subjectId: ID | null
+  projectId: ID | null
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+}
+
 export interface WeeklyReview {
   id: ID
   weekOf: string // civil du lundi
@@ -310,11 +322,12 @@ export interface AppState {
   socialExercises: SocialExercise[]
   ankiLogs: AnkiLog[]
   weeklyReviews: WeeklyReview[]
+  notes: Note[]
   activeTimer: ActiveTimer | null
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '1.5.0'
+export const APP_VERSION = '2.0.0'
 
 export function defaultState(): AppState {
   return {
@@ -362,6 +375,7 @@ export function defaultState(): AppState {
     socialExercises: [],
     ankiLogs: [],
     weeklyReviews: [],
+    notes: [],
     activeTimer: null
   }
 }

@@ -51,6 +51,8 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
       { id: 'p-today', group: 'Pages', title: "Aujourd'hui", icon: 'today', run: go(() => ui.navigate('today', null)) },
       { id: 'p-plan', group: 'Pages', title: 'Plan', icon: 'plan', run: go(() => ui.navigate('plan', null)) },
       { id: 'p-inbox', group: 'Pages', title: 'Inbox', icon: 'inbox', run: go(() => ui.navigate('plan', 'inbox')) },
+      { id: 'p-habits', group: 'Pages', title: 'Habitudes', icon: 'check', run: go(() => ui.navigate('plan', 'habits')) },
+      { id: 'p-notes', group: 'Pages', title: 'Notes', icon: 'book', run: go(() => ui.navigate('plan', 'notes')) },
       { id: 'p-review', group: 'Pages', title: 'Révisions dues', icon: 'review', run: go(() => ui.navigate('review', null)) },
       { id: 'p-errors', group: 'Pages', title: "Journal d'erreurs", icon: 'flag', run: go(() => ui.navigate('review', 'errors')) },
       { id: 'p-coach', group: 'Pages', title: 'Coach', icon: 'coach', run: go(() => ui.navigate('coach', null)) },
@@ -76,6 +78,12 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
     }
     for (const e of state.errorLogs.filter(e => !e.retested).slice(-30)) {
       list.push({ id: `e-${e.id}`, group: 'Erreurs', title: e.error.slice(0, 60), icon: 'flag', run: go(() => ui.navigate('review', 'errors')) })
+    }
+    for (const n of state.notes.filter(n => !n.deletedAt).slice(-40)) {
+      list.push({ id: `n-${n.id}`, group: 'Notes', title: n.title || n.body.slice(0, 50) || 'Sans titre', icon: 'book', run: go(() => ui.navigate('plan', 'notes')) })
+    }
+    for (const r of state.routines.filter(r => !r.archived)) {
+      list.push({ id: `h-${r.id}`, group: 'Habitudes', title: r.name, icon: 'check', run: go(() => ui.navigate('plan', 'habits')) })
     }
     return list
   }, [state, ui, onClose])
