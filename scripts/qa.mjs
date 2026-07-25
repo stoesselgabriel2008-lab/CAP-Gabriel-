@@ -177,4 +177,5 @@ if (errors.length) {
   process.exit(1)
 } else {
   console.log('\n=== QA PASS : aucune erreur console, parcours complets OK ===')
+  process.exit(0)
 }
