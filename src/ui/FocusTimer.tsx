@@ -192,7 +192,7 @@ export function EndSessionSheet({ onClose, onResume }: { onClose: () => void; on
       goal: timer.goal, plannedMin: timer.plannedMin,
       startedAt: timer.startedAt, endedAt: nowISO(),
       outcome, focusQuality: quality, proof: proof.trim(),
-      interruptions: timer.interruptions, createdAt: nowISO()
+      interruptions: timer.interruptions, workedMin: workedMin(timer), createdAt: nowISO()
     }
     update(s => {
       let next = { ...s, activeTimer: null as null, focusSessions: [...s.focusSessions, session] }

@@ -54,7 +54,7 @@ try {
   log('check-in OK')
 
   // Capture d'une tâche
-  await page.getByRole('button', { name: 'Ajouter' }).click()
+  await page.getByRole('button', { name: 'Ajouter', exact: true }).click()
   await page.getByLabel("Qu'as-tu en tête ?").fill('Réviser anatomie membre supérieur')
   await page.getByRole('button', { name: 'Tâche' }).click()
   await page.getByLabel('Quand').getByRole('button', { name: "Aujourd'hui" }).click()

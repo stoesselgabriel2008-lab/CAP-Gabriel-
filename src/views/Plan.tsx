@@ -232,6 +232,19 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       </button>
 
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>Enregistrer</button>
+      {task && !task.done && (
+        <button className="btn btn-secondary btn-block" style={{ marginTop: 8 }} onClick={() => {
+          const tomorrow = addDays(todayISO(state.profile.timezone), 1)
+          update(s => ({
+            ...s,
+            tasks: s.tasks.map(t => t.id === task.id ? { ...t, plannedDate: tomorrow, top3Date: null, top3Rank: null } : t)
+          }))
+          toast('Reportée à demain.')
+          onClose()
+        }}>
+          Reporter à demain
+        </button>
+      )}
       {task && !confirmDelete && (
         <button className="btn-plain btn-block" style={{ color: 'var(--danger)', marginTop: 12, minHeight: 44 }} onClick={() => setConfirmDelete(true)}>
           Supprimer la tâche

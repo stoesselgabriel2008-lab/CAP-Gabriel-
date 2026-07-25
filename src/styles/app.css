@@ -954,15 +954,37 @@ input[type="range"] {
    film translucide clair, flou saturé et éclairci, liseré de bord,
    reflet spéculaire haut-gauche, profondeur interne basse, ombre portée. */
 
-/* Fond neutre profond, à la manière d'Apple Music en mode sombre :
-   aucun halo coloré — la couleur reste réservée aux actions. */
+/* Fond profond avec teintes riches mais sombres : le verre a besoin de
+   matière à réfracter (checklist glassmorphism), l'OLED de noirs profonds. */
 .theme-glass {
   background:
-    radial-gradient(120% 60% at 50% -15%, rgba(255, 255, 255, 0.045), transparent 60%),
-    linear-gradient(180deg, #0c0c0e, #000);
+    radial-gradient(90% 55% at 82% -8%, rgba(52, 96, 255, 0.17), transparent 55%),
+    radial-gradient(75% 55% at 8% 22%, rgba(0, 170, 155, 0.09), transparent 60%),
+    radial-gradient(95% 65% at 50% 112%, rgba(122, 62, 220, 0.13), transparent 58%),
+    #000;
   background-attachment: fixed;
   min-height: 100dvh;
 }
+
+/* Lueurs d'accent minimales (spec OLED : glow discret, jamais criard) */
+.theme-glass .btn-primary { box-shadow: 0 4px 22px -4px rgba(10, 132, 255, 0.5); }
+.theme-glass .btn-danger { box-shadow: 0 4px 22px -4px rgba(255, 69, 58, 0.45); }
+.theme-glass .now-card {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.3),
+    0 10px 28px rgba(0, 0, 0, 0.45),
+    0 0 44px -20px rgba(10, 132, 255, 0.55);
+}
+
+/* Entrée en cascade des sections (transform/opacity uniquement) */
+.screen > * { animation: fade-up 340ms var(--ease-spring) backwards; }
+.screen > *:nth-child(2) { animation-delay: 30ms; }
+.screen > *:nth-child(3) { animation-delay: 60ms; }
+.screen > *:nth-child(4) { animation-delay: 90ms; }
+.screen > *:nth-child(5) { animation-delay: 120ms; }
+.screen > *:nth-child(6) { animation-delay: 150ms; }
+.screen > *:nth-child(n+7) { animation-delay: 180ms; }
 
 /* Cartes : opaques, profondes et précises (le verre est réservé aux couches
    flottantes — c'est ce que fait Apple : une carte statique n'a rien à réfracter). */

@@ -7,7 +7,7 @@ import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { SectionHeader, EmptyState, Sheet } from '../ui/Sheet'
 import { recommend, todayCheckIn, computeDueQueue, shouldReduceAmbition, type Recommendation } from '../domain/recommend'
-import { todayISO, formatCivilLong, localHour, ageAt } from '../lib/dates'
+import { todayISO, formatCivilLong, localHour, ageAt, addDays } from '../lib/dates'
 import { newId } from '../lib/id'
 import { nowISO } from '../lib/dates'
 import type { Task } from '../domain/types'
@@ -96,6 +96,9 @@ export function Today() {
           <p className="now-why">Pourquoi : {rec.why}</p>
         </div>
       </section>
+
+      {/* Bien démarrer : checklist de premiers pas, disparaît une fois complétée */}
+      <StarterCard onPickTop3={() => setPickerOpen(true)} />
 
       {/* Top 3 */}
       <SectionHeader action="Choisir" onAction={() => setPickerOpen(true)}>Top 3</SectionHeader>
@@ -193,6 +196,9 @@ export function Today() {
         </button>
       </div>
 
+      {/* Cette semaine */}
+      <WeekStats />
+
       {/* Check-in du jour */}
       {checkIn && (
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 20, textAlign: 'center' }}>
@@ -203,6 +209,76 @@ export function Today() {
 
       {pickerOpen && <Top3Picker onClose={() => setPickerOpen(false)} />}
     </div>
+  )
+}
+
+/** Checklist de démarrage : guide les premiers pas, se masque toute seule. */
+function StarterCard({ onPickTop3 }: { onPickTop3: () => void }) {
+  const { state, update } = useApp()
+  const ui = useUi()
+  const today = todayISO(state.profile.timezone)
+  if (state.settings.hintsDismissed.includes('starter')) return null
+
+  const items = [
+    { id: 'checkin', label: 'Faire ton premier check-in', done: state.checkIns.length > 0, run: () => ui.openCheckIn() },
+    { id: 'subject', label: 'Créer ta première matière', done: state.subjects.length > 0, run: () => ui.navigate('review', null) },
+    { id: 'unit', label: 'Ajouter un chapitre (plan de révision auto)', done: state.reviewPlans.length > 0, run: () => ui.navigate('review', null) },
+    { id: 'top3', label: 'Choisir ton Top 3 du jour', done: state.tasks.some(t => t.top3Date !== null), run: onPickTop3 },
+    { id: 'focus', label: 'Lancer ta première session de focus', done: state.focusSessions.length > 0, run: () => ui.openTimerStart() }
+  ]
+  const remaining = items.filter(i => !i.done)
+  if (remaining.length === 0) return null
+
+  return (
+    <>
+      <SectionHeader action="Masquer" onAction={() =>
+        update(s => ({ ...s, settings: { ...s.settings, hintsDismissed: [...s.settings.hintsDismissed, 'starter'] } }))
+      }>
+        Bien démarrer · {items.length - remaining.length}/{items.length}
+      </SectionHeader>
+      <div className="list-group">
+        {items.map(i => (
+          <button key={i.id} className="list-row" onClick={() => { if (!i.done) i.run() }} disabled={i.done}>
+            <span className={`check-circle${i.done ? ' checked' : ''}`}><Icon name="check" size={14} /></span>
+            <span className="row-main">
+              <span className="row-title" style={i.done ? { color: 'var(--secondary-label)', textDecoration: 'line-through' } : undefined}>
+                {i.label}
+              </span>
+            </span>
+            {!i.done && <Icon name="chevronRight" size={16} className="chevron" />}
+          </button>
+        ))}
+      </div>
+    </>
+  )
+}
+
+/** Trois chiffres réels de la semaine — pas un mur de graphiques. */
+function WeekStats() {
+  const { state } = useApp()
+  const today = todayISO(state.profile.timezone)
+  const weekAgo = addDays(today, -7)
+  const sessions = state.focusSessions.filter(s => s.endedAt && s.startedAt.slice(0, 10) >= weekAgo)
+  const minutes = sessions.reduce((a, s) => a + (s.workedMin ?? s.plannedMin), 0)
+  const reviews = state.reviewLogs.filter(l => l.date >= weekAgo).length
+  if (sessions.length === 0 && reviews === 0) return null
+
+  const stat = (value: string | number, label: string) => (
+    <div style={{ flex: 1, textAlign: 'center' }}>
+      <div style={{ fontSize: 26, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      <div style={{ fontSize: 12, color: 'var(--secondary-label)', marginTop: 2 }}>{label}</div>
+    </div>
+  )
+
+  return (
+    <>
+      <SectionHeader>Cette semaine</SectionHeader>
+      <div className="card" style={{ display: 'flex', gap: 8, padding: '18px 8px' }}>
+        {stat(sessions.length, `session${sessions.length !== 1 ? 's' : ''} focus`)}
+        {stat(minutes >= 60 ? `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}` : minutes, minutes >= 60 ? 'de focus' : 'min de focus')}
+        {stat(reviews, `révision${reviews !== 1 ? 's' : ''} notée${reviews !== 1 ? 's' : ''}`)}
+      </div>
+    </>
   )
 }
 

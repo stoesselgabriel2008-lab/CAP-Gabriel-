@@ -22,9 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Nouveau mode Clair : la palette officielle iOS, fidèle aux apps Apple en mode jour (Moi → Réglages → Apparence)',
-  'Liquid Glass affiné : cartes opaques profondes façon Apple Music, le verre est réservé aux barres flottantes et fenêtres — comme le fait Apple',
-  'Trois styles au choix : Sombre, Clair, Liquid Glass'
+  'Liquid Glass enrichi : fond profond aux teintes subtiles, lueurs d\'accent sur les boutons et la carte Maintenant, animations d\'entrée en cascade',
+  '« Bien démarrer » : une checklist guidée sur l\'accueil pour tes premiers pas (se masque toute seule)',
+  '« Cette semaine » : tes sessions, minutes de focus et révisions en trois chiffres sur l\'accueil',
+  '« Reporter à demain » en un bouton dans chaque tâche'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

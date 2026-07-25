@@ -150,6 +150,7 @@ export interface FocusSession {
   focusQuality: number | null // 1..5
   proof: string
   interruptions: number
+  workedMin: number | null // minutes réellement travaillées (hors pauses)
   createdAt: string
 }
 
@@ -313,7 +314,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '1.4.0'
+export const APP_VERSION = '1.5.0'
 
 export function defaultState(): AppState {
   return {
