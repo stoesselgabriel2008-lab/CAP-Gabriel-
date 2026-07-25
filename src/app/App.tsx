@@ -22,11 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Nouveau style « Liquid Glass » : active-le dans Moi → Profil et réglages → Apparence',
-  'Guide d\'utilisation complet dans Moi → Guide : chaque fonction expliquée pas à pas',
-  'Les textes des listes s\'affichent désormais en entier (sur deux lignes)',
-  'Badges sur les onglets : révisions dues sur Réviser, éléments à trier sur Plan',
-  'Sélecteurs de date et d\'heure intégrés — fini les popups système'
+  'Liquid Glass entièrement refait : surfaces de verre clair avec reflets, liserés lumineux et profondeur — active-le dans Moi → Profil et réglages → Apparence',
+  'Barre d\'onglets en capsule flottante quand le thème verre est actif',
+  'Guide d\'utilisation complet dans Moi → Guide (12 sections pas à pas)',
+  'Textes des listes affichés en entier, badges sur les onglets Réviser et Plan'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
