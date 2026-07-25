@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react'
 import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
-import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
+import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/Sheet'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Task, Capture, Project, Goal } from '../domain/types'
@@ -206,20 +206,22 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
 
       {state.projects.length > 0 && (
         <>
-          <label className="field-label" htmlFor="te-project">Projet</label>
-          <select id="te-project" className="field" value={projectId} onChange={e => setProjectId(e.target.value)}>
-            <option value="">Aucun</option>
-            {state.projects.filter(p => p.status !== 'termine').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <span className="field-label">Projet</span>
+          <ChoiceChips
+            label="Projet" allowNone="Aucun"
+            options={state.projects.filter(p => p.status !== 'termine').map(p => ({ value: p.id, label: p.name }))}
+            value={projectId} onChange={setProjectId}
+          />
         </>
       )}
       {state.subjects.length > 0 && (
         <>
-          <label className="field-label" htmlFor="te-subject">Matière</label>
-          <select id="te-subject" className="field" value={subjectId} onChange={e => setSubjectId(e.target.value)}>
-            <option value="">Aucune</option>
-            {state.subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
+          <span className="field-label">Matière</span>
+          <ChoiceChips
+            label="Matière" allowNone="Aucune"
+            options={state.subjects.map(s => ({ value: s.id, label: s.name }))}
+            value={subjectId} onChange={setSubjectId}
+          />
         </>
       )}
 

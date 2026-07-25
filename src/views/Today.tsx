@@ -79,7 +79,6 @@ export function Today() {
       <h1 className="large-title">Aujourd'hui</h1>
       <p className="subtitle-context">
         {greeting} {state.profile.firstName} · {formatCivilLong(today)}
-        {' · '}{ageAt(state.profile.birthDate, today)} ans
       </p>
 
       {/* Carte Maintenant */}

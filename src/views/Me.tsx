@@ -10,7 +10,7 @@ import { BackHeader } from './Plan'
 import { computeInsights, notEnoughDataMessage } from '../domain/insights'
 import { exportBackup, validateImport, mergeStates, type ImportPreview } from '../domain/backup'
 import { defaultState, APP_VERSION } from '../domain/types'
-import { todayISO, addDays, isoWeekday, daysBetween, nowISO, isValidCivil } from '../lib/dates'
+import { todayISO, addDays, isoWeekday, daysBetween, nowISO, isValidCivil, ageAt } from '../lib/dates'
 import { newId } from '../lib/id'
 import { readLegacyV6 } from '../storage/db'
 
@@ -33,7 +33,9 @@ function MeHome() {
   return (
     <div className="screen">
       <h1 className="large-title">Moi</h1>
-      <p className="subtitle-context">Ce que tu apprends sur toi, et les réglages du système.</p>
+      <p className="subtitle-context">
+        {state.profile.firstName} · {ageAt(state.profile.birthDate, today)} ans · réglages et tendances
+      </p>
 
       <div className="list-group">
         <button className="list-row" onClick={() => ui.setSub('me', 'weekly')}>

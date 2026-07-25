@@ -259,16 +259,11 @@ function LapseFlow({ onClose }: { onClose: () => void }) {
       <button className="btn btn-secondary btn-block" style={{ marginTop: 8 }} onClick={onClose}>Non, revenir</button>
     </div>,
     <div key="1">
-      <label className="field-label">Le contexte (quelques taps suffisent)</label>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      <span className="field-label">Le contexte (quelques taps suffisent)</span>
+      <div className="chip-row">
         {LAPSE_CONTEXTS.map(c => (
-          <button key={c} aria-pressed={contexts.includes(c)}
-            onClick={() => setContexts(x => x.includes(c) ? x.filter(y => y !== c) : [...x, c])}
-            style={{
-              padding: '8px 14px', borderRadius: 999, fontSize: 15, minHeight: 38,
-              background: contexts.includes(c) ? 'var(--tint)' : 'var(--tertiary-system-background)',
-              color: contexts.includes(c) ? '#fff' : 'var(--label)'
-            }}>
+          <button key={c} type="button" className="chip" aria-pressed={contexts.includes(c)}
+            onClick={() => setContexts(x => x.includes(c) ? x.filter(y => y !== c) : [...x, c])}>
             {c}
           </button>
         ))}

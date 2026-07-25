@@ -6,12 +6,11 @@ import './styles/app.css'
 import { registerSW } from 'virtual:pwa-register'
 
 // Service worker : mise à jour contrôlée, pas de boucle de cache.
+// La proposition de rechargement passe par une bannière intégrée (pas d'alerte système).
 const updateSW = registerSW({
   onNeedRefresh() {
-    // simple et honnête : proposer le rechargement via confirm natif
-    if (window.confirm('Une nouvelle version de Cap est disponible. Recharger maintenant ?')) {
-      updateSW(true)
-    }
+    ;(window as any).__capApplyUpdate = () => updateSW(true)
+    window.dispatchEvent(new CustomEvent('cap-update-available'))
   }
 })
 

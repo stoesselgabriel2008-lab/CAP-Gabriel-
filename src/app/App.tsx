@@ -34,6 +34,7 @@ export default function App() {
   const [sub, setSubState] = useState<Partial<Record<TabId, string | null>>>({})
   const [overlay, setOverlay] = useState<Overlay>(null)
   const [timerOpts, setTimerOpts] = useState<TimerStartOpts>({})
+  const [updateAvailable, setUpdateAvailable] = useState(false)
   const scrollPositions = useRef<Partial<Record<TabId, number>>>({})
   const [, forceTick] = useState(0)
 
@@ -55,6 +56,12 @@ export default function App() {
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [state.activeTimer])
+
+  useEffect(() => {
+    const onUpdate = () => setUpdateAvailable(true)
+    window.addEventListener('cap-update-available', onUpdate)
+    return () => window.removeEventListener('cap-update-available', onUpdate)
+  }, [])
 
   const setTab = useCallback((t: TabId) => {
     setTabRaw(prev => {
@@ -110,6 +117,19 @@ export default function App() {
   return (
     <UiContext.Provider value={ui}>
       <div className={cls}>
+        {updateAvailable && (
+          <div className="update-banner" role="status">
+            <span style={{ flex: 1, fontSize: 15 }}>Nouvelle version de Cap disponible.</span>
+            <button className="btn btn-primary" style={{ minHeight: 38, padding: '0 14px', fontSize: 15 }}
+              onClick={() => (window as any).__capApplyUpdate?.()}>
+              Recharger
+            </button>
+            <button aria-label="Plus tard" style={{ minHeight: 38, minWidth: 38, color: 'var(--secondary-label)' }}
+              onClick={() => setUpdateAvailable(false)}>
+              <Icon name="close" size={18} />
+            </button>
+          </div>
+        )}
         {corrupted && (
           <div role="alert" className="card" style={{ margin: 16, borderLeft: '3px solid var(--warning)' }}>
             Des données locales étaient illisibles. Cap a restauré la dernière copie valide.

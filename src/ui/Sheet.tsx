@@ -89,6 +89,32 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
   )
 }
 
+/** Sélecteur en pastilles — remplace les <select> natifs (popup iOS peu soigné). */
+export function ChoiceChips<T extends string>({ options, value, onChange, label, allowNone }: {
+  options: Array<{ value: T; label: string }>
+  value: T | '' | null
+  onChange: (v: T | '') => void
+  label: string
+  allowNone?: string // libellé de l'option "aucun"
+}) {
+  return (
+    <div className="chip-row" role="group" aria-label={label}>
+      {allowNone !== undefined && (
+        <button type="button" className="chip" aria-pressed={!value}
+          onClick={() => onChange('')}>
+          {allowNone}
+        </button>
+      )}
+      {options.map(o => (
+        <button key={o.value} type="button" className="chip" aria-pressed={value === o.value}
+          onClick={() => onChange(value === o.value && allowNone !== undefined ? '' : o.value)}>
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export function EmptyState({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="empty-state">

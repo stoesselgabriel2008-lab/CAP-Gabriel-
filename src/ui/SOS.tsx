@@ -236,16 +236,10 @@ function ChipPicker({ label, options, value, onChange }: {
   return (
     <div role="group" aria-label={label}>
       <span className="field-label">{label}</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      <div className="chip-row">
         {options.map(o => (
-          <button key={o} aria-pressed={value === o}
-            onClick={() => onChange(value === o ? '' : o)}
-            style={{
-              padding: '8px 14px', borderRadius: 999, fontSize: 15, minHeight: 38,
-              background: value === o ? 'var(--tint)' : 'var(--tertiary-system-background)',
-              color: value === o ? '#fff' : 'var(--label)',
-              fontWeight: value === o ? 600 : 400
-            }}>
+          <button key={o} type="button" className="chip" aria-pressed={value === o}
+            onClick={() => onChange(value === o ? '' : o)}>
             {o}
           </button>
         ))}

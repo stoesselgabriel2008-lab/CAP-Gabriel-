@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react'
 import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
-import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
+import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/Sheet'
 import { BackHeader } from './Plan'
 import { computeDueQueue, todayCheckIn } from '../domain/recommend'
 import { createPlan, J_SEQUENCE } from '../domain/srs'
@@ -278,10 +278,13 @@ function UnitEditor({ subjectId, unit, onClose }: { subjectId: string; unit: Stu
       <label className="field-label" htmlFor="ue-name">Nom du chapitre</label>
       <input id="ue-name" className="field" value={name} onChange={e => setName(e.target.value)} autoFocus
         placeholder="ex. Membre supérieur — ostéologie" />
-      <label className="field-label">Type de contenu</label>
-      <select className="field" value={kind} onChange={e => setKind(e.target.value as UnitKind)} aria-label="Type de contenu">
-        {Object.entries(KIND_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-      </select>
+      <span className="field-label">Type de contenu</span>
+      <ChoiceChips
+        label="Type de contenu"
+        options={Object.entries(KIND_LABELS).map(([k, v]) => ({ value: k as UnitKind, label: v }))}
+        value={kind}
+        onChange={v => { if (v) setKind(v) }}
+      />
       <label className="field-label" htmlFor="ue-source">Source ou lien (facultatif)</label>
       <input id="ue-source" className="field" value={source} onChange={e => setSource(e.target.value)}
         placeholder="ex. Cours du 12/09, page 34" />
@@ -477,11 +480,12 @@ function ErrorEditor({ error, onClose }: { error: ErrorLog | null; onClose: () =
       <input id="ee-retest" className="field" type="date" value={retestOn ?? ''} onChange={e => setRetestOn(e.target.value)} />
       {state.subjects.length > 0 && (
         <>
-          <label className="field-label" htmlFor="ee-subject">Matière</label>
-          <select id="ee-subject" className="field" value={subjectId ?? ''} onChange={e => setSubjectId(e.target.value)}>
-            <option value="">Aucune</option>
-            {state.subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
+          <span className="field-label">Matière</span>
+          <ChoiceChips
+            label="Matière" allowNone="Aucune"
+            options={state.subjects.map(s => ({ value: s.id, label: s.name }))}
+            value={subjectId ?? ''} onChange={setSubjectId}
+          />
         </>
       )}
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>Enregistrer</button>
