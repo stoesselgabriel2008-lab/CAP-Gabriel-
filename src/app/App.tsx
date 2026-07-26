@@ -22,10 +22,11 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Habitudes : suivi quotidien avec graphiques — séries, taux sur 30 jours, grille des 4 dernières semaines, barres hebdo (Plan → Habitudes, coche rapide sur l\'accueil)',
-  'Notes : fiches durables, épinglables, liées à une matière, recherchables (Plan → Notes)',
-  'Nouveau thème « Verre clair » : Apple Music en mode jour — surfaces blanches translucides, capsule flottante (Moi → Réglages → Apparence)',
-  'Graphique du focus : tes minutes par jour sur 7 jours dans Moi'
+  'Graphiques animés : les barres se dessinent, les anneaux se remplissent, les heatmaps apparaissent en vague',
+  'Nouvelle page Statistiques (Moi) : heatmaps 6 mois du focus et des habitudes, focus par matière, énergie sur 14 jours',
+  'Plan → À venir devient un agenda groupé par jour ; les tâches en retard remontent avec des boutons « Auj. / Demain »',
+  'Habitudes : objectif souple « X fois par semaine » et record de série',
+  'Accueil allégé : la timeline n\'apparaît que si tu as des blocs horaires'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

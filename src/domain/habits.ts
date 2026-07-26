@@ -78,6 +78,53 @@ export function dayStates(r: Routine, logs: RoutineLog[], today: string, days = 
   return out
 }
 
+/** Lundi de la semaine d'une date civile. */
+export function mondayOf(date: string): string {
+  return addDays(date, -(isoWeekday(date) - 1))
+}
+
+/** Progrès de la semaine en cours pour un objectif « X fois par semaine ». */
+export function weeklyProgress(r: Routine, logs: RoutineLog[], today: string): { done: number; target: number } {
+  const target = r.timesPerWeek ?? 0
+  const monday = mondayOf(today)
+  let done = 0
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(monday, i)
+    if (date > today) break
+    if (isDone(logs, r.id, date)) done++
+  }
+  return { done, target }
+}
+
+/** Semaines consécutives (avant celle-ci) où l'objectif hebdo a été atteint. */
+export function weeklyTargetStreak(r: Routine, logs: RoutineLog[], today: string): number {
+  const target = r.timesPerWeek ?? 0
+  if (target <= 0) return 0
+  let streak = 0
+  let monday = addDays(mondayOf(today), -7)
+  for (let w = 0; w < 52; w++) {
+    if (r.createdAt && addDays(monday, 6) < r.createdAt.slice(0, 10)) break
+    let done = 0
+    for (let i = 0; i < 7; i++) if (isDone(logs, r.id, addDays(monday, i))) done++
+    if (done >= target) streak++
+    else break
+    monday = addDays(monday, -7)
+  }
+  return streak
+}
+
+/** Meilleure série jamais atteinte (fenêtre d'un an). */
+export function bestStreakEver(r: Routine, logs: RoutineLog[], today: string): number {
+  let best = 0, cur = 0
+  for (let i = 365; i >= 0; i--) {
+    const date = addDays(today, -i)
+    if (!isScheduled(r, date)) continue
+    if (isDone(logs, r.id, date)) { cur++; best = Math.max(best, cur) }
+    else if (date !== today) cur = 0
+  }
+  return best
+}
+
 /** Pour le graphique : % d'habitudes prévues faites, jour par jour (7 derniers jours). */
 export function dailyCompletion(routines: Routine[], logs: RoutineLog[], today: string, days = 7): Array<{ date: string; rate: number | null }> {
   const active = routines.filter(r => !r.archived)

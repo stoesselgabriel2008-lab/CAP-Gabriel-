@@ -161,14 +161,11 @@ export function Today() {
       {/* Habitudes du jour */}
       <TodayHabits />
 
-      {/* Timeline */}
+      {/* Timeline — seulement si des blocs horaires existent */}
+      {timelineTasks.length > 0 && (
+      <>
       <SectionHeader>Ta journée</SectionHeader>
       <div className="card timeline" aria-label="Timeline du jour">
-        {timelineTasks.length === 0 && (
-          <p style={{ color: 'var(--secondary-label)', fontSize: 15 }}>
-            Aucun bloc horaire prévu. Le temps non planifié est du temps disponible — pas du retard.
-          </p>
-        )}
         {timelineTasks.map(t => {
           const passed = (t.plannedTime ?? '') < `${String(hour).padStart(2, '0')}:00`
           return (
@@ -182,6 +179,8 @@ export function Today() {
           {String(hour).padStart(2, '0')}:{String(new Date().getMinutes()).padStart(2, '0')}
         </div>
       </div>
+      </>
+      )}
 
       {/* Raccourcis */}
       <SectionHeader>Raccourcis</SectionHeader>

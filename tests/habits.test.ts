@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isScheduled, habitStreak, completionRate, dayStates, dailyCompletion } from '../src/domain/habits'
+import { isScheduled, habitStreak, completionRate, dayStates, dailyCompletion, weeklyProgress, weeklyTargetStreak, bestStreakEver, mondayOf } from '../src/domain/habits'
 import type { Routine, RoutineLog } from '../src/domain/types'
 
 const daily: Routine = { id: 'h1', name: 'Lecture', schedule: 'daily', customDays: [], negative: false, archived: false, createdAt: '' }
@@ -46,6 +46,26 @@ describe('habitudes', () => {
     const logs = [log('h2', '2026-07-24')]
     const states = dayStates(weekdays, logs, '2026-07-26', 4) // je 23 → di 26
     expect(states.map(s => s.state)).toEqual(['missed', 'done', 'off', 'off'])
+  })
+
+  it('objectif hebdo : progrès et série de semaines', () => {
+    const weekly: Routine = { ...daily, id: 'h4', timesPerWeek: 3 }
+    // semaine du lundi 20 juillet 2026 ; aujourd'hui samedi 25
+    expect(mondayOf('2026-07-25')).toBe('2026-07-20')
+    const logs = [log('h4', '2026-07-21'), log('h4', '2026-07-23')]
+    expect(weeklyProgress(weekly, logs, '2026-07-25')).toEqual({ done: 2, target: 3 })
+    // semaine précédente (13-19) : 3 faits → série 1
+    const prev = [...logs, log('h4', '2026-07-14'), log('h4', '2026-07-15'), log('h4', '2026-07-17')]
+    expect(weeklyTargetStreak(weekly, prev, '2026-07-25')).toBe(1)
+    expect(weeklyTargetStreak(weekly, logs, '2026-07-25')).toBe(0)
+  })
+
+  it('meilleure série jamais atteinte', () => {
+    const logs = [
+      log('h1', '2026-07-10'), log('h1', '2026-07-11'), log('h1', '2026-07-12'), // série 3
+      log('h1', '2026-07-24') // série 1
+    ]
+    expect(bestStreakEver(daily, logs, '2026-07-25')).toBe(3)
   })
 
   it('complétion quotidienne globale pour le graphique', () => {

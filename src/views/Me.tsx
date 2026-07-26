@@ -8,7 +8,8 @@ import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader } from './Plan'
 import { DateField, TimeField } from '../ui/pickers'
-import { BarChart } from '../ui/charts'
+import { BarChart, HBarChart, Heatmap } from '../ui/charts'
+import { dailyCompletion } from '../domain/habits'
 import { computeInsights, notEnoughDataMessage } from '../domain/insights'
 import { exportBackup, validateImport, mergeStates, type ImportPreview } from '../domain/backup'
 import { defaultState, APP_VERSION } from '../domain/types'
@@ -24,6 +25,7 @@ export function Me() {
   if (sub === 'data') return <DataView />
   if (sub === 'settings') return <SettingsView />
   if (sub === 'guide') return <GuideView />
+  if (sub === 'stats') return <StatsView />
   return <MeHome />
 }
 
@@ -45,6 +47,12 @@ function MeHome() {
           <Icon name="book" size={22} className="chevron" />
           <span className="row-main"><span className="row-title">Guide d'utilisation</span>
             <span className="row-sub">Tout ce que Cap sait faire, expliqué pas à pas</span></span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
+        <button className="list-row" onClick={() => ui.setSub('me', 'stats')}>
+          <Icon name="body" size={22} className="chevron" />
+          <span className="row-main"><span className="row-title">Statistiques</span>
+            <span className="row-sub">Heatmaps de focus et d'habitudes, énergie, matières</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'weekly')}>
@@ -140,6 +148,122 @@ function FocusChart() {
         </p>
       </div>
     </>
+  )
+}
+
+/* ─── Statistiques ─────────────────────────────────────────────────── */
+
+function StatsView() {
+  const { state } = useApp()
+  const ui = useUi()
+  const today = todayISO(state.profile.timezone)
+  const DAYS = 26 * 7
+
+  // Heatmap focus : minutes par jour, normalisées
+  const focusByDay = new Map<string, number>()
+  for (const s of state.focusSessions) {
+    if (!s.endedAt) continue
+    const d = s.startedAt.slice(0, 10)
+    focusByDay.set(d, (focusByDay.get(d) ?? 0) + (s.workedMin ?? s.plannedMin))
+  }
+  const maxFocus = Math.max(25, ...focusByDay.values())
+  const focusDays: Array<{ date: string; value: number | null }> = []
+  for (let i = DAYS - 1; i >= 0; i--) {
+    const date = addDays(today, -i)
+    const min = focusByDay.get(date) ?? 0
+    focusDays.push({ date, value: min === 0 ? 0 : min / maxFocus })
+  }
+  const totalFocus = [...focusByDay.values()].reduce((a, b) => a + b, 0)
+
+  // Heatmap habitudes : % faites par jour
+  const habitDays = dailyCompletion(state.routines, state.routineLogs, today, DAYS)
+    .map(d => ({ date: d.date, value: d.rate }))
+  const hasHabits = state.routines.some(r => !r.archived)
+
+  // Focus par matière (top 5)
+  const bySubject = new Map<string, number>()
+  for (const s of state.focusSessions) {
+    if (!s.endedAt || !s.unitId) continue
+    const unit = state.studyUnits.find(u => u.id === s.unitId)
+    const subj = unit && state.subjects.find(x => x.id === unit.subjectId)
+    if (subj) bySubject.set(subj.name, (bySubject.get(subj.name) ?? 0) + (s.workedMin ?? s.plannedMin))
+  }
+  const topSubjects = [...bySubject.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([label, value]) => ({ label, value }))
+
+  // Énergie des 14 derniers jours
+  const energyDays: Array<{ label: string; value: number | null; highlight?: boolean }> = []
+  for (let i = 13; i >= 0; i--) {
+    const date = addDays(today, -i)
+    const ci = state.checkIns.filter(c => c.date === date).sort((a, b) => b.at.localeCompare(a.at))[0]
+    energyDays.push({
+      label: i % 2 === 0 ? String(Number(date.slice(8, 10))) : '',
+      value: ci ? (ci.energy === 'haute' ? 3 : ci.energy === 'moyenne' ? 2 : 1) : null,
+      highlight: date === today
+    })
+  }
+  const hasEnergy = energyDays.some(d => d.value !== null)
+
+  const fmtMin = (m: number) => m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}` : `${m} min`
+
+  return (
+    <div className="screen">
+      <BackHeader title="Statistiques" onBack={() => ui.setSub('me', null)} />
+      <p className="subtitle-context">Six derniers mois. Les cases se remplissent avec l'usage réel — rien n'est simulé.</p>
+
+      <SectionHeader>Focus — 6 mois</SectionHeader>
+      <div className="card">
+        {totalFocus === 0 ? (
+          <p style={{ color: 'var(--secondary-label)', fontSize: 15 }}>
+            Aucune session encore. Chaque session de focus terminée colorera sa case ici.
+          </p>
+        ) : (
+          <>
+            <Heatmap days={focusDays} />
+            <p style={{ color: 'var(--tertiary-label)', fontSize: 12, marginTop: 8 }}>
+              {fmtMin(totalFocus)} au total · plus la case est vive, plus la journée a été chargée
+            </p>
+          </>
+        )}
+      </div>
+
+      <SectionHeader>Habitudes — 6 mois</SectionHeader>
+      <div className="card">
+        {!hasHabits ? (
+          <p style={{ color: 'var(--secondary-label)', fontSize: 15 }}>
+            Crée une habitude (Plan → Habitudes) pour voir ta régularité se dessiner ici.
+          </p>
+        ) : (
+          <>
+            <Heatmap days={habitDays} color="var(--success)" />
+            <p style={{ color: 'var(--tertiary-label)', fontSize: 12, marginTop: 8 }}>
+              Part des habitudes prévues faites chaque jour
+            </p>
+          </>
+        )}
+      </div>
+
+      {topSubjects.length > 0 && (
+        <>
+          <SectionHeader>Focus par matière</SectionHeader>
+          <div className="card">
+            <HBarChart data={topSubjects} formatValue={fmtMin} />
+          </div>
+        </>
+      )}
+
+      {hasEnergy && (
+        <>
+          <SectionHeader>Énergie — 14 jours</SectionHeader>
+          <div className="card">
+            <BarChart data={energyDays} height={72} formatValue={v => ['', 'basse', 'moyenne', 'haute'][v] ?? ''} />
+            <p style={{ color: 'var(--tertiary-label)', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
+              Énergie déclarée au check-in (basse, moyenne, haute)
+            </p>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 

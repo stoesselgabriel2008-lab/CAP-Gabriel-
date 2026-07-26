@@ -29,7 +29,7 @@ export function Plan() {
 }
 
 function PlanHome({ inboxCount }: { inboxCount: number }) {
-  const { state, updateUndoable } = useApp()
+  const { state, update, updateUndoable, toast } = useApp()
   const ui = useUi()
   const today = todayISO(state.profile.timezone)
   const [editing, setEditing] = useState<Task | 'new' | null>(null)
@@ -37,11 +37,17 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
 
   const active = state.tasks.filter(t => !t.deletedAt)
   const lists = useMemo(() => ({
+    overdue: active.filter(t => !t.done && !t.someday && t.plannedDate && t.plannedDate < today),
     today: active.filter(t => !t.done && (t.plannedDate === today || (t.deadline && daysBetween(today, t.deadline) <= 0))),
     upcoming: active.filter(t => !t.done && !t.someday && ((t.plannedDate && t.plannedDate > today) || (!t.plannedDate && t.deadline && t.deadline > today) || (!t.plannedDate && !t.deadline))),
     someday: active.filter(t => !t.done && t.someday),
     done: active.filter(t => t.done).slice(-30).reverse()
   }), [active, today])
+
+  const reschedule = (t: Task, date: string, label: string) => {
+    update(s => ({ ...s, tasks: s.tasks.map(x => x.id === t.id ? { ...x, plannedDate: date } : x) }))
+    toast(label)
+  }
 
   const complete = (t: Task) => {
     updateUndoable(`« ${t.title} » terminée.`, s => ({
@@ -107,8 +113,39 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           { value: 'done', label: 'Faites' }
         ]} />
 
+      {section === 'today' && lists.overdue.length > 0 && (
+        <>
+          <h3 className="section-header" style={{ color: 'var(--warning)' }}>
+            En retard · {lists.overdue.length}
+          </h3>
+          <div className="list-group">
+            {lists.overdue.map(t => (
+              <div key={t.id} className="list-row">
+                <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => complete(t)}>
+                  <span className="check-circle"><Icon name="check" size={14} /></span>
+                </button>
+                <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => setEditing(t)}>
+                  <span className="row-title" style={{ display: 'block' }}>{t.title}</span>
+                  <span className="row-sub">prévu {relativeLabel(t.plannedDate!, today)}</span>
+                </button>
+                <button className="btn-plain" style={{ minHeight: 44, fontSize: 14, flexShrink: 0 }}
+                  onClick={() => reschedule(t, today, `« ${t.title} » replanifiée aujourd'hui.`)}>
+                  Auj.
+                </button>
+                <button className="btn-plain" style={{ minHeight: 44, fontSize: 14, flexShrink: 0 }}
+                  onClick={() => reschedule(t, addDays(today, 1), `« ${t.title} » reportée à demain.`)}>
+                  Demain
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <div style={{ marginTop: 12 }}>
-        {lists[section].length === 0 ? (
+        {section === 'upcoming' && lists.upcoming.length > 0 ? (
+          <UpcomingAgenda tasks={lists.upcoming} today={today} onEdit={setEditing} onComplete={complete} />
+        ) : lists[section].length === 0 ? (
           <div className="card">
             <EmptyState title={section === 'done' ? 'Rien de terminé récemment' : 'Rien ici'}>
               {section === 'today' && "Aucune tâche prévue aujourd'hui. Tu peux en planifier une ou profiter de l'espace."}
@@ -149,6 +186,57 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
         />
       )}
     </div>
+  )
+}
+
+/** Agenda des 7 prochains jours, puis « Plus tard » et « Sans date ». */
+function UpcomingAgenda({ tasks, today, onEdit, onComplete }: {
+  tasks: Task[]
+  today: string
+  onEdit: (t: Task) => void
+  onComplete: (t: Task) => void
+}) {
+  const groups: Array<{ label: string; items: Task[] }> = []
+  for (let i = 1; i <= 7; i++) {
+    const date = addDays(today, i)
+    const items = tasks.filter(t => t.plannedDate === date)
+    if (items.length) {
+      const label = relativeLabel(date, today)
+      groups.push({ label: label.charAt(0).toUpperCase() + label.slice(1), items })
+    }
+  }
+  const later = tasks.filter(t => t.plannedDate && t.plannedDate > addDays(today, 7))
+  if (later.length) groups.push({ label: 'Plus tard', items: later })
+  const noDate = tasks.filter(t => !t.plannedDate)
+  if (noDate.length) groups.push({ label: 'Sans date', items: noDate })
+
+  return (
+    <>
+      {groups.map(g => (
+        <div key={g.label}>
+          <h3 className="section-header" style={{ marginTop: 16 }}>{g.label}</h3>
+          <div className="list-group">
+            {g.items.map(t => (
+              <div key={t.id} className="list-row">
+                <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => onComplete(t)}>
+                  <span className="check-circle"><Icon name="check" size={14} /></span>
+                </button>
+                <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => onEdit(t)}>
+                  <span className="row-title" style={{ display: 'block' }}>{t.title}</span>
+                  {(t.plannedTime || t.deadline) && (
+                    <span className="row-sub">
+                      {t.plannedTime ?? ''}{t.plannedTime && t.deadline ? ' · ' : ''}
+                      {t.deadline ? `échéance ${relativeLabel(t.deadline, today)}` : ''}
+                    </span>
+                  )}
+                </button>
+                <Icon name="chevronRight" size={16} className="chevron" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
   )
 }
 

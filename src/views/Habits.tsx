@@ -9,7 +9,7 @@ import { Icon } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader } from './Plan'
 import { BarChart, DayGrid, ProgressRing } from '../ui/charts'
-import { isScheduled, isDone, habitStreak, completionRate, dayStates, dailyCompletion } from '../domain/habits'
+import { isScheduled, isDone, habitStreak, completionRate, dayStates, dailyCompletion, weeklyProgress, weeklyTargetStreak, bestStreakEver } from '../domain/habits'
 import { todayISO, nowISO, relativeLabel } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Routine } from '../domain/types'
@@ -98,14 +98,17 @@ export function HabitsView() {
           <div className="list-group">
             {active.map(r => {
               const c = completionRate(r, state.routineLogs, today)
+              const wp = r.timesPerWeek ? weeklyProgress(r, state.routineLogs, today) : null
               return (
                 <button key={r.id} className="list-row" onClick={() => setDetail(r)}>
-                  <ProgressRing value={c.rate} size={44} label={`de régularité pour ${r.name}`} />
+                  <ProgressRing value={wp ? Math.min(1, wp.done / wp.target) : c.rate} size={44}
+                    label={`de régularité pour ${r.name}`} />
                   <span className="row-main">
                     <span className="row-title">{r.negative ? `Éviter : ${r.name}` : r.name}</span>
                     <span className="row-sub">
-                      {c.done}/{c.scheduled} jours prévus
-                      {r.schedule === 'weekdays' ? ' · en semaine' : r.schedule === 'custom' ? ` · ${r.customDays.length} j/sem` : ' · quotidien'}
+                      {wp
+                        ? `${wp.done}/${wp.target} cette semaine · objectif souple`
+                        : `${c.done}/${c.scheduled} jours prévus${r.schedule === 'weekdays' ? ' · en semaine' : r.schedule === 'custom' ? ` · ${r.customDays.length} j/sem` : ' · quotidien'}`}
                     </span>
                   </span>
                   <Icon name="chevronRight" size={16} className="chevron" />
@@ -128,14 +131,30 @@ function HabitDetail({ habit, onClose, onEdit }: { habit: Routine; onClose: () =
   const states = dayStates(habit, state.routineLogs, today)
   const c = completionRate(habit, state.routineLogs, today)
   const streak = habitStreak(habit, state.routineLogs, today)
+  const best = bestStreakEver(habit, state.routineLogs, today)
+  const wp = habit.timesPerWeek ? weeklyProgress(habit, state.routineLogs, today) : null
+  const wStreak = habit.timesPerWeek ? weeklyTargetStreak(habit, state.routineLogs, today) : 0
 
   return (
     <Sheet title={habit.negative ? `Éviter : ${habit.name}` : habit.name} onClose={onClose}>
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 8 }}>
-        <ProgressRing value={c.rate} size={64} label="de régularité" />
+        <ProgressRing value={wp ? Math.min(1, wp.done / wp.target) : c.rate} size={64} label="de régularité" />
         <div>
-          <p style={{ fontSize: 15 }}><strong>{c.done}</strong> jours faits sur <strong>{c.scheduled}</strong> prévus (30 j)</p>
-          <p style={{ fontSize: 14, color: 'var(--secondary-label)' }}>Série actuelle : {streak} jour{streak !== 1 ? 's' : ''}</p>
+          {wp ? (
+            <>
+              <p style={{ fontSize: 15 }}><strong>{wp.done}</strong>/<strong>{wp.target}</strong> cette semaine</p>
+              <p style={{ fontSize: 14, color: 'var(--secondary-label)' }}>
+                {wStreak > 0 ? `${wStreak} semaine${wStreak > 1 ? 's' : ''} d'affilée à l'objectif` : 'Objectif hebdo souple'}
+              </p>
+            </>
+          ) : (
+            <>
+              <p style={{ fontSize: 15 }}><strong>{c.done}</strong> jours faits sur <strong>{c.scheduled}</strong> prévus (30 j)</p>
+              <p style={{ fontSize: 14, color: 'var(--secondary-label)' }}>
+                Série : {streak} j{best > streak ? ` · record : ${best} j` : streak > 0 ? ' · record en cours' : ''}
+              </p>
+            </>
+          )}
         </div>
       </div>
       <SectionHeader>4 dernières semaines</SectionHeader>
@@ -166,11 +185,17 @@ function HabitEditor({ habit, onClose }: { habit: Routine | null; onClose: () =>
   const [schedule, setSchedule] = useState<Routine['schedule']>(habit?.schedule ?? 'daily')
   const [customDays, setCustomDays] = useState<number[]>(habit?.customDays ?? [1, 3, 5])
   const [negative, setNegative] = useState(habit?.negative ?? false)
+  const [timesPerWeek, setTimesPerWeek] = useState<number | null>(habit?.timesPerWeek ?? null)
 
   const save = () => {
     if (!name.trim()) { toast('Un nom est nécessaire.'); return }
     if (schedule === 'custom' && customDays.length === 0) { toast('Choisis au moins un jour.'); return }
-    const fields = { name: name.trim(), schedule, customDays: schedule === 'custom' ? [...customDays].sort() : [], negative }
+    const fields = {
+      name: name.trim(), schedule,
+      customDays: schedule === 'custom' ? [...customDays].sort() : [],
+      timesPerWeek: schedule === 'daily' ? timesPerWeek : null,
+      negative
+    }
     if (habit) {
       update(s => ({ ...s, routines: s.routines.map(r => r.id === habit.id ? { ...r, ...fields } : r) }))
     } else {
@@ -192,6 +217,22 @@ function HabitEditor({ habit, onClose }: { habit: Routine | null; onClose: () =>
           { value: 'weekdays', label: 'En semaine' },
           { value: 'custom', label: 'Certains jours' }
         ]} />
+      {schedule === 'daily' && (
+        <>
+          <label className="field-label">Objectif souple (facultatif) — X fois par semaine</label>
+          <div className="chip-row" role="group" aria-label="Objectif par semaine">
+            <button type="button" className="chip" aria-pressed={timesPerWeek === null}
+              onClick={() => setTimesPerWeek(null)}>Strict</button>
+            {[3, 4, 5, 6].map(n => (
+              <button key={n} type="button" className="chip" aria-pressed={timesPerWeek === n}
+                onClick={() => setTimesPerWeek(timesPerWeek === n ? null : n)}>{n}×/sem</button>
+            ))}
+          </div>
+          <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 6 }}>
+            Avec un objectif souple, on mesure la semaine, pas la perfection quotidienne.
+          </p>
+        </>
+      )}
       {schedule === 'custom' && (
         <div className="chip-row" style={{ marginTop: 12 }} role="group" aria-label="Jours">
           {DAY_NAMES_FULL.map((d, i) => (

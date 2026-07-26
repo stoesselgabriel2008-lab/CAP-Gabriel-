@@ -718,6 +718,21 @@ mark {
   border-radius: 2px;
 }
 
+/* ─── Graphiques : dessin progressif ─────────────────────────────── */
+@keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.chart-bar {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: bar-grow 520ms var(--ease-spring) backwards;
+}
+@keyframes hbar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.chart-hbar {
+  transform-origin: left center;
+  animation: hbar-grow 560ms var(--ease-spring) backwards;
+}
+@keyframes cell-in { from { opacity: 0; } to { opacity: 1; } }
+.chart-cell { animation: cell-in 400ms ease backwards; }
+
 /* ─── États vides ────────────────────────────────────────────────── */
 .empty-state {
   text-align: center;

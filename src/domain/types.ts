@@ -83,6 +83,7 @@ export interface Routine {
   name: string
   schedule: 'daily' | 'weekdays' | 'custom'
   customDays: number[] // ISO weekdays 1..7
+  timesPerWeek?: number | null // objectif souple : X fois par semaine (au lieu du quotidien strict)
   negative: boolean // "éviter un comportement"
   archived: boolean
   createdAt: string
@@ -327,7 +328,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '2.0.0'
+export const APP_VERSION = '2.1.0'
 
 export function defaultState(): AppState {
   return {
