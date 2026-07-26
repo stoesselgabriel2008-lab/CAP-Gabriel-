@@ -22,11 +22,11 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Graphiques animés : les barres se dessinent, les anneaux se remplissent, les heatmaps apparaissent en vague',
-  'Nouvelle page Statistiques (Moi) : heatmaps 6 mois du focus et des habitudes, focus par matière, énergie sur 14 jours',
-  'Plan → À venir devient un agenda groupé par jour ; les tâches en retard remontent avec des boutons « Auj. / Demain »',
-  'Habitudes : objectif souple « X fois par semaine » et record de série',
-  'Accueil allégé : la timeline n\'apparaît que si tu as des blocs horaires'
+  'Bulle de verre coulissante dans la barre d\'onglets : elle glisse d\'un onglet à l\'autre avec un ressort fluide',
+  'Tous les sélecteurs (énergie, durée, apparence…) ont maintenant une pastille qui coulisse, comme les contrôles iOS',
+  'Boutons redessinés : dégradé subtil, reflet supérieur, enfoncement au toucher',
+  'Re-taper l\'onglet actif ramène à sa racine (convention des grandes apps)',
+  'Typographie et espacements affinés partout'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -92,6 +92,8 @@ export default function App() {
         scrollPositions.current[prev] = window.scrollY
         requestAnimationFrame(() => window.scrollTo(0, scrollPositions.current[t] ?? 0))
       } else {
+        // re-taper l'onglet actif : retour à la racine + haut de page (convention iOS)
+        setSubState(s => ({ ...s, [t]: null }))
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
       return t
@@ -237,7 +239,12 @@ export default function App() {
 
         {/* Tab bar */}
         <nav className="tab-bar" aria-label="Navigation principale">
-          <div className="tab-bar-inner">
+          <div className="tab-bar-inner" style={{ position: 'relative' }}>
+            <span
+              className="tab-thumb"
+              aria-hidden="true"
+              style={{ transform: `translateX(${TABS.findIndex(t => t.id === tab) * 100}%)` }}
+            />
             {TABS.map(t => {
               const badge = tabBadges[t.id] ?? 0
               return (

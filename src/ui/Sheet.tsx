@@ -83,8 +83,17 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
   onChange: (v: T) => void
   label: string
 }) {
+  const idx = options.findIndex(o => o.value === value)
+  const n = options.length
   return (
     <div className="segmented" role="group" aria-label={label}>
+      {idx >= 0 && (
+        <span
+          className="segmented-thumb"
+          aria-hidden="true"
+          style={{ width: `calc((100% - 4px) / ${n})`, transform: `translateX(${idx * 100}%)` }}
+        />
+      )}
       {options.map(o => (
         <button
           key={o.value}
