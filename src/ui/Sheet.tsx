@@ -7,30 +7,6 @@ import React, { useEffect, useRef } from 'react'
 // et le scroll du fond n'est restauré que quand la dernière se ferme.
 const sheetStack: symbol[] = []
 
-/**
- * Hauteur du clavier iOS via visualViewport (seuil 60 px pour ignorer les
- * micro-variations de Safari). Les sheets remontent d'autant.
- */
-export function useKeyboardInset(): number {
-  const [inset, setInset] = React.useState(0)
-  React.useEffect(() => {
-    const vv = window.visualViewport
-    if (!vv) return
-    const update = () => {
-      const i = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
-      setInset(i > 60 ? i : 0)
-    }
-    update()
-    vv.addEventListener('resize', update)
-    vv.addEventListener('scroll', update)
-    return () => {
-      vv.removeEventListener('resize', update)
-      vv.removeEventListener('scroll', update)
-    }
-  }, [])
-  return inset
-}
-
 export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }: {
   title: string
   onClose: () => void
@@ -77,7 +53,40 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
     }
   }, [onClose])
 
-  const kb = useKeyboardInset()
+  // Remontée au-dessus du clavier, mesurée sur la sheet elle-même
+  // (getBoundingClientRect vs visualViewport). Sur iOS plein écran,
+  // window.innerHeight surestime le clavier et collait la sheet tout en
+  // haut de l'écran : ici elle ne monte que du strict nécessaire.
+  const [lift, setLift] = React.useState(0)
+  const liftRef = useRef(0)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    let timer: number | undefined
+    const measure = () => {
+      const el = ref.current
+      if (!el) return
+      const kbTop = vv.offsetTop + vv.height // haut du clavier, coordonnées layout
+      const naturalBottom = el.getBoundingClientRect().bottom + liftRef.current
+      const needed = Math.max(0, naturalBottom - kbTop + 10)
+      const next = needed > 24 ? Math.round(needed) : 0
+      if (Math.abs(next - liftRef.current) > 2) { liftRef.current = next; setLift(next) }
+    }
+    const onChange = () => {
+      measure()
+      // re-mesure après l'animation d'ouverture / le défilement du clavier
+      window.clearTimeout(timer)
+      timer = window.setTimeout(measure, 450)
+    }
+    onChange()
+    vv.addEventListener('resize', onChange)
+    vv.addEventListener('scroll', onChange)
+    return () => {
+      window.clearTimeout(timer)
+      vv.removeEventListener('resize', onChange)
+      vv.removeEventListener('scroll', onChange)
+    }
+  }, [])
 
   // Champ focalisé recentré dans la zone scrollable (clavier ouvert)
   useEffect(() => {
@@ -126,12 +135,11 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
         tabIndex={-1}
         className={`sheet${full ? ' sheet-full' : ''}`}
         style={{
-          transform: dy > 0 ? `translateY(${dy}px)` : undefined,
-          bottom: kb > 0 ? `${kb + 8}px` : undefined,
-          maxHeight: kb > 0 ? `calc(100dvh - var(--sat) - ${kb + 20}px)` : undefined,
+          transform: dy - lift !== 0 ? `translateY(${dy - lift}px)` : undefined,
+          maxHeight: lift > 0 ? `calc(100dvh - var(--sat) - ${40 + lift}px)` : undefined,
           transition: dragging.current
             ? 'none'
-            : 'transform 320ms var(--ease-spring), bottom 250ms var(--ease-spring), max-height 250ms var(--ease-spring)'
+            : 'transform 280ms var(--ease-spring), max-height 250ms var(--ease-spring)'
         }}
       >
         <div
