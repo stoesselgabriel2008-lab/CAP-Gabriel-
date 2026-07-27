@@ -265,6 +265,7 @@ function ShortcutGrid({ onNewTask }: { onNewTask: () => void }) {
       case 'notes': ui.navigate('plan', 'notes'); break
       case 'search': ui.openCommand(); break
       case 'evening': ui.openEvening(); break
+      case 'resist': ui.navigate('coach', 'resist'); break
     }
   }
 

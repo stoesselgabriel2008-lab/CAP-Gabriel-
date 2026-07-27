@@ -195,6 +195,17 @@ export interface CheckIn {
   mood: string
 }
 
+/** Compteur de résistance : « depuis combien de temps je tiens ». */
+export interface Resistance {
+  id: ID
+  name: string
+  startDate: string // civil — début de la série en cours
+  colorId: string // couleur (ui/accents.ts)
+  bestDays: number // record de jours tenus (séries précédentes comprises)
+  resets: number
+  createdAt: string
+}
+
 export interface CommitmentState {
   startDate: string // civil — départ de la série actuelle
   originalStart: string // civil — tout premier départ
@@ -329,11 +340,12 @@ export interface AppState {
   ankiLogs: AnkiLog[]
   weeklyReviews: WeeklyReview[]
   notes: Note[]
+  resistances: Resistance[]
   activeTimer: ActiveTimer | null
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '4.4.0'
+export const APP_VERSION = '4.5.0'
 
 export function defaultState(): AppState {
   return {
@@ -384,6 +396,7 @@ export function defaultState(): AppState {
     ankiLogs: [],
     weeklyReviews: [],
     notes: [],
+    resistances: [],
     activeTimer: null
   }
 }

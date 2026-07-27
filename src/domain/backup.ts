@@ -39,7 +39,7 @@ const ARRAY_KEYS: (keyof AppState)[] = [
   'subjects', 'studyUnits', 'reviewPlans', 'reviewLogs', 'focusSessions',
   'errorLogs', 'checkIns', 'urgeEvents', 'lapseEvents', 'ifThenPlans',
   'sleepLogs', 'bodyLogs', 'journalEntries', 'socialExercises', 'ankiLogs',
-  'weeklyReviews', 'notes'
+  'weeklyReviews', 'notes', 'resistances'
 ]
 
 /** Valide un fichier importé et produit un aperçu. Ne modifie rien. */

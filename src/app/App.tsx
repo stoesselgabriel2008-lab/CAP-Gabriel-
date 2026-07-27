@@ -23,9 +23,9 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Tâches récurrentes : chaque jour, semaine ou mois — terminer une occurrence crée la suivante automatiquement',
-  'Capture en langage naturel : écris « DST anatomie vendredi 17h » et la tâche est datée toute seule (aperçu « Détecté » sous le champ)',
-  'Statistiques : taux de rétention par matière — la part de tes rappels réussis, pour repérer les matières fragiles'
+  'Compteurs de résistance (Coach → Résistances) : compte les jours depuis que tu tiens, avec ta couleur, une phrase d\'encouragement chaque jour, des paliers à franchir et ton record',
+  'Tu peux en créer plusieurs — un par chose à laquelle tu résistes — et antidater le début (ton engagement du 12 juillet, par exemple)',
+  '« J\'ai craqué » garde le record, repart aujourd\'hui, et enchaîne sur le SOS'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

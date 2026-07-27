@@ -10,9 +10,12 @@ import { TimeField } from '../ui/pickers'
 import { BackHeader } from './Plan'
 import { currentStreak, bestStreak, alignedDaysLast30, afterLapse } from '../domain/streak'
 import { todayCheckIn } from '../domain/recommend'
-import { todayISO, formatCivilShort, localHour, nowISO } from '../lib/dates'
+import { nextMilestone, prevMilestone, isMilestone, phraseFor } from '../domain/resist'
+import { ACCENTS, accentColor } from '../ui/accents'
+import { DateField } from '../ui/pickers'
+import { todayISO, formatCivilShort, formatCivilLong, localHour, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
-import type { IfThenPlan, SleepLog } from '../domain/types'
+import type { IfThenPlan, SleepLog, Resistance } from '../domain/types'
 
 export function Coach() {
   const ui = useUi()
@@ -22,6 +25,7 @@ export function Coach() {
   if (sub === 'mental') return <MentalView />
   if (sub === 'body') return <BodyView />
   if (sub === 'social') return <SocialView />
+  if (sub === 'resist') return <ResistView />
   return <CoachHome />
 }
 
@@ -78,10 +82,210 @@ function CoachHome() {
         ))}
       </div>
 
+      {/* Compteurs de résistance : accès direct avec le meilleur compteur en aperçu */}
+      <div className="list-group">
+        <button className="list-row" onClick={() => ui.setSub('coach', 'resist')}>
+          <span className="cat-dot" style={{
+            width: 12, height: 12,
+            background: state.resistances[0] ? accentColor(state.resistances[0].colorId) : 'var(--tint)'
+          }} aria-hidden="true" />
+          <span className="row-main">
+            <span className="row-title">Résistances</span>
+            <span className="row-sub">
+              {state.resistances.length === 0
+                ? 'Compte les jours depuis que tu tiens — crée ton premier compteur'
+                : state.resistances.map(r => `${r.name} · ${Math.max(0, daysBetween(r.startDate, today))} j`).slice(0, 2).join(' — ')}
+            </span>
+          </span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
+      </div>
+
       <button className="btn btn-danger btn-block btn-large" style={{ marginTop: 8 }} onClick={ui.openSOS}>
         SOS — traverser une envie
       </button>
     </div>
+  )
+}
+
+/* ─── Résistances : compteurs « je tiens depuis N jours » ──────────── */
+
+function ResistView() {
+  const { state, updateUndoable } = useApp()
+  const ui = useUi()
+  const today = todayISO(state.profile.timezone)
+  const [editing, setEditing] = useState<Resistance | 'new' | null>(null)
+  const [resetting, setResetting] = useState<Resistance | null>(null)
+
+  return (
+    <div className="screen">
+      <BackHeader title="Résistances" onBack={() => ui.setSub('coach', null)}
+        action="+ Compteur" onAction={() => setEditing('new')} />
+
+      {state.resistances.length === 0 ? (
+        <>
+          <p className="subtitle-context" style={{ marginTop: 4 }}>
+            Un compteur par chose à laquelle tu résistes. Il compte les jours,
+            t'encourage chaque matin, et garde ton record si tu craques.
+          </p>
+          <div className="card">
+            <EmptyState title="Aucun compteur">
+              Commence par celui qui compte le plus.
+            </EmptyState>
+            <button className="btn btn-primary btn-block btn-large" onClick={() => setEditing('new')}>
+              Créer mon premier compteur
+            </button>
+          </div>
+        </>
+      ) : (
+        state.resistances.map(r => {
+          const days = Math.max(0, daysBetween(r.startDate, today))
+          const color = accentColor(r.colorId)
+          const next = nextMilestone(days)
+          const prev = prevMilestone(days)
+          const progress = Math.min(1, Math.max(0, (days - prev) / Math.max(1, next - prev)))
+          const record = Math.max(r.bestDays, days)
+          return (
+            <div key={r.id} className="card resist-card" style={{ ['--rc' as never]: color }}>
+              <div className="resist-head">
+                <span className="resist-name">{r.name}</span>
+                <button className="btn-plain" style={{ minHeight: 36, fontSize: 14 }} onClick={() => setEditing(r)}>
+                  Modifier
+                </button>
+              </div>
+              <div className="resist-count">
+                <span className="resist-days">{days}</span>
+                <span className="resist-unit">jour{days > 1 ? 's' : ''}</span>
+              </div>
+              <p className="resist-since">depuis le {formatCivilLong(r.startDate)}</p>
+              {isMilestone(days) && (
+                <p className="resist-milestone">Palier atteint : {days} jours. Prends deux secondes pour le savourer.</p>
+              )}
+              <div className="resist-bar" aria-label={`Prochain palier : ${next} jours`}>
+                <span style={{ width: `${progress * 100}%` }} />
+              </div>
+              <p className="resist-next">
+                prochain palier : {next} j{record > days ? ` · record : ${record} j` : days >= 7 ? ' · record en cours' : ''}
+              </p>
+              <p className="resist-phrase">{phraseFor(r.id, days)}</p>
+              <button className="btn-plain resist-lapse" onClick={() => setResetting(r)}>
+                J'ai craqué…
+              </button>
+            </div>
+          )
+        })
+      )}
+
+      {editing && (
+        <ResistEditor
+          resistance={editing === 'new' ? null : editing}
+          onClose={() => setEditing(null)}
+        />
+      )}
+
+      {resetting && (
+        <Sheet title="Repartir à zéro" onClose={() => setResetting(null)}>
+          <p style={{ fontSize: 16, lineHeight: 1.5 }}>
+            Un écart n'efface pas {Math.max(0, daysBetween(resetting.startDate, today))} jours
+            de preuve que tu peux tenir. Le record est gardé — la série repart aujourd'hui.
+          </p>
+          <button className="btn btn-danger btn-block btn-large" style={{ marginTop: 16 }} onClick={() => {
+            const days = Math.max(0, daysBetween(resetting.startDate, today))
+            updateUndoable(`« ${resetting.name} » repart à zéro. Record gardé : ${Math.max(resetting.bestDays, days)} j.`, s => ({
+              ...s,
+              resistances: s.resistances.map(x => x.id === resetting.id
+                ? { ...x, startDate: today, bestDays: Math.max(x.bestDays, days), resets: x.resets + 1 }
+                : x)
+            }))
+            setResetting(null)
+            ui.openSOS()
+          }}>
+            Confirmer — et traverser la suite avec le SOS
+          </button>
+          <button className="btn btn-secondary btn-block" style={{ marginTop: 8 }} onClick={() => setResetting(null)}>
+            Non, je tiens encore
+          </button>
+        </Sheet>
+      )}
+    </div>
+  )
+}
+
+function ResistEditor({ resistance, onClose }: { resistance: Resistance | null; onClose: () => void }) {
+  const { state, update, updateUndoable, toast } = useApp()
+  const today = todayISO(state.profile.timezone)
+  const [name, setName] = useState(resistance?.name ?? '')
+  const [colorId, setColorId] = useState(resistance?.colorId ?? 'rose')
+  const [startDate, setStartDate] = useState(resistance?.startDate ?? today)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const save = () => {
+    const trimmed = name.trim()
+    if (!trimmed) { toast('Donne un nom au compteur.'); return }
+    const start = startDate && startDate <= today ? startDate : today
+    if (resistance) {
+      update(s => ({
+        ...s,
+        resistances: s.resistances.map(r => r.id === resistance.id
+          ? { ...r, name: trimmed, colorId, startDate: start }
+          : r)
+      }))
+    } else {
+      update(s => ({
+        ...s,
+        resistances: [...s.resistances, {
+          id: newId('res'), name: trimmed, colorId, startDate: start,
+          bestDays: 0, resets: 0, createdAt: nowISO()
+        }]
+      }))
+      toast('Compteur créé. Tiens bon.')
+    }
+    onClose()
+  }
+
+  return (
+    <Sheet title={resistance ? 'Modifier le compteur' : 'Nouveau compteur'} onClose={onClose}>
+      <label className="field-label" htmlFor="re-name">Je résiste à…</label>
+      <input id="re-name" className="field" value={name} onChange={e => setName(e.target.value)}
+        placeholder="ex. Contenu adulte, réseaux le soir, sucre…" autoFocus={!resistance} />
+
+      <span className="field-label">Couleur</span>
+      <div className="accent-row" role="group" aria-label="Couleur du compteur">
+        {ACCENTS.map(a => (
+          <button key={a.id} type="button" className="accent-dot" aria-pressed={colorId === a.id}
+            aria-label={a.name} style={{ background: a.color }}
+            onClick={() => setColorId(a.id)} />
+        ))}
+      </div>
+
+      <DateField label="Je tiens depuis le…" value={startDate} onChange={setStartDate} allowNone={false} />
+      <p style={{ color: 'var(--tertiary-label)', fontSize: 13, margin: '6px 2px 0' }}>
+        Tu peux mettre une date passée — par exemple le début de ton engagement.
+      </p>
+
+      <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>
+        Enregistrer
+      </button>
+
+      {resistance && (
+        !confirmDelete ? (
+          <button className="btn-plain btn-block" style={{ minHeight: 44, marginTop: 10, color: 'var(--danger)' }}
+            onClick={() => setConfirmDelete(true)}>
+            Supprimer ce compteur
+          </button>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => {
+              updateUndoable(`« ${resistance.name} » supprimé.`, s => ({
+                ...s, resistances: s.resistances.filter(r => r.id !== resistance.id)
+              }))
+              onClose()
+            }}>Confirmer</button>
+            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setConfirmDelete(false)}>Garder</button>
+          </div>
+        )
+      )}
+    </Sheet>
   )
 }
 
