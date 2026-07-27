@@ -223,7 +223,9 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
   border-radius: 18px;
   padding: var(--sp-4);
   margin-bottom: var(--sp-3);
+  transition: transform 150ms var(--ease-spring), background-color 260ms;
 }
+button.card:active { transform: scale(0.985); }
 
 .list-group {
   background: var(--secondary-system-grouped-background);
@@ -241,7 +243,13 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
   padding: 12px var(--sp-4);
   text-align: left;
   position: relative;
+  transition: background 130ms;
 }
+/* Retour visuel au tap, comme UITableView */
+button.list-row:active,
+.list-row:has(> .row-main:active) { background: rgba(255, 255, 255, 0.05); }
+.theme-light button.list-row:active,
+.theme-light .list-row:has(> .row-main:active) { background: rgba(0, 0, 0, 0.05); }
 .list-row + .list-row::before {
   content: "";
   position: absolute;
@@ -781,6 +789,12 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
   justify-content: center;
   color: transparent;
   transition: background 160ms, border-color 160ms, color 160ms;
+}
+.check-circle.checked { animation: check-pop 280ms var(--ease-spring); }
+@keyframes check-pop {
+  0% { transform: scale(0.72); }
+  55% { transform: scale(1.14); }
+  100% { transform: scale(1); }
 }
 .check-circle.checked {
   background: var(--tint);
@@ -1455,6 +1469,19 @@ input[type="range"] {
     0 10px 28px rgba(0, 0, 0, 0.45),
     0 0 44px -20px color-mix(in srgb, var(--tint) 55%, transparent);
 }
+
+/* Changement d'onglet : l'écran entrant glisse doucement en place
+   ([hidden] → visible relance l'animation ; transform:none en fin,
+   donc les sheets fixed à l'intérieur se positionnent normalement) */
+main > div:not([hidden]) { animation: screen-in 220ms var(--ease-spring); }
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Bascule de thème en fondu */
+body { transition: background-color 260ms; }
+.app-shell, .list-group, .now-card { transition-property: background-color; transition-duration: 260ms; }
 
 /* Entrée en cascade des sections (transform/opacity uniquement) */
 .screen > * { animation: fade-up 340ms var(--ease-spring) backwards; }

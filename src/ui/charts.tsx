@@ -141,7 +141,10 @@ export function ProgressRing({ value, size = 52, label }: { value: number; size?
       <circle cx="24" cy="24" r={r} fill="none" stroke="var(--separator)" strokeWidth="4" />
       <circle cx="24" cy="24" r={r} fill="none" stroke={pct >= 0.8 ? 'var(--success)' : 'var(--tint)'} strokeWidth="4"
         strokeLinecap="round" strokeDasharray={`${drawn ? c * pct : 0} ${c}`}
-        style={{ transition: 'stroke-dasharray 700ms cubic-bezier(0.32, 0.72, 0, 1)' }}
+        style={{
+          transition: 'stroke-dasharray 700ms cubic-bezier(0.32, 0.72, 0, 1)',
+          filter: `drop-shadow(0 0 5px color-mix(in srgb, ${pct >= 0.8 ? 'var(--success)' : 'var(--tint)'} 45%, transparent))`
+        }}
         transform="rotate(-90 24 24)" />
       <text x="24" y="27.5" textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--label)">
         {Math.round(pct * 100)}

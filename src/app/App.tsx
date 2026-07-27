@@ -23,11 +23,9 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Refonte complète : fond anthracite, deux thèmes (Sombre / Clair), interface plus calme et plus lisible',
-  'Aujourd\'hui : l\'anneau du jour remplace les tuiles — ta journée en un cercle, chaque ligne est tappable',
-  'Réviser : note un rappel en deux taps (Facile → Oublié), avec la prochaine date annoncée — le minuteur reste disponible',
-  'Nouvelle tâche express : titre, catégorie, date, priorité — le reste sous « Plus d\'options », ta dernière catégorie est retenue',
-  'Les anciens thèmes Verre deviennent Sombre / Clair automatiquement, rien n\'est perdu'
+  'Tout est plus fluide : les onglets glissent en place, chaque ligne répond au doigt, les coches font un petit rebond',
+  'La bascule Sombre / Clair se fait en fondu, l\'anneau du jour a une lueur douce',
+  'Carte Maintenant compacte : l\'essentiel de l\'accueil tient à l\'écran sans défiler'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
