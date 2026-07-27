@@ -11,6 +11,7 @@ import { HabitsView } from './Habits'
 import { NotesView } from './Notes'
 import { CalendarView } from './CalendarView'
 import { TASK_CATEGORIES, taskColor, categoryOf, categoryBarColor, priorityColor } from '../domain/categories'
+import { completeTask } from '../domain/repeat'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Task, Capture, Project, Goal } from '../domain/types'
@@ -82,9 +83,8 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
   )
 
   const complete = (t: Task) => {
-    updateUndoable(`« ${t.title} » terminée.`, s => ({
-      ...s, tasks: s.tasks.map(x => x.id === t.id ? { ...x, done: true, completedAt: nowISO() } : x)
-    }))
+    updateUndoable(`« ${t.title} » terminée.${t.repeat ? ' Prochaine occurrence créée.' : ''}`,
+      s => completeTask(s, t.id, today))
   }
 
   return (
@@ -308,6 +308,7 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
   // nouvelle tâche : reprend la dernière catégorie utilisée (moins de saisie)
   const [category, setCategory] = useState(() => task?.category ?? defaults?.category
     ?? (() => { try { return localStorage.getItem('cap-last-cat') ?? '' } catch { return '' } })())
+  const [repeat, setRepeat] = useState<Task['repeat']>(task?.repeat ?? null)
   const [someday, setSomeday] = useState(task?.someday ?? false)
   const [projectId, setProjectId] = useState(task?.projectId ?? '')
   const [subjectId, setSubjectId] = useState(task?.subjectId ?? '')
@@ -326,7 +327,7 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       plannedDate: plannedDate || null, plannedTime: plannedTime || null,
       deadline: deadline || null,
       durationMin: durationMin ? Math.max(1, parseInt(durationMin, 10) || 0) : null,
-      priority, category: category || null, someday,
+      priority, category: category || null, someday, repeat: repeat || null,
       projectId: projectId || null, subjectId: subjectId || null
     }
     if (task) {
@@ -377,6 +378,23 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       <label className="field-label">Priorité</label>
       <Segmented label="Priorité" value={priority} onChange={setPriority}
         options={[{ value: 'basse', label: 'Basse' }, { value: 'normale', label: 'Normale' }, { value: 'haute', label: 'Haute' }]} />
+
+      <span className="field-label">Répéter</span>
+      <ChoiceChips
+        label="Répéter" allowNone="Jamais"
+        options={[
+          { value: 'daily', label: 'Chaque jour' },
+          { value: 'weekly', label: 'Chaque semaine' },
+          { value: 'monthly', label: 'Chaque mois' }
+        ]}
+        value={repeat ?? ''}
+        onChange={v => setRepeat((v || null) as Task['repeat'])}
+      />
+      {repeat && (
+        <p style={{ color: 'var(--tertiary-label)', fontSize: 13, margin: '6px 2px 0' }}>
+          Terminer cette tâche créera automatiquement la prochaine occurrence.
+        </p>
+      )}
 
       {!moreOpen ? (
         <button className="btn-plain btn-block" style={{ minHeight: 44, marginTop: 12 }}

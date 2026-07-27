@@ -47,6 +47,7 @@ export interface Task {
   energy: Energy | null
   priority: Priority
   category?: string | null // id de catégorie colorée (domain/categories.ts)
+  repeat?: 'daily' | 'weekly' | 'monthly' | null // récurrence : terminer crée l'occurrence suivante
   projectId: ID | null
   subjectId: ID | null
   someday: boolean
@@ -332,7 +333,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '4.3.0'
+export const APP_VERSION = '4.4.0'
 
 export function defaultState(): AppState {
   return {

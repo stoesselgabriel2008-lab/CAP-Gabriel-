@@ -23,10 +23,9 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Le geste retour utilise maintenant le vrai retour d\'iOS : glisse depuis le bord, ça ferme le sous-écran ou la fenêtre ouverte — fiable partout',
-  'Accueil : les raccourcis sont juste sous l\'anneau, visibles sans faire défiler',
-  'Barre du bas redessinée : matériau sobre unique, bulle active à ta couleur d\'accent',
-  'Les confirmations s\'affichent en haut de l\'écran — elles ne recouvrent plus les boutons'
+  'Tâches récurrentes : chaque jour, semaine ou mois — terminer une occurrence crée la suivante automatiquement',
+  'Capture en langage naturel : écris « DST anatomie vendredi 17h » et la tâche est datée toute seule (aperçu « Détecté » sous le champ)',
+  'Statistiques : taux de rétention par matière — la part de tes rappels réussis, pour repérer les matières fragiles'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

@@ -193,6 +193,17 @@ function StatsView() {
   const topSubjects = [...bySubject.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
     .map(([label, value]) => ({ label, value }))
 
+  // Rétention par matière : part des rappels réussis (facile ou moyen)
+  const retention: Array<{ label: string; value: number; total: number }> = []
+  for (const subj of state.subjects) {
+    const unitIds = new Set(state.studyUnits.filter(u => u.subjectId === subj.id).map(u => u.id))
+    const logs = state.reviewLogs.filter(l => unitIds.has(l.unitId))
+    if (logs.length < 3) continue // pas de pourcentage sur 1 ou 2 rappels
+    const ok = logs.filter(l => l.rating === 'facile' || l.rating === 'moyen').length
+    retention.push({ label: subj.name, value: Math.round((ok / logs.length) * 100), total: logs.length })
+  }
+  retention.sort((a, b) => b.value - a.value)
+
   // Énergie des 14 derniers jours
   const energyDays: Array<{ label: string; value: number | null; highlight?: boolean }> = []
   for (let i = 13; i >= 0; i--) {
@@ -250,6 +261,20 @@ function StatsView() {
           <SectionHeader>Focus par matière</SectionHeader>
           <div className="card">
             <HBarChart data={topSubjects} formatValue={fmtMin} />
+          </div>
+        </>
+      )}
+
+      {retention.length > 0 && (
+        <>
+          <SectionHeader>Rétention par matière</SectionHeader>
+          <div className="card">
+            <HBarChart data={retention.map(r => ({ label: r.label, value: r.value }))}
+              formatValue={v => `${v} %`} />
+            <p style={{ color: 'var(--tertiary-label)', fontSize: 12, marginTop: 8 }}>
+              Part des rappels notés Facile ou Moyen. Une matière sous 60 % mérite
+              des sessions plus courtes et plus fréquentes.
+            </p>
           </div>
         </>
       )}

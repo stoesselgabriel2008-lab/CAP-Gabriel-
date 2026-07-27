@@ -9,6 +9,7 @@ import { SectionHeader, EmptyState, Sheet } from '../ui/Sheet'
 import { TaskEditor } from './Plan'
 import { SHORTCUT_DEFS, activeShortcuts, shortcutDef } from '../ui/shortcuts'
 import { ProgressRing } from '../ui/charts'
+import { completeTask as completeTaskState } from '../domain/repeat'
 import { recommend, todayCheckIn, computeDueQueue, shouldReduceAmbition, type Recommendation } from '../domain/recommend'
 import { todayISO, formatCivilLong, localHour, ageAt, addDays } from '../lib/dates'
 import { newId } from '../lib/id'
@@ -68,10 +69,8 @@ export function Today() {
     setCompleting(task.id)
     setTimeout(() => {
       setCompleting(null)
-      updateUndoable(`« ${task.title} » terminée.`, s => ({
-        ...s,
-        tasks: s.tasks.map(t => t.id === task.id ? { ...t, done: true, completedAt: nowISO() } : t)
-      }))
+      updateUndoable(`« ${task.title} » terminée.${task.repeat ? ' Prochaine occurrence créée.' : ''}`,
+        s => completeTaskState(s, task.id, today))
     }, 220)
   }
 

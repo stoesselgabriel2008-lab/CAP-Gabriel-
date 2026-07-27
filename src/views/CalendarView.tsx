@@ -9,6 +9,7 @@ import { SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader, TaskEditor } from './Plan'
 import { todayISO, isoWeekday, relativeLabel, formatCivilLong, nowISO } from '../lib/dates'
 import { taskColor, categoryOf, categoryBarColor, priorityColor } from '../domain/categories'
+import { completeTask } from '../domain/repeat'
 import type { Task } from '../domain/types'
 
 const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
@@ -74,9 +75,8 @@ export function CalendarView() {
   }, [active, selected])
 
   const complete = (t: Task) => {
-    updateUndoable(`« ${t.title} » terminée.`, s => ({
-      ...s, tasks: s.tasks.map(x => x.id === t.id ? { ...x, done: true, completedAt: nowISO() } : x)
-    }))
+    updateUndoable(`« ${t.title} » terminée.${t.repeat ? ' Prochaine occurrence créée.' : ''}`,
+      s => completeTask(s, t.id, today))
   }
 
   const cells: Array<number | null> = [

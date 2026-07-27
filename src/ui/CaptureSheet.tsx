@@ -1,11 +1,12 @@
 // Capture universelle : un texte suffit, le reste est facultatif.
 // Le classement (type, date, matière) peut se faire maintenant ou dans l'Inbox.
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Sheet, Segmented } from './Sheet'
 import { useApp } from '../state/store'
 import { newId } from '../lib/id'
-import { nowISO, todayISO, addDays } from '../lib/dates'
+import { nowISO, todayISO, addDays, relativeLabel } from '../lib/dates'
+import { parseCapture } from '../lib/nlp'
 import type { CaptureKind, Task } from '../domain/types'
 
 const KINDS: Array<{ value: CaptureKind; label: string }> = [
@@ -22,20 +23,27 @@ export function CaptureSheet({ onClose }: { onClose: () => void }) {
   const [when, setWhen] = useState<'none' | 'today' | 'tomorrow'>('none')
   const today = todayISO(state.profile.timezone)
 
+  // Langage naturel : « DST anatomie vendredi 17h » → date + heure détectées
+  const parsed = useMemo(() => parseCapture(text, today), [text, today])
+
   const save = () => {
     const trimmed = text.trim()
     if (!trimmed) return
     if (kind === 'task') {
+      // les pastilles Aujourd'hui/Demain priment ; sinon la date détectée
+      const planned = when === 'today' ? today
+        : when === 'tomorrow' ? addDays(today, 1)
+        : parsed.date
       const task: Task = {
-        id: newId('task'), title: trimmed, note: '',
-        plannedDate: when === 'today' ? today : when === 'tomorrow' ? addDays(today, 1) : null,
-        deadline: null, plannedTime: null, durationMin: null, energy: null,
+        id: newId('task'), title: parsed.title, note: '',
+        plannedDate: planned,
+        deadline: null, plannedTime: parsed.time, durationMin: null, energy: null,
         priority: 'normale', projectId: null, subjectId: null, someday: false,
         top3Rank: null, top3Date: null, done: false,
         createdAt: nowISO(), completedAt: null, deletedAt: null
       }
       update(s => ({ ...s, tasks: [...s.tasks, task] }))
-      toast(when === 'none' ? 'Tâche créée.' : `Tâche planifiée ${when === 'today' ? "aujourd'hui" : 'demain'}.`)
+      toast(planned ? `Tâche planifiée ${relativeLabel(planned, today)}.` : 'Tâche créée.')
     } else {
       update(s => ({
         ...s,
@@ -57,6 +65,12 @@ export function CaptureSheet({ onClose }: { onClose: () => void }) {
         placeholder="Tâche, idée, question, chapitre à revoir…"
         onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save() }}
       />
+      {kind === 'task' && (parsed.date || parsed.time) && (
+        <p style={{ color: 'var(--tint)', fontSize: 13, margin: '6px 2px 0' }} aria-live="polite">
+          Détecté : {parsed.date ? relativeLabel(parsed.date, today) : ''}
+          {parsed.date && parsed.time ? ' · ' : ''}{parsed.time ?? ''}
+        </p>
+      )}
       <label className="field-label">Type (facultatif — sinon Inbox)</label>
       <Segmented label="Type" value={kind} onChange={setKind} options={KINDS} />
       {kind === 'task' && (
