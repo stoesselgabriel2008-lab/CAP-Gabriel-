@@ -225,15 +225,18 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
   border-radius: 18px;
   padding: var(--sp-4);
   margin-bottom: var(--sp-3);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.06), 0 0 0 0.5px rgba(255, 255, 255, 0.04);
   transition: transform 150ms var(--ease-spring), background-color 260ms;
 }
 button.card:active { transform: scale(0.985); }
+.theme-light .card { box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.04); }
 
 .list-group {
   background: var(--secondary-system-grouped-background);
   border-radius: 18px;
   overflow: hidden;
   margin-bottom: var(--sp-3);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.06), 0 0 0 0.5px rgba(255, 255, 255, 0.04);
 }
 
 .list-row {
@@ -293,24 +296,36 @@ button.list-row:active { background: var(--tertiary-system-background); }
   align-items: center;
   justify-content: center;
   gap: var(--sp-2);
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 var(--sp-5);
-  border-radius: var(--radius-control);
+  border-radius: 14px;
   font-size: 17px;
   font-weight: 600;
-  transition: transform 140ms var(--ease-spring), opacity 140ms;
+  letter-spacing: -0.01em;
+  transition: transform 140ms var(--ease-spring), opacity 140ms, filter 140ms;
 }
-.btn:active { transform: scale(0.97); filter: brightness(0.92); }
+.btn:active { transform: scale(0.97); filter: brightness(0.9); }
 .btn-primary {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 80%, #fff 20%), var(--tint));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 85%, #fff 15%), var(--tint) 62%, color-mix(in srgb, var(--tint) 88%, #000 12%));
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 6px color-mix(in srgb, var(--tint) 28%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.12),
+    0 2px 10px color-mix(in srgb, var(--tint) 32%, transparent);
 }
-.btn-secondary { background: var(--tertiary-system-background); color: var(--label); }
+.btn-secondary {
+  background: var(--tertiary-system-background);
+  color: var(--label);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.theme-light .btn-secondary { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.04); }
 .btn-danger {
-  background: linear-gradient(180deg, #ff5d52, var(--danger));
+  background: linear-gradient(180deg, #ff5d52, var(--danger) 62%, #e63a30);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 6px rgba(255, 69, 58, 0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.12),
+    0 2px 10px rgba(255, 69, 58, 0.28);
 }
 .btn-plain { color: var(--tint); font-weight: 400; padding: 0 var(--sp-2); }
 .btn-plain-bold { color: var(--tint); font-weight: 600; padding: 0 var(--sp-2); }
@@ -323,10 +338,12 @@ button.list-row:active { background: var(--tertiary-system-background); }
   position: relative;
   display: flex;
   background: var(--tertiary-system-background);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 2px;
   touch-action: pan-y;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
 }
+.theme-light .segmented { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.04); }
 .tab-bar-inner { touch-action: pan-y; }
 .sheet-drag-zone { touch-action: none; cursor: grab; }
 .segmented-thumb {
@@ -334,9 +351,9 @@ button.list-row:active { background: var(--tertiary-system-background); }
   top: 2px;
   bottom: 2px;
   left: 2px;
-  border-radius: 8px;
-  background: #636366;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25), inset 0 0.5px 0 rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #6b6b70, #5c5c61);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3), inset 0 0.5px 0 rgba(255, 255, 255, 0.25);
   transition: transform 300ms var(--ease-spring), width 300ms var(--ease-spring);
   pointer-events: none;
 }
@@ -368,9 +385,17 @@ button.list-row:active { background: var(--tertiary-system-background); }
   border: none;
   border-radius: var(--radius-control);
   padding: 12px var(--sp-4);
-  min-height: 44px;
+  min-height: 46px;
   color: var(--label);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+  transition: box-shadow 160ms;
 }
+.field:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--tint);
+}
+.theme-light .field { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.05); }
+.theme-light .field:focus { box-shadow: inset 0 0 0 1.5px var(--tint); }
 .field::placeholder { color: var(--tertiary-label); }
 textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
 .field-label {
@@ -834,8 +859,11 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--secondary-system-grouped-background);
-  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.07), inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.25);
+  background: linear-gradient(180deg, #242427, #1a1a1d);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.28),
+    0 3px 10px rgba(0, 0, 0, 0.3);
 }
 .shortcut svg { color: var(--tint); }
 .shortcut.sos svg { color: var(--danger); }
@@ -1240,10 +1268,11 @@ mark {
 }
 .chip:active { transform: scale(0.95); }
 .chip[aria-pressed="true"] {
-  background: var(--tint);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 85%, #fff 15%), var(--tint));
   border-color: transparent;
   color: #fff;
   font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 6px color-mix(in srgb, var(--tint) 25%, transparent);
 }
 
 /* ─── Bannière de mise à jour ────────────────────────────────────── */

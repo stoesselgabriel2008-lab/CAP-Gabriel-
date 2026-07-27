@@ -23,9 +23,8 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Compteurs de résistance (Coach → Résistances) : compte les jours depuis que tu tiens, avec ta couleur, une phrase d\'encouragement chaque jour, des paliers à franchir et ton record',
-  'Tu peux en créer plusieurs — un par chose à laquelle tu résistes — et antidater le début (ton engagement du 12 juillet, par exemple)',
-  '« J\'ai craqué » garde le record, repart aujourd\'hui, et enchaîne sur le SOS'
+  'Finitions : boutons avec relief subtil, cartes cerclées d\'un filet lumineux, champs avec anneau bleu au focus, sélecteurs profilés',
+  'Compteurs de résistance (Coach → Résistances) : jours tenus, couleur au choix, phrase du jour, paliers et record — « J\'ai craqué » garde le record et enchaîne sur le SOS'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
