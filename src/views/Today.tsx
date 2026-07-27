@@ -142,6 +142,10 @@ export function Today() {
         top3Total={state.tasks.filter(t => !t.deletedAt && t.top3Date === today).length}
       />
 
+      {/* Raccourcis — visibles sans défiler, personnalisables via « Modifier » */}
+      <SectionHeader action="Modifier" onAction={() => setEditShortcuts(true)}>Raccourcis</SectionHeader>
+      <ShortcutGrid onNewTask={() => setNewTask(true)} />
+
       {/* Bien démarrer : checklist de premiers pas, disparaît une fois complétée */}
       <StarterCard onPickTop3={() => setPickerOpen(true)} />
 
@@ -227,10 +231,6 @@ export function Today() {
       </div>
       </>
       )}
-
-      {/* Raccourcis — personnalisables via « Modifier » */}
-      <SectionHeader action="Modifier" onAction={() => setEditShortcuts(true)}>Raccourcis</SectionHeader>
-      <ShortcutGrid onNewTask={() => setNewTask(true)} />
 
       {/* Check-in du jour */}
       {checkIn && (

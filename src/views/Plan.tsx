@@ -583,7 +583,7 @@ export function BackHeader({ title, onBack, action, onAction }: {
       if (animate) window.setTimeout(() => { screen.style.transition = '' }, 260)
     }
     const onDown = (e: PointerEvent) => {
-      if (e.clientX > 28 || screen.offsetParent === null) return
+      if (e.clientX > 44 || screen.offsetParent === null) return
       // sheet ou recherche ouverte (elles verrouillent le défilement) : pas de geste retour
       if (document.body.style.overflow === 'hidden') return
       armed = true; moved = false; startX = e.clientX; startY = e.clientY

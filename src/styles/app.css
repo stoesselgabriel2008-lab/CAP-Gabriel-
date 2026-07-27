@@ -642,13 +642,14 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
 .sheet-full { height: calc(100dvh - var(--sat) - 40px); }
 
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ─── Toasts ─────────────────────────────────────────────────────── */
 .toast-region {
   position: fixed;
-  bottom: calc(var(--tab-bar-height) + var(--action-bar-height) + var(--sab) + 20px);
+  top: calc(var(--sat) + 10px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
@@ -669,7 +670,7 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
   padding: 12px var(--sp-4);
   font-size: 15px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  animation: fade-up 220ms var(--ease-spring);
+  animation: toast-in 240ms var(--ease-spring);
 }
 .toast .toast-undo { color: var(--tint); font-weight: 600; flex-shrink: 0; min-height: 32px; }
 
@@ -827,8 +828,8 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
 }
 .shortcut:active { transform: scale(0.93); }
 .shortcut-circle {
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1586,14 +1587,21 @@ body { transition: background-color 260ms; }
 
 /* ─── Capsule flottante (layout commun à tous les thèmes) ──────────── */
 /* Matériau par défaut (thèmes Sombre / Clair) — les thèmes verre surchargent */
-.theme-capsule .tab-bar {
-  border: 0.5px solid var(--glass-stroke);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+/* Tab bar + barre d'action : un seul matériau sobre, pas de soupe de verre.
+   Encre translucide profonde, un filet discret, une ombre douce — et la
+   bulle active prend la couleur d'accent au lieu d'un pill blanchâtre. */
+.theme-capsule .tab-bar,
+.theme-capsule .action-bar {
+  background: rgba(22, 22, 25, 0.82);
+  border: 0.5px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
-.theme-light.theme-capsule .tab-bar {
-  box-shadow: 0 8px 28px rgba(30, 40, 70, 0.14);
+.theme-light.theme-capsule .tab-bar,
+.theme-light.theme-capsule .action-bar {
+  background: rgba(250, 250, 252, 0.82);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 28px rgba(30, 40, 70, 0.12);
 }
-.theme-capsule .action-bar { border: 0.5px solid var(--glass-stroke); }
 .theme-capsule .tab-bar {
   left: 50%;
   right: auto;
@@ -1608,13 +1616,21 @@ body { transition: background-color 260ms; }
 .theme-capsule .tab-bar-inner { height: 56px; }
 .theme-capsule .action-bar {
   bottom: calc(var(--tab-bar-height) + var(--sab) + 30px);
+  width: min(calc(100% - 24px), 480px);
+}
+.theme-capsule .tab-thumb {
+  background: color-mix(in srgb, var(--tint) 16%, transparent);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.theme-light.theme-capsule .tab-thumb {
+  background: color-mix(in srgb, var(--tint) 12%, transparent);
+  box-shadow: none;
 }
 .theme-capsule .action-bar::after { display: none; }
 .theme-capsule .screen {
   padding-bottom: calc(var(--tab-bar-height) + var(--action-bar-height) + var(--sab) + 48px);
-}
-.theme-capsule .toast-region {
-  bottom: calc(var(--tab-bar-height) + var(--action-bar-height) + var(--sab) + 40px);
 }
 
 /* Séparateurs et labels : plus lumineux sur verre */

@@ -23,9 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Glisse depuis le bord gauche pour revenir en arrière — l\'écran suit ton doigt, comme partout sur iOS',
-  'Tire une fenêtre vers le bas pour la fermer, depuis son contenu aussi (plus besoin de viser la poignée)',
-  'Le bouton Retour et le bouton Fermer restent là — les gestes s\'ajoutent, rien ne se perd'
+  'Le geste retour utilise maintenant le vrai retour d\'iOS : glisse depuis le bord, ça ferme le sous-écran ou la fenêtre ouverte — fiable partout',
+  'Accueil : les raccourcis sont juste sous l\'anneau, visibles sans faire défiler',
+  'Barre du bas redessinée : matériau sobre unique, bulle active à ta couleur d\'accent',
+  'Les confirmations s\'affichent en haut de l\'écran — elles ne recouvrent plus les boutons'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -48,7 +49,57 @@ export default function App() {
     } catch { return 'today' }
   })
   const [sub, setSubState] = useState<Partial<Record<TabId, string | null>>>({})
-  const [overlay, setOverlay] = useState<Overlay>(null)
+  const [overlay, setOverlayRaw] = useState<Overlay>(null)
+
+  // ─── Historique natif ────────────────────────────────────────────
+  // Chaque sous-écran ou surcouche ouvert pousse une entrée d'historique :
+  // le geste retour du bord d'écran (iOS) et le bouton retour (Android)
+  // ferment donc naturellement ce qui est ouvert, comme une app native.
+  const navDepth = useRef(0) // entrées poussées par nous
+  const popGuard = useRef(0) // back() interne : ignorer le popstate qui suit
+  const pushNav = () => {
+    try { history.pushState({ cap: navDepth.current + 1 }, '') } catch { /* historique indisponible */ }
+    navDepth.current++
+  }
+  const consumeNav = () => {
+    if (navDepth.current === 0) return
+    navDepth.current--
+    popGuard.current++
+    try { history.back() } catch { popGuard.current-- }
+  }
+  const tabRef = useRef(tab)
+  tabRef.current = tab
+  const subRef = useRef(sub)
+  subRef.current = sub
+  const overlayRef = useRef(overlay)
+  overlayRef.current = overlay
+
+  const setOverlay = useCallback((v: Overlay) => {
+    const cur = overlayRef.current
+    if (v && !cur) pushNav()
+    else if (!v && cur) consumeNav()
+    // remplacement (ex. timer-start → timer) : même niveau, pas d'entrée
+    setOverlayRaw(v)
+  }, [])
+
+  // Geste retour système : fermer du plus haut niveau vers le bas
+  useEffect(() => {
+    const onPop = () => {
+      if (popGuard.current > 0) { popGuard.current--; return }
+      if (navDepth.current === 0) return
+      navDepth.current--
+      if (overlayRef.current) { setOverlayRaw(null); return }
+      setSubState(prev => {
+        const t = tabRef.current
+        if (prev[t]) return { ...prev, [t]: null }
+        // entrée orpheline : sous-écran resté ouvert sur un autre onglet
+        const other = (Object.keys(prev) as TabId[]).find(k => prev[k])
+        return other ? { ...prev, [other]: null } : prev
+      })
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
   const [timerOpts, setTimerOpts] = useState<TimerStartOpts>({})
   const [updateAvailable, setUpdateAvailable] = useState(false)
   const scrollPositions = useRef<Partial<Record<TabId, number>>>({})
@@ -115,17 +166,19 @@ export default function App() {
 
   const setTab = useCallback((t: TabId) => {
     try { localStorage.setItem('cap-last-tab', t) } catch { /* stockage indisponible */ }
-    setTabRaw(prev => {
-      if (prev !== t) {
-        scrollPositions.current[prev] = window.scrollY
-        requestAnimationFrame(() => window.scrollTo(0, scrollPositions.current[t] ?? 0))
-      } else {
-        // re-taper l'onglet actif : retour à la racine + haut de page (convention iOS)
+    const prev = tabRef.current
+    if (prev !== t) {
+      scrollPositions.current[prev] = window.scrollY
+      setTabRaw(t)
+      requestAnimationFrame(() => window.scrollTo(0, scrollPositions.current[t] ?? 0))
+    } else {
+      // re-taper l'onglet actif : retour à la racine + haut de page (convention iOS)
+      if (subRef.current[t]) {
+        consumeNav()
         setSubState(s => ({ ...s, [t]: null }))
-        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
-      return t
-    })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }, [])
 
   // Bulle d'onglets draggable : le doigt la fait glisser, relâcher sélectionne.
@@ -160,6 +213,9 @@ export default function App() {
   }
 
   const setSub = useCallback((t: TabId, s: string | null) => {
+    const cur = subRef.current[t] ?? null
+    if (s && !cur) pushNav()
+    else if (!s && cur) consumeNav()
     setSubState(prev => ({ ...prev, [t]: s }))
     window.scrollTo(0, 0)
   }, [])
