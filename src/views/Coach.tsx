@@ -14,7 +14,6 @@ import { nextMilestone, prevMilestone, isMilestone, phraseFor } from '../domain/
 import { ACCENTS, accentColor } from '../ui/accents'
 import { DateField } from '../ui/pickers'
 import { todayISO, formatCivilShort, formatCivilLong, localHour, nowISO, daysBetween } from '../lib/dates'
-import { CoachAI } from './CoachAI'
 import { newId } from '../lib/id'
 import type { IfThenPlan, SleepLog, Resistance } from '../domain/types'
 
@@ -27,7 +26,6 @@ export function Coach() {
   if (sub === 'body') return <BodyView />
   if (sub === 'social') return <SocialView />
   if (sub === 'resist') return <ResistView />
-  if (sub === 'ai') return <CoachAI />
   return <CoachHome />
 }
 
@@ -84,16 +82,8 @@ function CoachHome() {
         ))}
       </div>
 
-      {/* Coach IA + compteurs de résistance */}
+      {/* Compteurs de résistance : accès direct avec le meilleur compteur en aperçu */}
       <div className="list-group">
-        <button className="list-row" onClick={() => ui.setSub('coach', 'ai')}>
-          <span style={{ color: 'var(--tint)', display: 'flex', flexShrink: 0 }}><Icon name="mind" size={22} /></span>
-          <span className="row-main">
-            <span className="row-title">Coach IA</span>
-            <span className="row-sub">Claude, qui connaît ta journée — conseils personnalisés</span>
-          </span>
-          <Icon name="chevronRight" size={16} className="chevron" />
-        </button>
         <button className="list-row" onClick={() => ui.setSub('coach', 'resist')}>
           <span className="cat-dot" style={{
             width: 12, height: 12,

@@ -868,47 +868,6 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
 .shortcut svg { color: var(--tint); }
 .shortcut.sos svg { color: var(--danger); }
 
-/* ─── Coach IA ───────────────────────────────────────────────────── */
-.ai-screen { display: flex; flex-direction: column; }
-.ai-chat { flex: 1; display: flex; flex-direction: column; gap: 10px; padding-bottom: 8px; }
-.ai-hello { color: var(--secondary-label); font-size: 15px; line-height: 1.5; margin: 8px 2px 4px; }
-.ai-suggestions { display: flex; flex-wrap: wrap; gap: 8px; }
-.ai-bubble {
-  max-width: 86%;
-  padding: 10px 14px;
-  border-radius: 18px;
-  font-size: 16px;
-  line-height: 1.45;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-}
-.ai-bubble.user {
-  align-self: flex-end;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 85%, #fff 15%), var(--tint));
-  color: #fff;
-  border-bottom-right-radius: 6px;
-}
-.ai-bubble.assistant {
-  align-self: flex-start;
-  background: var(--secondary-system-grouped-background);
-  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.06), 0 0 0 0.5px rgba(255, 255, 255, 0.04);
-  border-bottom-left-radius: 6px;
-}
-.theme-light .ai-bubble.assistant { box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06); }
-.ai-typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
-.ai-typing span {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--secondary-label);
-  animation: ai-dot 1.2s infinite;
-}
-.ai-typing span:nth-child(2) { animation-delay: 0.15s; }
-.ai-typing span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes ai-dot { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
-.ai-inputbar { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-.ai-inputbar .field { flex: 1; }
-.ai-error { color: var(--danger); font-size: 14px; margin: 4px 2px; }
-.ai-privacy { color: var(--tertiary-label); font-size: 12px; line-height: 1.45; margin-top: 8px; }
-
 /* ─── Compteurs de résistance ────────────────────────────────────── */
 .resist-card { --rc: var(--tint); padding: var(--sp-4) var(--sp-4) var(--sp-3); }
 .resist-head {

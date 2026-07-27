@@ -23,9 +23,8 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Coach IA (Coach → Coach IA) : discute avec Claude directement dans Cap — il connaît ta journée (tâches, révisions, engagement, compteurs) et répond en direct',
-  'Il faut une clé API Anthropic (guide pas à pas dans l\'écran) — elle reste sur ton téléphone, jamais dans tes exports',
-  'Modèle au choix dans les réglages du coach : Opus 5 (conseillé), Sonnet 5, Haiku 4.5'
+  'Le Coach IA (payant) a été retiré : Cap redevient 100 % gratuit, hors ligne et sans compte',
+  'Si tu avais entré une clé API, elle a été effacée de ton téléphone automatiquement'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -150,6 +149,16 @@ export default function App() {
     document.documentElement.style.colorScheme = lightTheme ? 'light' : 'dark'
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', lightTheme ? '#f2f2f7' : '#0c0c0e')
   }, [lightTheme])
+
+  // Nettoyage du Coach IA retiré en 4.6.1 : une clé API qui aurait été
+  // enregistrée sur l'appareil est effacée, ainsi que la conversation.
+  useEffect(() => {
+    try {
+      localStorage.removeItem('cap-ai-key')
+      localStorage.removeItem('cap-ai-chat')
+      localStorage.removeItem('cap-ai-model')
+    } catch { /* stockage indisponible */ }
+  }, [])
 
   // Popup « Quoi de neuf » après une mise à jour
   const [showWhatsNew, setShowWhatsNew] = useState(false)
