@@ -189,7 +189,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
 .subtitle-context {
   color: var(--secondary-label);
   font-size: 15px;
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--sp-2);
 }
 
 /* En-têtes gras façon Apple Fitness / Music — plus de petites capitales web */
@@ -199,7 +199,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
   color: var(--label);
   letter-spacing: -0.01em;
   text-transform: none;
-  margin: 28px var(--sp-1) 10px;
+  margin: 20px var(--sp-1) 8px;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -723,14 +723,17 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
   background: var(--tint);
   transition: width 400ms var(--ease-spring);
 }
+.now-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
 .now-why-toggle {
-  display: block;
-  margin-top: var(--sp-3);
-  color: var(--secondary-label);
+  color: var(--tertiary-label);
   font-size: 13px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  min-height: 32px;
+  min-height: 28px;
+  padding: 0 4px;
 }
 
 /* ─── Carte Maintenant ───────────────────────────────────────────── */
@@ -739,7 +742,7 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
   background: linear-gradient(180deg, #232326, #1b1b1e);
   border-radius: 20px;
   border: 0.5px solid rgba(255, 255, 255, 0.09);
-  padding: var(--sp-5) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
   margin-bottom: var(--sp-3);
   overflow: hidden;
 }
@@ -752,13 +755,12 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
   pointer-events: none;
 }
 .now-card .now-kicker {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--tint);
-  margin-bottom: var(--sp-1);
 }
-.now-card .now-title { font-size: 24px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 2px; }
-.now-card .now-sub { color: var(--secondary-label); font-size: 15px; margin-bottom: var(--sp-3); }
+.now-card .now-title { font-size: 20px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 2px; }
+.now-card .now-sub { color: var(--secondary-label); font-size: 14px; margin-bottom: var(--sp-3); }
 .now-card .now-why {
   color: var(--secondary-label);
   font-size: 14px;
@@ -847,8 +849,8 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
 .dayring {
   display: flex;
   align-items: center;
-  gap: var(--sp-5);
-  padding: var(--sp-4);
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
 }
 .dayring-ring { flex-shrink: 0; display: flex; }
 .dayring-rows { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -856,7 +858,7 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  min-height: 38px;
+  min-height: 34px;
   font-size: 15px;
   border-bottom: 0.5px solid var(--separator);
   text-align: left;

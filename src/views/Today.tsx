@@ -111,17 +111,19 @@ export function Today() {
       {/* Carte Maintenant */}
       <section aria-label="Maintenant">
         <div className={`now-card${rec.action.kind === 'sos' ? ' sos-suggested' : ''}`}>
-          <div className="now-kicker">Maintenant</div>
+          <div className="now-head">
+            <span className="now-kicker">Maintenant</span>
+            <button className="now-why-toggle" aria-expanded={showWhy} onClick={() => setShowWhy(!showWhy)}>
+              Pourquoi ?
+            </button>
+          </div>
           <div className="now-title">{rec.title}</div>
           <div className="now-sub">{rec.subtitle}</div>
           <button
-            className={`btn btn-block btn-large ${rec.action.kind === 'sos' ? 'btn-danger' : 'btn-primary'}`}
+            className={`btn btn-block ${rec.action.kind === 'sos' ? 'btn-danger' : 'btn-primary'}`}
             onClick={() => runAction(rec)}
           >
             {rec.cta}
-          </button>
-          <button className="now-why-toggle" aria-expanded={showWhy} onClick={() => setShowWhy(!showWhy)}>
-            Pourquoi cette proposition ?
           </button>
           {showWhy && <p className="now-why">{rec.why}</p>}
         </div>
@@ -351,7 +353,7 @@ function DayRing({ due, reviewsDone, focusMin, focusGoal, habitsDone, habitsDue,
   return (
     <div className="card dayring" aria-label="Progression du jour">
       <div className="dayring-ring">
-        <ProgressRing value={value} size={84} label="de la journée" />
+        <ProgressRing value={value} size={72} label="de la journée" />
       </div>
       <div className="dayring-rows">
         {row('Révisions', due > 0 ? `${due} due${due > 1 ? 's' : ''}` : reviewsDone > 0 ? 'à jour' : '—', () => ui.navigate('review', null))}
