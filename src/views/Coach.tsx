@@ -61,7 +61,7 @@ function CoachHome() {
         <div className="now-title">{first.title}</div>
         <div className="now-sub">{recommended.why}</div>
         <button className="btn btn-primary btn-block btn-large" onClick={() => ui.setSub('coach', first.id)}>
-          Ouvrir
+          Ouvrir {first.title}
         </button>
       </div>
 

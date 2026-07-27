@@ -23,10 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Barre d\'onglets : la bulle et les couleurs suivent ton doigt en direct, mais l\'écran ne s\'ouvre qu\'au relâchement — comme tu l\'as demandé',
-  'Objectif de focus quotidien (Réglages) : la tuile Focus affiche ta progression avec une barre',
-  'Réviser : compte à rebours J-X vers ton prochain examen, avec rappel des erreurs à retester',
-  'Fiche de tâche : actions (reporter, dupliquer, supprimer) regroupées en liste propre'
+  'Audit visuel complet sur deux tailles d\'iPhone : libellés tronqués corrigés (« Verre nuit / Verre jour »), zéro débordement vérifié écran par écran',
+  'Les notifications passagères disparaissent plus vite (3 s) pour ne plus masquer le contenu',
+  'Cap rouvre sur ton dernier onglet utilisé',
+  'Coach : le bouton dit désormais ce qu\'il ouvre (« Ouvrir Contrôle », « Ouvrir Sommeil »…)'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -41,7 +41,13 @@ type Overlay = null | 'capture' | 'checkin' | 'command' | 'sos' | 'timer-start' 
 
 export default function App() {
   const { state, ready, saveError, corrupted, update, toasts, dismissToast, retrySave } = useApp()
-  const [tab, setTabRaw] = useState<TabId>('today')
+  // Reprendre sur le dernier onglet utilisé (comme les grandes apps)
+  const [tab, setTabRaw] = useState<TabId>(() => {
+    try {
+      const saved = localStorage.getItem('cap-last-tab')
+      return (['today', 'plan', 'review', 'coach', 'me'] as TabId[]).includes(saved as TabId) ? saved as TabId : 'today'
+    } catch { return 'today' }
+  })
   const [sub, setSubState] = useState<Partial<Record<TabId, string | null>>>({})
   const [overlay, setOverlay] = useState<Overlay>(null)
   const [timerOpts, setTimerOpts] = useState<TimerStartOpts>({})
@@ -100,6 +106,7 @@ export default function App() {
   }, [update])
 
   const setTab = useCallback((t: TabId) => {
+    try { localStorage.setItem('cap-last-tab', t) } catch { /* stockage indisponible */ }
     setTabRaw(prev => {
       if (prev !== t) {
         scrollPositions.current[prev] = window.scrollY

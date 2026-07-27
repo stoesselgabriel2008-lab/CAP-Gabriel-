@@ -83,7 +83,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => dismissToast(id), ttl)
   }, [dismissToast])
 
-  const toast = useCallback((message: string) => pushToast({ message }), [pushToast])
+  // Les toasts simples disparaissent vite (3,2 s) pour ne pas masquer le contenu ;
+  // ceux avec Annuler restent 6 s.
+  const toast = useCallback((message: string) => pushToast({ message }, 3200), [pushToast])
 
   const updateUndoable = useCallback((message: string, fn: (s: AppState) => AppState) => {
     const snapshot = stateRef.current

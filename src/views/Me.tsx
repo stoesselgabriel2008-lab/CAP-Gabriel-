@@ -862,8 +862,8 @@ function SettingsView() {
           options={[
             { value: 'sobre', label: 'Sombre' },
             { value: 'clair', label: 'Clair' },
-            { value: 'glass', label: 'Verre sombre' },
-            { value: 'glass-clair', label: 'Verre clair' }
+            { value: 'glass', label: 'Verre nuit' },
+            { value: 'glass-clair', label: 'Verre jour' }
           ]}
         />
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>

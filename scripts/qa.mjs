@@ -128,7 +128,7 @@ try {
   // Coach → Contrôle
   await page.getByLabel('Navigation principale').getByRole('button', { name: 'Coach' }).click()
   await shot('17-coach')
-  await page.getByRole('button', { name: 'Ouvrir', exact: true }).click()
+  await page.getByRole('button', { name: /^Ouvrir / }).click()
   await shot('18-control')
   await page.getByRole('button', { name: 'Retour' }).click()
   log('coach OK')
