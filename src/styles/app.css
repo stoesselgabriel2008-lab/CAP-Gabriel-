@@ -762,6 +762,52 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
 }
 .timer-goal { color: var(--secondary-label); font-size: 16px; }
 
+/* ─── Recherche plein écran (ancrée en haut, façon Spotlight) ────── */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--system-background);
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(var(--sat) + 10px);
+  animation: fade-in 200ms ease;
+}
+.search-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-4) 10px;
+  flex-shrink: 0;
+}
+.search-field-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  background: var(--tertiary-system-background);
+  border-radius: 12px;
+  padding: 0 var(--sp-3);
+  min-height: 42px;
+}
+.search-field-wrap input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  min-height: 42px;
+  color: var(--label);
+}
+.search-field-wrap input::placeholder { color: var(--tertiary-label); }
+.search-field-wrap input:focus-visible { outline: none; }
+.search-results {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 0 var(--sp-4) calc(var(--sab) + 24px);
+}
+
 /* ─── Command center ─────────────────────────────────────────────── */
 .cmd-results { margin-top: var(--sp-3); }
 .cmd-group-label {

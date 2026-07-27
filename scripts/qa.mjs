@@ -138,7 +138,7 @@ try {
   await page.getByRole('searchbox', { name: 'Recherche' }).fill('erreur')
   await page.waitForTimeout(300)
   await shot('19-command')
-  await page.getByRole('button', { name: 'Fermer' }).click()
+  await page.getByRole('button', { name: 'Annuler', exact: true }).click()
   log('command OK')
 
   // Moi + données

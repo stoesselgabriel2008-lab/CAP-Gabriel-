@@ -22,10 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'La bulle d\'onglets et les pastilles de sélection se font maintenant glisser au doigt — pose, glisse, relâche',
-  'Les fenêtres se ferment en les tirant vers le bas, comme partout sur iOS',
-  'Refonte visuelle : en-têtes gras façon Apple Fitness, cartes épurées sans bordures, grands boutons en pilule, raccourcis en cercles',
-  '« Dupliquer la tâche » en un bouton dans chaque tâche'
+  'La recherche est maintenant plein écran, ancrée en haut comme Spotlight — le clavier ne la fait plus sauter',
+  'Toutes les fenêtres de saisie remontent proprement au-dessus du clavier (fini les boutons cachés)',
+  'Le champ en cours d\'écriture se recentre automatiquement à l\'écran',
+  'Fermer la recherche : bouton Annuler à côté du champ, comme dans les apps Apple'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

@@ -7,6 +7,30 @@ import React, { useEffect, useRef } from 'react'
 // et le scroll du fond n'est restauré que quand la dernière se ferme.
 const sheetStack: symbol[] = []
 
+/**
+ * Hauteur du clavier iOS via visualViewport (seuil 60 px pour ignorer les
+ * micro-variations de Safari). Les sheets remontent d'autant.
+ */
+export function useKeyboardInset(): number {
+  const [inset, setInset] = React.useState(0)
+  React.useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const update = () => {
+      const i = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
+      setInset(i > 60 ? i : 0)
+    }
+    update()
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+    }
+  }, [])
+  return inset
+}
+
 export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }: {
   title: string
   onClose: () => void
@@ -53,6 +77,22 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
     }
   }, [onClose])
 
+  const kb = useKeyboardInset()
+
+  // Champ focalisé recentré dans la zone scrollable (clavier ouvert)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const onFocus = (e: FocusEvent) => {
+      const t = e.target as HTMLElement
+      if (t.matches?.('input, textarea, select')) {
+        setTimeout(() => t.scrollIntoView({ block: 'center', behavior: 'smooth' }), 260)
+      }
+    }
+    el.addEventListener('focusin', onFocus)
+    return () => el.removeEventListener('focusin', onFocus)
+  }, [])
+
   // Fermeture en tirant la sheet vers le bas (depuis la poignée / l'en-tête)
   const [dy, setDy] = React.useState(0)
   const dragging = useRef<{ startY: number } | null>(null)
@@ -87,7 +127,11 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
         className={`sheet${full ? ' sheet-full' : ''}`}
         style={{
           transform: dy > 0 ? `translateY(${dy}px)` : undefined,
-          transition: dragging.current ? 'none' : 'transform 320ms var(--ease-spring)'
+          bottom: kb > 0 ? `${kb + 8}px` : undefined,
+          maxHeight: kb > 0 ? `calc(100dvh - var(--sat) - ${kb + 20}px)` : undefined,
+          transition: dragging.current
+            ? 'none'
+            : 'transform 320ms var(--ease-spring), bottom 250ms var(--ease-spring), max-height 250ms var(--ease-spring)'
         }}
       >
         <div

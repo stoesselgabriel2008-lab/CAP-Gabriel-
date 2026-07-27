@@ -2,7 +2,6 @@
 // chapitres, projets, notes et erreurs. Résultats groupés par type.
 
 import React, { useMemo, useState } from 'react'
-import { Sheet } from './Sheet'
 import { Icon } from './Icon'
 import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
@@ -39,6 +38,19 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
   const { state } = useApp()
   const ui = useUi()
   const [query, setQuery] = useState('')
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  // Plein écran ancré en haut : le clavier ne déplace jamais le champ.
+  React.useEffect(() => {
+    inputRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
 
   const commands = useMemo<Cmd[]>(() => {
     const go = (fn: () => void) => () => { onClose(); fn() }
@@ -102,14 +114,20 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
   }, [commands, query])
 
   return (
-    <Sheet title="Rechercher ou agir" onClose={onClose} full>
-      <input
-        className="field" type="search" autoFocus
-        placeholder="Tâche, chapitre, page, action…"
-        value={query} onChange={e => setQuery(e.target.value)}
-        aria-label="Recherche"
-      />
-      <div className="cmd-results">
+    <div className="search-overlay" role="dialog" aria-modal="true" aria-label="Rechercher ou agir">
+      <div className="search-head">
+        <div className="search-field-wrap">
+          <Icon name="search" size={18} className="chevron" />
+          <input
+            ref={inputRef} type="search"
+            placeholder="Tâche, chapitre, page, action…"
+            value={query} onChange={e => setQuery(e.target.value)}
+            aria-label="Recherche"
+          />
+        </div>
+        <button className="btn-plain-bold" style={{ minHeight: 44 }} onClick={onClose}>Annuler</button>
+      </div>
+      <div className="search-results cmd-results">
         {results.size === 0 && (
           <p className="empty-state">Aucun résultat pour « {query} ».</p>
         )}
@@ -131,6 +149,6 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
           </div>
         ))}
       </div>
-    </Sheet>
+    </div>
   )
 }
