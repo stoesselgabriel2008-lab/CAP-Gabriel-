@@ -857,19 +857,15 @@ function SettingsView() {
       <div className="card">
         <Segmented
           label="Style visuel"
-          value={state.settings.appearance}
+          value={state.settings.appearance === 'glass' ? 'sobre'
+            : state.settings.appearance === 'glass-clair' ? 'clair'
+            : state.settings.appearance}
           onChange={v => update(s => ({ ...s, settings: { ...s.settings, appearance: v } }))}
           options={[
             { value: 'sobre', label: 'Sombre' },
-            { value: 'clair', label: 'Clair' },
-            { value: 'glass', label: 'Verre nuit' },
-            { value: 'glass-clair', label: 'Verre jour' }
+            { value: 'clair', label: 'Clair' }
           ]}
         />
-        <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
-          Clair : palette officielle iOS. Verre : cartes profondes et capsule flottante
-          façon Apple Music, en nuit ou en jour.
-        </p>
 
         <span className="field-label">Couleur d'accent</span>
         <div className="accent-row" role="group" aria-label="Couleur d'accent">

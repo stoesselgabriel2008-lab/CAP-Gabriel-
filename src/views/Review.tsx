@@ -9,10 +9,10 @@ import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/
 import { DateField } from '../ui/pickers'
 import { BackHeader } from './Plan'
 import { computeDueQueue, todayCheckIn } from '../domain/recommend'
-import { createPlan, J_SEQUENCE } from '../domain/srs'
+import { createPlan, applyReview, J_SEQUENCE } from '../domain/srs'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
-import type { Subject, StudyUnit, ErrorLog, UnitKind } from '../domain/types'
+import type { Subject, StudyUnit, ErrorLog, UnitKind, ReviewPlan, ReviewRating } from '../domain/types'
 
 const KIND_LABELS: Record<UnitKind, string> = {
   factuel: 'Factuel', conceptuel: 'Conceptuel', procedural: 'Procédural / maths',
@@ -44,6 +44,7 @@ function ReviewHome() {
   const checkIn = todayCheckIn(state, today)
   const lowEnergy = checkIn?.energy === 'basse'
   const [newSubject, setNewSubject] = useState(false)
+  const [rate, setRate] = useState<{ plan: ReviewPlan; unit: StudyUnit; why: string } | null>(null)
   const untested = state.errorLogs.filter(e => !e.retested).length
 
   return (
@@ -94,13 +95,13 @@ function ReviewHome() {
               const subj = state.subjects.find(s => s.id === unit.subjectId)
               return (
                 <button key={item.plan.id} className="list-row"
-                  onClick={() => ui.openTimerStart({ minutes: lowEnergy ? 25 : 25, unitId: unit.id })}>
+                  onClick={() => setRate({ plan: item.plan, unit, why: item.why })}>
                   <Icon name="book" size={20} className="chevron" />
                   <span className="row-main">
                     <span className="row-title">{unit.name}</span>
                     <span className="row-sub">{subj?.name} · {item.why}</span>
                   </span>
-                  <span className="row-detail" style={{ color: 'var(--tint)' }}>25 min</span>
+                  <span className="row-detail" style={{ color: 'var(--tint)' }}>Noter</span>
                 </button>
               )
             })}
@@ -183,7 +184,68 @@ function ReviewHome() {
       )}
 
       {newSubject && <SubjectEditor subject={null} onClose={() => setNewSubject(false)} />}
+      {rate && <QuickRate plan={rate.plan} unit={rate.unit} why={rate.why} onClose={() => setRate(null)} />}
     </div>
+  )
+}
+
+/** Notation directe d'un rappel : 4 boutons pleine largeur, effet annoncé.
+ *  Pour un rappel fait hors app (fiches, BU) — sinon, minuteur en dessous. */
+function QuickRate({ plan, unit, why, onClose }: {
+  plan: ReviewPlan
+  unit: StudyUnit
+  why: string
+  onClose: () => void
+}) {
+  const { state, update, toast } = useApp()
+  const ui = useUi()
+  const today = todayISO(state.profile.timezone)
+  const subj = state.subjects.find(s => s.id === unit.subjectId)
+
+  const OPTIONS: Array<{ r: ReviewRating; label: string; color: string }> = [
+    { r: 'facile', label: 'Facile', color: 'var(--success)' },
+    { r: 'moyen', label: 'Moyen', color: 'var(--tint)' },
+    { r: 'difficile', label: 'Difficile', color: '#ff9f0a' },
+    { r: 'oublie', label: 'Oublié', color: 'var(--danger)' }
+  ]
+
+  const grade = (r: ReviewRating) => {
+    const out = applyReview(plan, r, today)
+    update(s => ({
+      ...s,
+      reviewPlans: s.reviewPlans.map(p => p.id === plan.id
+        ? { ...p, stage: out.stage, intervalDays: out.intervalDays, nextDue: out.nextDue }
+        : p),
+      reviewLogs: [...s.reviewLogs, {
+        id: newId('rl'), planId: plan.id, unitId: plan.unitId, date: today, rating: r, createdAt: nowISO()
+      }]
+    }))
+    toast(`Noté. Prochaine révision : ${relativeLabel(out.nextDue, today)}.`)
+    onClose()
+  }
+
+  return (
+    <Sheet title="Noter le rappel" onClose={onClose}>
+      <p style={{ fontWeight: 600, fontSize: 17 }}>{unit.name}</p>
+      <p style={{ color: 'var(--secondary-label)', fontSize: 14, marginBottom: 14 }}>
+        {subj?.name ? `${subj.name} · ` : ''}{why}
+      </p>
+      <p style={{ fontSize: 15, marginBottom: 8 }}>Rappel de mémoire fait — c'était comment ?</p>
+      {OPTIONS.map(o => {
+        const out = applyReview(plan, o.r, today)
+        return (
+          <button key={o.r} className="rate-btn" onClick={() => grade(o.r)}>
+            <span className="cat-dot" style={{ background: o.color }} aria-hidden="true" />
+            <span style={{ fontWeight: 600 }}>{o.label}</span>
+            <span className="rate-next">{relativeLabel(out.nextDue, today)}</span>
+          </button>
+        )
+      })}
+      <button className="btn btn-secondary btn-block" style={{ marginTop: 14, minHeight: 48 }}
+        onClick={() => { onClose(); ui.openTimerStart({ minutes: 25, unitId: unit.id }) }}>
+        Réviser 25 min d'abord (minuteur)
+      </button>
+    </Sheet>
   )
 }
 

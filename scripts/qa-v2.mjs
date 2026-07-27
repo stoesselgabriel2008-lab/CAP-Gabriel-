@@ -45,15 +45,15 @@ await page.getByRole('button', { name: 'Enregistrer' }).click()
 await page.waitForTimeout(300)
 console.log('notes OK')
 
-// Thème verre clair
+// Thème clair
 await page.getByLabel('Navigation principale').getByRole('button', { name: 'Moi' }).click()
-await page.getByRole('button', { name: /Profil et réglages/ }).click()
-await page.getByRole('button', { name: 'Verre clair' }).click()
+await page.getByRole('button', { name: /^Réglages/ }).click()
+await page.getByRole('button', { name: 'Clair', exact: true }).click()
 await page.waitForTimeout(300)
 await page.getByLabel('Navigation principale').getByRole('button', { name: "Aujourd'hui" }).click()
 await page.waitForTimeout(400)
-await page.screenshot({ path: 'qa-shots/v2-glass-light.png' })
-console.log('verre clair OK')
+await page.screenshot({ path: 'qa-shots/v2-light.png' })
+console.log('thème clair OK')
 
 console.log(errors.length ? 'ERREURS: ' + errors.join('; ') : 'V2 OK')
 await browser.close()

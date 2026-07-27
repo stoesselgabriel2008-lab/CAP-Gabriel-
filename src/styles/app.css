@@ -2,12 +2,13 @@
 :root {
   color-scheme: dark;
 
-  --system-background: #000000;
+  /* Gris anthracite profond — jamais de noir pur plein écran */
+  --system-background: #0c0c0e;
   --secondary-system-background: #1c1c1e;
-  --tertiary-system-background: #2c2c2e;
-  --system-grouped-background: #000000;
+  --tertiary-system-background: #2b2b2e;
+  --system-grouped-background: #0c0c0e;
   --secondary-system-grouped-background: #1c1c1e;
-  --tertiary-system-grouped-background: #2c2c2e;
+  --tertiary-system-grouped-background: #2b2b2e;
 
   --label: rgba(255, 255, 255, 0.96);
   --secondary-label: #8e8e93;
@@ -166,6 +167,24 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
 }
 .btn-add-pill:active { transform: scale(0.94); }
 .theme-light .btn-add-pill { background: color-mix(in srgb, var(--tint) 13%, transparent); }
+
+/* En-tête de sous-écran : grille 3 colonnes, titre réellement centré */
+.back-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0 4px;
+  min-height: 44px;
+}
+.back-header-title {
+  font-size: 22px;
+  max-width: 55vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
 
 .subtitle-context {
   color: var(--secondary-label);
@@ -544,6 +563,12 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
     backdrop-filter: blur(6px);
   }
 }
+/* Sheet posée sur une autre : voile léger, pas de double assombrissement */
+.sheet-backdrop.stacked {
+  background: rgba(0, 0, 0, 0.22);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 .sheet {
   position: fixed;
   left: max(10px, var(--sal));
@@ -795,6 +820,55 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
 }
 .shortcut svg { color: var(--tint); }
 .shortcut.sos svg { color: var(--danger); }
+
+/* ─── Notation directe d'un rappel ───────────────────────────────── */
+.rate-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--sp-4);
+  margin-top: 8px;
+  border-radius: var(--radius-control);
+  background: var(--tertiary-system-background);
+  font-size: 17px;
+  text-align: left;
+  transition: transform 140ms var(--ease-spring);
+}
+.rate-btn:active { transform: scale(0.98); }
+.rate-next {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--secondary-label);
+}
+
+/* ─── Anneau du jour (élément signature d'Aujourd'hui) ───────────── */
+.dayring {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-4);
+}
+.dayring-ring { flex-shrink: 0; display: flex; }
+.dayring-rows { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dayring-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 38px;
+  font-size: 15px;
+  border-bottom: 0.5px solid var(--separator);
+  text-align: left;
+}
+.dayring-row:last-child { border-bottom: none; }
+.dayring-label { font-weight: 600; }
+.dayring-detail {
+  margin-left: auto;
+  color: var(--secondary-label);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
 
 /* ─── Timeline ───────────────────────────────────────────────────── */
 .timeline { position: relative; }

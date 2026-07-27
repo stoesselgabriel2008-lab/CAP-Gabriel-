@@ -31,6 +31,8 @@ if (inList === 0) errors.push('tâche absente de la liste du jour')
 await page.screenshot({ path: 'qa-shots/v32-calendar.png' })
 // éditeur de date : titre court
 await page.locator('main > div:not([hidden]) .list-row .row-main').last().click()
+const more = page.getByRole('button', { name: /Plus d'options/ })
+if (await more.count()) await more.click()
 await page.getByRole('button', { name: /Échéance réelle/ }).click()
 await page.waitForTimeout(300)
 await page.screenshot({ path: 'qa-shots/v32-datepicker.png' })

@@ -16,6 +16,8 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
+  // Sheet empilée sur une autre : backdrop discret (pas de double assombrissement)
+  const [stacked, setStacked] = React.useState(false)
 
   // onClose change d'identité à chaque render du parent : passer par une ref
   // pour que l'effet d'ouverture ne se rejoue JAMAIS (sinon il re-focalisait
@@ -26,6 +28,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
   useEffect(() => {
     const token = Symbol('sheet')
     sheetStack.push(token)
+    if (sheetStack.length > 1) setStacked(true)
     const isTop = () => sheetStack[sheetStack.length - 1] === token
     previouslyFocused.current = document.activeElement as HTMLElement
     const el = ref.current
@@ -143,7 +146,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
 
   return (
     <>
-      <div className="sheet-backdrop" onClick={onClose} aria-hidden="true"
+      <div className={`sheet-backdrop${stacked ? ' stacked' : ''}`} onClick={onClose} aria-hidden="true"
         style={dy > 0 ? { opacity: Math.max(0.3, 1 - dy / 400) } : undefined} />
       <div
         ref={ref}

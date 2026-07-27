@@ -140,11 +140,6 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           <span className="row-detail">{state.goals.filter(g => !g.done).length}</span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
-        <button className="list-row" onClick={() => ui.navigate('me', 'weekly')}>
-          <IconChip name="today" color="#5e5ce6" />
-          <span className="row-main"><span className="row-title">Revue hebdomadaire</span></span>
-          <Icon name="chevronRight" size={16} className="chevron" />
-        </button>
       </div>
 
       <SectionHeader>Tâches</SectionHeader>
@@ -310,11 +305,18 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
   const [deadline, setDeadline] = useState(task?.deadline ?? '')
   const [durationMin, setDurationMin] = useState(task?.durationMin ? String(task.durationMin) : '')
   const [priority, setPriority] = useState<Task['priority']>(task?.priority ?? 'normale')
-  const [category, setCategory] = useState(task?.category ?? '')
+  // nouvelle tâche : reprend la dernière catégorie utilisée (moins de saisie)
+  const [category, setCategory] = useState(() => task?.category ?? defaults?.category
+    ?? (() => { try { return localStorage.getItem('cap-last-cat') ?? '' } catch { return '' } })())
   const [someday, setSomeday] = useState(task?.someday ?? false)
   const [projectId, setProjectId] = useState(task?.projectId ?? '')
   const [subjectId, setSubjectId] = useState(task?.subjectId ?? '')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // options avancées repliées, sauf si la tâche en utilise déjà une
+  const [moreOpen, setMoreOpen] = useState(() => Boolean(
+    task && (task.plannedTime || task.deadline || task.durationMin || task.note
+      || task.projectId || task.subjectId || task.someday)
+  ))
 
   const save = () => {
     const trimmed = title.trim()
@@ -339,6 +341,7 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
         }]
       }))
     }
+    try { localStorage.setItem('cap-last-cat', category || '') } catch { /* stockage indisponible */ }
     onSaved?.()
     onClose()
   }
@@ -370,46 +373,56 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       </div>
 
       <DateField label="Je veux la faire le… (facultatif)" value={plannedDate} onChange={setPlannedDate} />
-      <TimeField label="Heure (facultatif, pour la timeline)" value={plannedTime} onChange={setPlannedTime} />
-      <DateField label="Échéance réelle — doit être fini avant (facultatif)" value={deadline} onChange={setDeadline} />
 
       <label className="field-label">Priorité</label>
       <Segmented label="Priorité" value={priority} onChange={setPriority}
         options={[{ value: 'basse', label: 'Basse' }, { value: 'normale', label: 'Normale' }, { value: 'haute', label: 'Haute' }]} />
 
-      <label className="field-label" htmlFor="te-duration">Durée estimée (min, facultatif)</label>
-      <input id="te-duration" className="field" type="number" inputMode="numeric" value={durationMin} onChange={e => setDurationMin(e.target.value)} />
-
-      {state.projects.length > 0 && (
+      {!moreOpen ? (
+        <button className="btn-plain btn-block" style={{ minHeight: 44, marginTop: 12 }}
+          aria-expanded={false} onClick={() => setMoreOpen(true)}>
+          Plus d'options…
+        </button>
+      ) : (
         <>
-          <span className="field-label">Projet</span>
-          <ChoiceChips
-            label="Projet" allowNone="Aucun"
-            options={state.projects.filter(p => p.status !== 'termine').map(p => ({ value: p.id, label: p.name }))}
-            value={projectId} onChange={setProjectId}
-          />
+          <TimeField label="Heure (facultatif, pour la timeline)" value={plannedTime} onChange={setPlannedTime} />
+          <DateField label="Échéance réelle — doit être fini avant (facultatif)" value={deadline} onChange={setDeadline} />
+
+          <label className="field-label" htmlFor="te-duration">Durée estimée (min, facultatif)</label>
+          <input id="te-duration" className="field" type="number" inputMode="numeric" value={durationMin} onChange={e => setDurationMin(e.target.value)} />
+
+          {state.projects.length > 0 && (
+            <>
+              <span className="field-label">Projet</span>
+              <ChoiceChips
+                label="Projet" allowNone="Aucun"
+                options={state.projects.filter(p => p.status !== 'termine').map(p => ({ value: p.id, label: p.name }))}
+                value={projectId} onChange={setProjectId}
+              />
+            </>
+          )}
+          {state.subjects.length > 0 && (
+            <>
+              <span className="field-label">Matière</span>
+              <ChoiceChips
+                label="Matière" allowNone="Aucune"
+                options={state.subjects.map(s => ({ value: s.id, label: s.name }))}
+                value={subjectId} onChange={setSubjectId}
+              />
+            </>
+          )}
+
+          <label className="field-label" htmlFor="te-note">Note</label>
+          <textarea id="te-note" className="field" rows={2} value={note} onChange={e => setNote(e.target.value)} />
+
+          <button className="list-row" style={{ marginTop: 12, borderRadius: 12, background: 'var(--tertiary-system-background)' }}
+            onClick={() => setSomeday(!someday)} aria-pressed={someday}>
+            <span className={`check-circle${someday ? ' checked' : ''}`}><Icon name="check" size={14} /></span>
+            <span className="row-main"><span className="row-title">Un jour peut-être</span>
+              <span className="row-sub">Hors des listes actives, garde l'idée</span></span>
+          </button>
         </>
       )}
-      {state.subjects.length > 0 && (
-        <>
-          <span className="field-label">Matière</span>
-          <ChoiceChips
-            label="Matière" allowNone="Aucune"
-            options={state.subjects.map(s => ({ value: s.id, label: s.name }))}
-            value={subjectId} onChange={setSubjectId}
-          />
-        </>
-      )}
-
-      <label className="field-label" htmlFor="te-note">Note</label>
-      <textarea id="te-note" className="field" rows={2} value={note} onChange={e => setNote(e.target.value)} />
-
-      <button className="list-row" style={{ marginTop: 12, borderRadius: 12, background: 'var(--tertiary-system-background)' }}
-        onClick={() => setSomeday(!someday)} aria-pressed={someday}>
-        <span className={`check-circle${someday ? ' checked' : ''}`}><Icon name="check" size={14} /></span>
-        <span className="row-main"><span className="row-title">Un jour peut-être</span>
-          <span className="row-sub">Hors des listes actives, garde l'idée</span></span>
-      </button>
 
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>Enregistrer</button>
 
@@ -555,12 +568,12 @@ export function BackHeader({ title, onBack, action, onAction }: {
   onAction?: () => void
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 0 4px', minHeight: 44 }}>
-      <button className="btn-plain" onClick={onBack} style={{ display: 'flex', alignItems: 'center', minHeight: 44, marginLeft: -8 }}>
+    <div className="back-header">
+      <button className="btn-plain" onClick={onBack} style={{ display: 'flex', alignItems: 'center', minHeight: 44, marginLeft: -8, justifySelf: 'start' }}>
         <Icon name="chevronLeft" size={22} /> Retour
       </button>
-      <h1 style={{ fontSize: 22, flex: 1, textAlign: 'center', marginRight: action ? 0 : 70 }}>{title}</h1>
-      {action && <button className="btn-add-pill" style={{ minHeight: 36 }} onClick={onAction}>{action}</button>}
+      <h1 className="back-header-title">{title}</h1>
+      {action ? <button className="btn-add-pill" style={{ minHeight: 36, justifySelf: 'end' }} onClick={onAction}>{action}</button> : <span />}
     </div>
   )
 }

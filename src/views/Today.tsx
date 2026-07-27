@@ -8,6 +8,7 @@ import { Icon } from '../ui/Icon'
 import { SectionHeader, EmptyState, Sheet } from '../ui/Sheet'
 import { TaskEditor } from './Plan'
 import { SHORTCUT_DEFS, activeShortcuts, shortcutDef } from '../ui/shortcuts'
+import { ProgressRing } from '../ui/charts'
 import { recommend, todayCheckIn, computeDueQueue, shouldReduceAmbition, type Recommendation } from '../domain/recommend'
 import { todayISO, formatCivilLong, localHour, ageAt, addDays } from '../lib/dates'
 import { newId } from '../lib/id'
@@ -126,37 +127,18 @@ export function Today() {
         </div>
       </section>
 
-      {/* Tuiles d'un coup d'œil (façon Apple Fitness) */}
-      <div className="tile-grid">
-        <button className="card tile" onClick={() => ui.navigate('review', null)}>
-          <span className="tile-label"><span style={{ color: '#0a84ff', display: 'flex' }}><Icon name="review" size={16} /></span> Révisions</span>
-          <span className="tile-value">{due.length}</span>
-          <span className="tile-sub">{due.length > 0 ? `due${due.length > 1 ? 's' : ''} aujourd'hui` : 'rien de dû'}</span>
-        </button>
-        <button className="card tile" onClick={() => ui.openTimerStart()}>
-          <span className="tile-label"><span style={{ color: '#ff9f0a', display: 'flex' }}><Icon name="timer" size={16} /></span> Focus</span>
-          <span className="tile-value">
-            {focusGoal > 0 ? `${focusMinToday}/${focusGoal}` : focusMinToday > 0 ? `${focusMinToday} min` : '—'}
-          </span>
-          {focusGoal > 0 ? (
-            <span className="tile-bar" aria-hidden="true">
-              <span style={{ width: `${Math.min(100, (focusMinToday / focusGoal) * 100)}%` }} />
-            </span>
-          ) : (
-            <span className="tile-sub">{focusMinToday > 0 ? "aujourd'hui" : 'lancer une session'}</span>
-          )}
-        </button>
-        <button className="card tile" onClick={() => ui.navigate('plan', 'habits')}>
-          <span className="tile-label"><span style={{ color: '#30d158', display: 'flex' }}><Icon name="check" size={16} /></span> Habitudes</span>
-          <span className="tile-value">{habitsDue.length > 0 ? `${habitsDone}/${habitsDue.length}` : '—'}</span>
-          <span className="tile-sub">{habitsDue.length > 0 ? 'faites ce jour' : 'en créer une'}</span>
-        </button>
-        <button className="card tile" onClick={() => ui.navigate('coach', 'control')}>
-          <span className="tile-label"><span style={{ color: '#ff453a', display: 'flex' }}><Icon name="sos" size={16} /></span> Engagement</span>
-          <span className="tile-value">{streak} j</span>
-          <span className="tile-sub">série en cours</span>
-        </button>
-      </div>
+      {/* L'anneau du jour — un seul élément dessiné, le reste s'efface */}
+      <DayRing
+        due={due.length}
+        reviewsDone={state.reviewLogs.filter(l => l.date === today).length}
+        focusMin={focusMinToday}
+        focusGoal={focusGoal}
+        habitsDone={habitsDone}
+        habitsDue={habitsDue.length}
+        streak={streak}
+        top3Done={state.tasks.filter(t => !t.deletedAt && t.top3Date === today && t.done).length}
+        top3Total={state.tasks.filter(t => !t.deletedAt && t.top3Date === today).length}
+      />
 
       {/* Bien démarrer : checklist de premiers pas, disparaît une fois complétée */}
       <StarterCard onPickTop3={() => setPickerOpen(true)} />
@@ -248,9 +230,6 @@ export function Today() {
       <SectionHeader action="Modifier" onAction={() => setEditShortcuts(true)}>Raccourcis</SectionHeader>
       <ShortcutGrid onNewTask={() => setNewTask(true)} />
 
-      {/* Cette semaine */}
-      <WeekStats />
-
       {/* Check-in du jour */}
       {checkIn && (
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 20, textAlign: 'center' }}>
@@ -341,6 +320,49 @@ function ShortcutsEditor({ onClose }: { onClose: () => void }) {
   )
 }
 
+/** Anneau du jour : Top 3, révisions, habitudes (et focus si objectif) en un cercle. */
+function DayRing({ due, reviewsDone, focusMin, focusGoal, habitsDone, habitsDue, streak, top3Done, top3Total }: {
+  due: number
+  reviewsDone: number
+  focusMin: number
+  focusGoal: number
+  habitsDone: number
+  habitsDue: number
+  streak: number
+  top3Done: number
+  top3Total: number
+}) {
+  const ui = useUi()
+  const parts: number[] = []
+  if (top3Total > 0) parts.push(top3Done / top3Total)
+  if (due + reviewsDone > 0) parts.push(reviewsDone / (due + reviewsDone))
+  if (habitsDue > 0) parts.push(habitsDone / habitsDue)
+  if (focusGoal > 0) parts.push(Math.min(1, focusMin / focusGoal))
+  const value = parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : 0
+
+  const row = (label: string, detail: string, onClick: () => void) => (
+    <button className="dayring-row" onClick={onClick}>
+      <span className="dayring-label">{label}</span>
+      <span className="dayring-detail">{detail}</span>
+      <Icon name="chevronRight" size={14} className="chevron" />
+    </button>
+  )
+
+  return (
+    <div className="card dayring" aria-label="Progression du jour">
+      <div className="dayring-ring">
+        <ProgressRing value={value} size={84} label="de la journée" />
+      </div>
+      <div className="dayring-rows">
+        {row('Révisions', due > 0 ? `${due} due${due > 1 ? 's' : ''}` : reviewsDone > 0 ? 'à jour' : '—', () => ui.navigate('review', null))}
+        {row('Focus', focusGoal > 0 ? `${focusMin}/${focusGoal} min` : focusMin > 0 ? `${focusMin} min` : '—', () => ui.openTimerStart())}
+        {row('Habitudes', habitsDue > 0 ? `${habitsDone}/${habitsDue}` : '—', () => ui.navigate('plan', 'habits'))}
+        {row('Engagement', `${streak} j`, () => ui.navigate('coach', 'control'))}
+      </div>
+    </div>
+  )
+}
+
 /** Habitudes prévues aujourd'hui : coche rapide, détail dans Plan → Habitudes. */
 function TodayHabits() {
   const { state, update } = useApp()
@@ -423,35 +445,6 @@ function StarterCard({ onPickTop3 }: { onPickTop3: () => void }) {
             {!i.done && <Icon name="chevronRight" size={16} className="chevron" />}
           </button>
         ))}
-      </div>
-    </>
-  )
-}
-
-/** Trois chiffres réels de la semaine — pas un mur de graphiques. */
-function WeekStats() {
-  const { state } = useApp()
-  const today = todayISO(state.profile.timezone)
-  const weekAgo = addDays(today, -7)
-  const sessions = state.focusSessions.filter(s => s.endedAt && s.startedAt.slice(0, 10) >= weekAgo)
-  const minutes = sessions.reduce((a, s) => a + (s.workedMin ?? s.plannedMin), 0)
-  const reviews = state.reviewLogs.filter(l => l.date >= weekAgo).length
-  if (sessions.length === 0 && reviews === 0) return null
-
-  const stat = (value: string | number, label: string) => (
-    <div style={{ flex: 1, textAlign: 'center' }}>
-      <div style={{ fontSize: 26, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-      <div style={{ fontSize: 12, color: 'var(--secondary-label)', marginTop: 2 }}>{label}</div>
-    </div>
-  )
-
-  return (
-    <>
-      <SectionHeader>Cette semaine</SectionHeader>
-      <div className="card" style={{ display: 'flex', gap: 8, padding: '18px 8px' }}>
-        {stat(sessions.length, `session${sessions.length !== 1 ? 's' : ''} focus`)}
-        {stat(minutes >= 60 ? `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}` : minutes, minutes >= 60 ? 'de focus' : 'min de focus')}
-        {stat(reviews, `révision${reviews !== 1 ? 's' : ''} notée${reviews !== 1 ? 's' : ''}`)}
       </div>
     </>
   )

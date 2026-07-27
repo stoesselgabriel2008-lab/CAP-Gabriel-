@@ -86,8 +86,10 @@ try {
   await shot('08-review-home')
   log('review OK')
 
-  // Minuteur : lancer et vérifier
+  // Minuteur : lancer et vérifier (la ligne due ouvre d'abord la notation)
   await page.getByRole('button', { name: /Membre supérieur/ }).first().click()
+  await page.waitForTimeout(300)
+  await page.getByRole('button', { name: /Réviser 25 min/ }).click()
   await page.waitForTimeout(300)
   await page.getByRole('button', { name: /^Commencer 25 min$/ }).click()
   await page.waitForTimeout(600)

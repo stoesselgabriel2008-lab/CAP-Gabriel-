@@ -23,9 +23,11 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Corrigé : la fiche de tâche ne saute plus dans tous les sens quand tu choisis une date ou une heure',
-  'Design affiné : icônes en pastilles colorées façon Réglages iOS dans Plan et Moi, tuiles colorées sur l\'accueil',
-  'Raccourcis personnalisables sur l\'accueil (« Modifier ») et bouton + Tâche partout'
+  'Refonte complète : fond anthracite, deux thèmes (Sombre / Clair), interface plus calme et plus lisible',
+  'Aujourd\'hui : l\'anneau du jour remplace les tuiles — ta journée en un cercle, chaque ligne est tappable',
+  'Réviser : note un rappel en deux taps (Facile → Oublié), avec la prochaine date annoncée — le minuteur reste disponible',
+  'Nouvelle tâche express : titre, catégorie, date, priorité — le reste sous « Plus d\'options », ta dernière catégorie est retenue',
+  'Les anciens thèmes Verre deviennent Sombre / Clair automatiquement, rien n\'est perdu'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -91,6 +93,15 @@ export default function App() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf) }
   }, [])
+
+  // Le body et la barre système suivent le thème (zones de rebond iOS).
+  // Placé avant les retours anticipés (ordre des hooks stable).
+  const lightTheme = state.settings.appearance === 'clair' || state.settings.appearance === 'glass-clair'
+  useEffect(() => {
+    document.body.style.background = lightTheme ? '#f2f2f7' : '#0c0c0e'
+    document.documentElement.style.colorScheme = lightTheme ? 'light' : 'dark'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', lightTheme ? '#f2f2f7' : '#0c0c0e')
+  }, [lightTheme])
 
   // Popup « Quoi de neuf » après une mise à jour
   const [showWhatsNew, setShowWhatsNew] = useState(false)
@@ -188,13 +199,15 @@ export default function App() {
   const checkIn = todayCheckIn(state, today)
   const timer = state.activeTimer
   const reduced = state.settings.reducedTransparency
-  const appearance = state.settings.appearance
-  // La capsule flottante est le layout de tous les thèmes ; seuls les matériaux changent.
+  // Deux thèmes : sombre et clair. Les anciens réglages « verre » sont
+  // traduits (verre nuit → sombre, verre jour → clair) — le verre reste
+  // réservé aux contrôles (tab bar, barre d'action, sheets).
+  const appearance = state.settings.appearance === 'glass' ? 'sobre'
+    : state.settings.appearance === 'glass-clair' ? 'clair'
+    : state.settings.appearance
   const cls = 'app-shell theme-capsule'
     + (reduced ? ' reduced-transparency' : '')
-    + (appearance === 'glass' && !reduced ? ' theme-glass' : '')
     + (appearance === 'clair' ? ' theme-light' : '')
-    + (appearance === 'glass-clair' ? (reduced ? ' theme-light' : ' theme-light theme-glass-light') : '')
   const dueCount = computeDueQueue(state, today).length
   const inboxCount = state.captures.filter(c => !c.processedAt).length
   const tabBadges: Partial<Record<TabId, number>> = { review: dueCount, plan: inboxCount }
