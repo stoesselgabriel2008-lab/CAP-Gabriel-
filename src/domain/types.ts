@@ -20,6 +20,7 @@ export interface Settings {
   appearance: 'sobre' | 'clair' | 'glass' | 'glass-clair' // sombre, clair iOS, verre sombre, verre clair
   accent: string // id de couleur d'accent (voir ui/accents.ts)
   dailyFocusGoalMin: number // objectif de focus quotidien en minutes (0 = désactivé)
+  shortcuts?: string[] // raccourcis de l'accueil (ids de ui/shortcuts.ts), ordonnés
 }
 
 export type CaptureKind = 'task' | 'note' | 'idea' | 'question' | 'error' | 'trigger' | 'event'
@@ -331,7 +332,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '3.3.1'
+export const APP_VERSION = '3.4.0'
 
 export function defaultState(): AppState {
   return {

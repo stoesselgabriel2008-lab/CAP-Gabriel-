@@ -23,11 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Fenêtre Capturer : elle reste juste au-dessus du clavier au lieu de monter tout en haut de l\'écran',
-  'Catégorie ET priorité visibles en même temps : barre colorée de catégorie + drapeau rouge (haute) ou flèche grise (basse) sur chaque tâche',
-  'Calendrier : les pastilles des tâches priorité haute sont cerclées de rouge',
-  'Bulle d\'onglets affinée : un tap simple ne la fait plus sauter — seul un vrai glissement la déplace',
-  'Fiche de tâche : la catégorie se choisit juste sous le titre'
+  'Raccourcis personnalisables sur l\'accueil : « Modifier » pour choisir tes actions (Tâche, Focus, Calendrier, Recherche…)',
+  'Bouton + Tâche directement sur l\'accueil et bien visible dans Plan',
+  'Calendrier repensé : jour sélectionné en cercle plein, bouton Aujourd\'hui, glisser à gauche/droite pour changer de mois, heures dans la liste du jour',
+  'Corrigé : taper Durée estimée ou Note dans une fiche ne renvoie plus le curseur au Titre'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

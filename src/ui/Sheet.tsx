@@ -17,6 +17,12 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
   const ref = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
 
+  // onClose change d'identité à chaque render du parent : passer par une ref
+  // pour que l'effet d'ouverture ne se rejoue JAMAIS (sinon il re-focalisait
+  // le premier champ — le titre — dès que le parent re-rendait).
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   useEffect(() => {
     const token = Symbol('sheet')
     sheetStack.push(token)
@@ -31,7 +37,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
     }
     const onKey = (e: KeyboardEvent) => {
       if (!isTop()) return
-      if (e.key === 'Escape') { e.stopPropagation(); onClose() }
+      if (e.key === 'Escape') { e.stopPropagation(); onCloseRef.current() }
       if (e.key === 'Tab' && ref.current) {
         const items = Array.from(ref.current.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -51,7 +57,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
       if (sheetStack.length === 0) document.body.style.overflow = ''
       previouslyFocused.current?.focus?.()
     }
-  }, [onClose])
+  }, [])
 
   // Remontée au-dessus du clavier, mesurée sur la sheet elle-même
   // (getBoundingClientRect vs visualViewport). Sur iOS plein écran,

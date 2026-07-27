@@ -91,8 +91,8 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
     <div className="screen">
       <div className="root-header">
         <h1 className="large-title">Plan</h1>
-        <button className="icon-btn" aria-label="Nouvelle tâche" onClick={() => setEditing('new')}>
-          <Icon name="plus" size={21} />
+        <button className="btn-add-pill" aria-label="Nouvelle tâche" onClick={() => setEditing('new')}>
+          <Icon name="plus" size={17} /> Tâche
         </button>
       </div>
       <p className="subtitle-context">Ce qui existe, quand, et pourquoi.</p>
@@ -562,7 +562,7 @@ export function BackHeader({ title, onBack, action, onAction }: {
         <Icon name="chevronLeft" size={22} /> Retour
       </button>
       <h1 style={{ fontSize: 22, flex: 1, textAlign: 'center', marginRight: action ? 0 : 70 }}>{title}</h1>
-      {action && <button className="btn-plain-bold" style={{ minHeight: 44 }} onClick={onAction}>{action}</button>}
+      {action && <button className="btn-add-pill" style={{ minHeight: 36 }} onClick={onAction}>{action}</button>}
     </div>
   )
 }

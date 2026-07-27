@@ -6,6 +6,8 @@ import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { SectionHeader, EmptyState, Sheet } from '../ui/Sheet'
+import { TaskEditor } from './Plan'
+import { SHORTCUT_DEFS, activeShortcuts, shortcutDef } from '../ui/shortcuts'
 import { recommend, todayCheckIn, computeDueQueue, shouldReduceAmbition, type Recommendation } from '../domain/recommend'
 import { todayISO, formatCivilLong, localHour, ageAt, addDays } from '../lib/dates'
 import { newId } from '../lib/id'
@@ -25,6 +27,8 @@ export function Today() {
   const [completing, setCompleting] = useState<string | null>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [showWhy, setShowWhy] = useState(false)
+  const [newTask, setNewTask] = useState(false)
+  const [editShortcuts, setEditShortcuts] = useState(false)
 
   const focusMinToday = state.focusSessions
     .filter(s => s.endedAt && s.startedAt.slice(0, 10) === today)
@@ -92,9 +96,14 @@ export function Today() {
           <p className="date-kicker">{formatCivilLong(today)}</p>
           <h1 className="large-title">Aujourd'hui</h1>
         </div>
-        <button className="icon-btn" aria-label="Réglages" onClick={() => ui.navigate('me', 'settings')}>
-          <Icon name="settings" size={21} />
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="icon-btn" aria-label="Ajouter une tâche" onClick={() => setNewTask(true)}>
+            <Icon name="plus" size={21} />
+          </button>
+          <button className="icon-btn" aria-label="Réglages" onClick={() => ui.navigate('me', 'settings')}>
+            <Icon name="settings" size={21} />
+          </button>
+        </div>
       </div>
       <p className="subtitle-context">{greeting} {state.profile.firstName}</p>
 
@@ -235,19 +244,9 @@ export function Today() {
       </>
       )}
 
-      {/* Raccourcis */}
-      <SectionHeader>Raccourcis</SectionHeader>
-      <div className="shortcut-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-        <button className="shortcut" onClick={ui.openCapture}>
-          <span className="shortcut-circle"><Icon name="capture" size={26} /></span> Capturer
-        </button>
-        <button className="shortcut sos" onClick={ui.openSOS}>
-          <span className="shortcut-circle"><Icon name="sos" size={26} /></span> SOS
-        </button>
-        <button className="shortcut" onClick={ui.openCheckIn}>
-          <span className="shortcut-circle"><Icon name="bolt" size={26} /></span> Check-in
-        </button>
-      </div>
+      {/* Raccourcis — personnalisables via « Modifier » */}
+      <SectionHeader action="Modifier" onAction={() => setEditShortcuts(true)}>Raccourcis</SectionHeader>
+      <ShortcutGrid onNewTask={() => setNewTask(true)} />
 
       {/* Cette semaine */}
       <WeekStats />
@@ -261,7 +260,84 @@ export function Today() {
       )}
 
       {pickerOpen && <Top3Picker onClose={() => setPickerOpen(false)} />}
+      {newTask && <TaskEditor task={null} defaults={{ plannedDate: today }} onClose={() => setNewTask(false)} />}
+      {editShortcuts && <ShortcutsEditor onClose={() => setEditShortcuts(false)} />}
     </div>
+  )
+}
+
+/** Grille des raccourcis actifs (réglage settings.shortcuts, ordonné). */
+function ShortcutGrid({ onNewTask }: { onNewTask: () => void }) {
+  const { state } = useApp()
+  const ui = useUi()
+  const ids = activeShortcuts(state.settings.shortcuts)
+
+  const run = (id: string) => {
+    switch (id) {
+      case 'task': onNewTask(); break
+      case 'capture': ui.openCapture(); break
+      case 'checkin': ui.openCheckIn(); break
+      case 'sos': ui.openSOS(); break
+      case 'focus': ui.openTimerStart(); break
+      case 'review': ui.navigate('review', null); break
+      case 'calendar': ui.navigate('plan', 'calendar'); break
+      case 'habits': ui.navigate('plan', 'habits'); break
+      case 'notes': ui.navigate('plan', 'notes'); break
+      case 'search': ui.openCommand(); break
+      case 'evening': ui.openEvening(); break
+    }
+  }
+
+  return (
+    <div className="shortcut-grid" style={{ gridTemplateColumns: `repeat(${Math.min(4, Math.max(2, ids.length))}, 1fr)` }}>
+      {ids.map(id => {
+        const d = shortcutDef(id)
+        if (!d) return null
+        return (
+          <button key={id} className={`shortcut${d.danger ? ' sos' : ''}`} aria-label={d.aria} onClick={() => run(id)}>
+            <span className="shortcut-circle"><Icon name={d.icon} size={26} /></span> {d.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Choix des raccourcis affichés : cocher pour ajouter (dans l'ordre), max 8. */
+function ShortcutsEditor({ onClose }: { onClose: () => void }) {
+  const { state, update, toast } = useApp()
+  const current = activeShortcuts(state.settings.shortcuts)
+
+  const toggle = (id: string) => {
+    const isIn = current.includes(id)
+    if (isIn && current.length <= 1) { toast('Garde au moins un raccourci.'); return }
+    if (!isIn && current.length >= 8) { toast('8 raccourcis maximum.'); return }
+    const next = isIn ? current.filter(x => x !== id) : [...current, id]
+    update(s => ({ ...s, settings: { ...s.settings, shortcuts: next } }))
+  }
+
+  return (
+    <Sheet title="Raccourcis de l'accueil" onClose={onClose} closeLabel="OK">
+      <p style={{ color: 'var(--secondary-label)', fontSize: 14, margin: '0 0 12px', lineHeight: 1.5 }}>
+        Coche les actions à garder sous la main — elles s'affichent dans l'ordre où tu les choisis.
+      </p>
+      <div className="list-group">
+        {SHORTCUT_DEFS.map(d => {
+          const isIn = current.includes(d.id)
+          const pos = current.indexOf(d.id)
+          return (
+            <button key={d.id} className="list-row" aria-pressed={isIn} onClick={() => toggle(d.id)}>
+              <span className={`check-circle${isIn ? ' checked' : ''}`}><Icon name="check" size={14} /></span>
+              <span style={{ color: d.danger ? 'var(--danger)' : 'var(--tint)', display: 'flex', flexShrink: 0 }}>
+                <Icon name={d.icon} size={20} />
+              </span>
+              <span className="row-main"><span className="row-title">{d.label}</span></span>
+              {isIn && <span className="row-detail">{pos + 1}</span>}
+            </button>
+          )
+        })}
+      </div>
+    </Sheet>
   )
 }
 

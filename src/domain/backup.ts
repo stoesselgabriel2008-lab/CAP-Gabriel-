@@ -98,6 +98,7 @@ export function sanitizeState(partial: Partial<AppState>): AppState {
     if ((['sobre', 'clair', 'glass', 'glass-clair'] as const).includes(partial.settings.appearance as any)) out.settings.appearance = partial.settings.appearance as AppState['settings']['appearance']
     if (typeof partial.settings.accent === 'string') out.settings.accent = partial.settings.accent
     if (typeof partial.settings.dailyFocusGoalMin === 'number' && partial.settings.dailyFocusGoalMin >= 0) out.settings.dailyFocusGoalMin = Math.min(720, Math.floor(partial.settings.dailyFocusGoalMin))
+    if (Array.isArray(partial.settings.shortcuts)) out.settings.shortcuts = partial.settings.shortcuts.filter(x => typeof x === 'string').slice(0, 12)
   }
   if (partial.commitment && typeof partial.commitment === 'object') {
     const c = partial.commitment

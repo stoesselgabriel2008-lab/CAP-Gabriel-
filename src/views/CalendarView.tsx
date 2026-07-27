@@ -7,7 +7,7 @@ import { useUi } from '../app/ui-context'
 import { Icon } from '../ui/Icon'
 import { SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader, TaskEditor } from './Plan'
-import { todayISO, addDays, isoWeekday, relativeLabel, nowISO } from '../lib/dates'
+import { todayISO, isoWeekday, relativeLabel, formatCivilLong, nowISO } from '../lib/dates'
 import { taskColor, categoryOf, categoryBarColor, priorityColor } from '../domain/categories'
 import type { Task } from '../domain/types'
 
@@ -46,7 +46,24 @@ export function CalendarView() {
 
   const shift = (months: number) => {
     const d = new Date(Date.UTC(y, m - 1 + months, 1))
-    setYm(`${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`)
+    const next = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`
+    setYm(next)
+    // la sélection suit le mois affiché : aujourd'hui si visible, sinon le 1er
+    setSelected(today.startsWith(next) ? today : `${next}-01`)
+  }
+
+  const goToday = () => { setYm(today.slice(0, 7)); setSelected(today) }
+
+  // Glissement horizontal sur la grille : mois précédent / suivant
+  const swipe = React.useRef<{ x: number; y: number } | null>(null)
+  const onGridDown = (e: React.PointerEvent) => { swipe.current = { x: e.clientX, y: e.clientY } }
+  const onGridUp = (e: React.PointerEvent) => {
+    const s = swipe.current
+    swipe.current = null
+    if (!s) return
+    const dx = e.clientX - s.x
+    const dyAbs = Math.abs(e.clientY - s.y)
+    if (Math.abs(dx) > 48 && Math.abs(dx) > dyAbs * 2) shift(dx < 0 ? 1 : -1)
   }
 
   const dayTasks = useMemo(() => {
@@ -74,18 +91,22 @@ export function CalendarView() {
 
       {/* Navigation du mois */}
       <div className="cal-head" style={{ marginTop: 4 }}>
+        <span className="cal-title" style={{ fontSize: 20, textAlign: 'left', paddingLeft: 4 }}>{MONTHS[m - 1]} {y}</span>
+        {!(ym === today.slice(0, 7) && selected === today) && (
+          <button type="button" className="cal-today-btn" onClick={goToday}>Aujourd'hui</button>
+        )}
         <button type="button" aria-label="Mois précédent" onClick={() => shift(-1)}>
           <Icon name="chevronLeft" size={20} />
         </button>
-        <span className="cal-title" style={{ fontSize: 18 }}>{MONTHS[m - 1]} {y}</span>
         <button type="button" aria-label="Mois suivant" onClick={() => shift(1)}>
           <Icon name="chevronRight" size={20} />
         </button>
       </div>
 
-      {/* Grille du mois */}
-      <div className="card" style={{ padding: '10px 8px' }}>
-        <div className="month-grid" role="grid" aria-label={`${MONTHS[m - 1]} ${y}`}>
+      {/* Grille du mois — glisser à gauche/droite change de mois */}
+      <div className="card" style={{ padding: '10px 8px', touchAction: 'pan-y' }}
+        onPointerDown={onGridDown} onPointerUp={onGridUp} onPointerCancel={() => { swipe.current = null }}>
+        <div className="month-grid" key={ym} role="grid" aria-label={`${MONTHS[m - 1]} ${y}`}>
           {DOW.map((d, i) => <span key={`h${i}`} className="cal-dow">{d}</span>)}
           {cells.map((day, i) => {
             if (day === null) return <span key={`e${i}`} />
@@ -117,9 +138,13 @@ export function CalendarView() {
         </div>
       </div>
 
-      {/* Jour sélectionné */}
+      {/* Jour sélectionné — liste façon agenda avec colonne horaire */}
       <SectionHeader action="+ Ce jour" onAction={() => setEditing('new')}>
-        {relativeLabel(selected, today).charAt(0).toUpperCase() + relativeLabel(selected, today).slice(1)}
+        {selected === today
+          ? "Aujourd'hui"
+          : relativeLabel(selected, today) === 'demain'
+            ? 'Demain'
+            : formatCivilLong(selected).charAt(0).toUpperCase() + formatCivilLong(selected).slice(1)}
       </SectionHeader>
       {dayTasks.planned.length === 0 && dayTasks.deadlines.length === 0 ? (
         <div className="card">
@@ -129,16 +154,17 @@ export function CalendarView() {
         <div className="list-group">
           {dayTasks.planned.map(t => (
             <div key={t.id} className="list-row">
-              <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => complete(t)}>
-                <span className="check-circle"><Icon name="check" size={14} /></span>
-              </button>
+              <span className="agenda-time" aria-hidden="true">{t.plannedTime ?? '·'}</span>
               <span className="cat-bar" style={{ background: categoryBarColor(t.category) }} aria-hidden="true" />
               <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => setEditing(t)}>
                 <span className="row-title" style={{ display: 'block' }}>{t.title}</span>
-                <span className="row-sub">
-                  {t.plannedTime ? `${t.plannedTime} · ` : ''}
-                  {categoryOf(t.category)?.label ?? ''}
-                </span>
+                {(categoryOf(t.category) || t.durationMin) && (
+                  <span className="row-sub">
+                    {categoryOf(t.category)?.label ?? ''}
+                    {categoryOf(t.category) && t.durationMin ? ' · ' : ''}
+                    {t.durationMin ? `${t.durationMin} min` : ''}
+                  </span>
+                )}
               </button>
               {t.priority !== 'normale' && (
                 <span aria-label={t.priority === 'haute' ? 'Priorité haute' : 'Priorité basse'}
@@ -146,12 +172,17 @@ export function CalendarView() {
                   <Icon name={t.priority === 'haute' ? 'flag' : 'down'} size={16} />
                 </span>
               )}
-              <Icon name="chevronRight" size={16} className="chevron" />
+              <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => complete(t)}>
+                <span className="check-circle"><Icon name="check" size={14} /></span>
+              </button>
             </div>
           ))}
           {dayTasks.deadlines.map(t => (
             <button key={t.id} className="list-row" onClick={() => setEditing(t)}>
-              <span style={{ color: 'var(--danger)', display: 'flex' }}><Icon name="flag" size={18} /></span>
+              <span className="agenda-time" style={{ color: 'var(--danger)' }} aria-hidden="true">
+                <Icon name="flag" size={15} />
+              </span>
+              <span className="cat-bar" style={{ background: 'var(--danger)' }} aria-hidden="true" />
               <span className="row-main">
                 <span className="row-title">{t.title}</span>
                 <span className="row-sub">Échéance ce jour</span>
