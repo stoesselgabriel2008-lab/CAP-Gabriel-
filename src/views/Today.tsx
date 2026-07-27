@@ -12,6 +12,7 @@ import { newId } from '../lib/id'
 import { nowISO } from '../lib/dates'
 import type { Task } from '../domain/types'
 import { isScheduled, isDone } from '../domain/habits'
+import { currentStreak } from '../domain/streak'
 
 export function Today() {
   const { state, update, updateUndoable } = useApp()
@@ -23,6 +24,14 @@ export function Today() {
   const checkIn = todayCheckIn(state, today)
   const [completing, setCompleting] = useState<string | null>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [showWhy, setShowWhy] = useState(false)
+
+  const focusMinToday = state.focusSessions
+    .filter(s => s.endedAt && s.startedAt.slice(0, 10) === today)
+    .reduce((a, s) => a + (s.workedMin ?? s.plannedMin), 0)
+  const habitsDue = state.routines.filter(r => !r.archived && isScheduled(r, today))
+  const habitsDone = habitsDue.filter(r => isDone(state.routineLogs, r.id, today)).length
+  const streak = currentStreak(state.commitment, today)
 
   const top3 = state.tasks
     .filter(t => !t.deletedAt && t.top3Date === today && !t.done)
@@ -78,14 +87,15 @@ export function Today() {
   return (
     <div className="screen">
       <div className="root-header">
-        <h1 className="large-title">Aujourd'hui</h1>
+        <div>
+          <p className="date-kicker">{formatCivilLong(today)}</p>
+          <h1 className="large-title">Aujourd'hui</h1>
+        </div>
         <button className="icon-btn" aria-label="Réglages" onClick={() => ui.navigate('me', 'settings')}>
           <Icon name="settings" size={21} />
         </button>
       </div>
-      <p className="subtitle-context">
-        {greeting} {state.profile.firstName} · {formatCivilLong(today)}
-      </p>
+      <p className="subtitle-context">{greeting} {state.profile.firstName}</p>
 
       {/* Carte Maintenant */}
       <section aria-label="Maintenant">
@@ -99,9 +109,36 @@ export function Today() {
           >
             {rec.cta}
           </button>
-          <p className="now-why">Pourquoi : {rec.why}</p>
+          <button className="now-why-toggle" aria-expanded={showWhy} onClick={() => setShowWhy(!showWhy)}>
+            Pourquoi cette proposition ?
+          </button>
+          {showWhy && <p className="now-why">{rec.why}</p>}
         </div>
       </section>
+
+      {/* Tuiles d'un coup d'œil (façon Apple Fitness) */}
+      <div className="tile-grid">
+        <button className="card tile" onClick={() => ui.navigate('review', null)}>
+          <span className="tile-label"><Icon name="review" size={16} /> Révisions</span>
+          <span className="tile-value">{due.length}</span>
+          <span className="tile-sub">{due.length > 0 ? `due${due.length > 1 ? 's' : ''} aujourd'hui` : 'rien de dû'}</span>
+        </button>
+        <button className="card tile" onClick={() => ui.openTimerStart()}>
+          <span className="tile-label"><Icon name="timer" size={16} /> Focus</span>
+          <span className="tile-value">{focusMinToday > 0 ? `${focusMinToday} min` : '—'}</span>
+          <span className="tile-sub">{focusMinToday > 0 ? "aujourd'hui" : 'lancer une session'}</span>
+        </button>
+        <button className="card tile" onClick={() => ui.navigate('plan', 'habits')}>
+          <span className="tile-label"><Icon name="check" size={16} /> Habitudes</span>
+          <span className="tile-value">{habitsDue.length > 0 ? `${habitsDone}/${habitsDue.length}` : '—'}</span>
+          <span className="tile-sub">{habitsDue.length > 0 ? 'faites ce jour' : 'en créer une'}</span>
+        </button>
+        <button className="card tile" onClick={() => ui.navigate('coach', 'control')}>
+          <span className="tile-label"><Icon name="sos" size={16} /> Engagement</span>
+          <span className="tile-value">{streak} j</span>
+          <span className="tile-sub">série en cours</span>
+        </button>
+      </div>
 
       {/* Bien démarrer : checklist de premiers pas, disparaît une fois complétée */}
       <StarterCard onPickTop3={() => setPickerOpen(true)} />
@@ -114,13 +151,15 @@ export function Today() {
         </p>
       )}
       {top3.length === 0 ? (
-        <div className="card">
-          <EmptyState title="Pas encore de priorités">
-            Choisis jusqu'à trois tâches qui feraient de cette journée une réussite.
-            <div style={{ marginTop: 12 }}>
-              <button className="btn btn-secondary" onClick={() => setPickerOpen(true)}>Choisir le Top 3</button>
-            </div>
-          </EmptyState>
+        <div className="list-group">
+          <button className="list-row" onClick={() => setPickerOpen(true)}>
+            <span className="check-circle" style={{ borderStyle: 'dashed' }}><Icon name="plus" size={14} /></span>
+            <span className="row-main">
+              <span className="row-title" style={{ color: 'var(--tint)' }}>Choisir mes 3 priorités</span>
+              <span className="row-sub">Les tâches qui feraient de cette journée une réussite</span>
+            </span>
+            <Icon name="chevronRight" size={16} className="chevron" />
+          </button>
         </div>
       ) : (
         <div className="list-group">
@@ -189,10 +228,7 @@ export function Today() {
 
       {/* Raccourcis */}
       <SectionHeader>Raccourcis</SectionHeader>
-      <div className="shortcut-grid">
-        <button className="shortcut" onClick={() => ui.openTimerStart()}>
-          <span className="shortcut-circle"><Icon name="timer" size={26} /></span> Focus
-        </button>
+      <div className="shortcut-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <button className="shortcut" onClick={ui.openCapture}>
           <span className="shortcut-circle"><Icon name="capture" size={26} /></span> Capturer
         </button>

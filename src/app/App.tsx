@@ -23,10 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  '8 couleurs d\'accent au choix (Réglages → Apparence) : la teinte s\'applique instantanément partout — boutons, bulle, graphiques, heatmaps',
-  'Les sliders réagissent en temps réel : la sélection change PENDANT que tu glisses, pas au relâchement',
-  'Glisser sur la barre d\'onglets change d\'onglet en direct sous ton doigt',
-  'Dégradés et lueurs unifiés sur ta couleur d\'accent'
+  'Accueil repensé : 4 tuiles d\'un coup d\'œil (Révisions, Focus du jour, Habitudes, Engagement) — chacune ouvre son écran',
+  'Carte « Maintenant » condensée : le pourquoi se déplie seulement si tu le demandes',
+  'Top 3 vide : une simple ligne « Choisir mes 3 priorités » au lieu d\'un gros bloc',
+  'Date mise en avant au-dessus du titre, raccourcis resserrés'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
