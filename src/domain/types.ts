@@ -18,6 +18,7 @@ export interface Settings {
   hintsDismissed: string[]
   lastSeenVersion: string // dernière version dont les nouveautés ont été vues
   appearance: 'sobre' | 'clair' | 'glass' | 'glass-clair' // sombre, clair iOS, verre sombre, verre clair
+  accent: string // id de couleur d'accent (voir ui/accents.ts)
 }
 
 export type CaptureKind = 'task' | 'note' | 'idea' | 'question' | 'error' | 'trigger' | 'event'
@@ -328,7 +329,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '2.6.0'
+export const APP_VERSION = '2.7.0'
 
 export function defaultState(): AppState {
   return {
@@ -347,7 +348,8 @@ export function defaultState(): AppState {
       lastBackupAt: null,
       hintsDismissed: [],
       lastSeenVersion: '',
-      appearance: 'sobre'
+      appearance: 'sobre',
+      accent: 'bleu'
     },
     captures: [],
     tasks: [],

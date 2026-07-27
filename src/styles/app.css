@@ -237,9 +237,9 @@ button.list-row:active { background: var(--tertiary-system-background); }
 }
 .btn:active { transform: scale(0.97); filter: brightness(0.92); }
 .btn-primary {
-  background: linear-gradient(180deg, #2b95ff, var(--tint));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 80%, #fff 20%), var(--tint));
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 6px rgba(10, 132, 255, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 6px color-mix(in srgb, var(--tint) 28%, transparent);
 }
 .btn-secondary { background: var(--tertiary-system-background); color: var(--label); }
 .btn-danger {
@@ -462,7 +462,8 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
 .action-bar-add {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: var(--tint);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 80%, #fff 20%), var(--tint));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
   color: #fff;
   display: flex;
   align-items: center;
@@ -873,9 +874,36 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
   margin: var(--sp-4) var(--sp-1) var(--sp-1);
 }
 mark {
-  background: rgba(10, 132, 255, 0.3);
+  background: color-mix(in srgb, var(--tint) 30%, transparent);
   color: inherit;
   border-radius: 2px;
+}
+
+/* ─── Pastilles de couleur d'accent ──────────────────────────────── */
+.accent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 10px;
+}
+.accent-dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 160ms var(--ease-spring), box-shadow 160ms;
+}
+.accent-dot:active { transform: scale(0.88); }
+.accent-dot[aria-pressed="true"] {
+  transform: scale(1.08);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    0 0 0 2.5px var(--secondary-system-grouped-background),
+    0 0 0 4.5px var(--ring, currentColor);
 }
 
 /* ─── Graphiques : dessin progressif ─────────────────────────────── */
@@ -1142,14 +1170,14 @@ input[type="range"] {
 }
 
 /* Lueurs d'accent minimales (spec OLED : glow discret, jamais criard) */
-.theme-glass .btn-primary { box-shadow: 0 4px 22px -4px rgba(10, 132, 255, 0.5); }
+.theme-glass .btn-primary { box-shadow: 0 4px 22px -4px color-mix(in srgb, var(--tint) 50%, transparent); }
 .theme-glass .btn-danger { box-shadow: 0 4px 22px -4px rgba(255, 69, 58, 0.45); }
 .theme-glass .now-card {
   box-shadow:
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.08),
     inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.3),
     0 10px 28px rgba(0, 0, 0, 0.45),
-    0 0 44px -20px rgba(10, 132, 255, 0.55);
+    0 0 44px -20px color-mix(in srgb, var(--tint) 55%, transparent);
 }
 
 /* Entrée en cascade des sections (transform/opacity uniquement) */

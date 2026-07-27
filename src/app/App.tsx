@@ -19,13 +19,14 @@ import { EveningSheet } from '../ui/Evening'
 import { Onboarding } from '../ui/Onboarding'
 import { Sheet } from '../ui/Sheet'
 import { APP_VERSION } from '../domain/types'
+import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'La recherche comprend les mots proches : tape « dormir » ou « dodo » → Sommeil, « nofap » → Contrôle, « pomodoro » → minuteur, « muscu » → Corps…',
-  'La barre d\'onglets en capsule flottante dans les 4 thèmes',
-  'Un en-tête compact apparaît en haut quand tu scrolles, comme dans les apps Apple',
-  'Nouvelles entrées de recherche : Mental, Corps, Social'
+  '8 couleurs d\'accent au choix (Réglages → Apparence) : la teinte s\'applique instantanément partout — boutons, bulle, graphiques, heatmaps',
+  'Les sliders réagissent en temps réel : la sélection change PENDANT que tu glisses, pas au relâchement',
+  'Glisser sur la barre d\'onglets change d\'onglet en direct sous ton doigt',
+  'Dégradés et lueurs unifiés sur ta couleur d\'accent'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -128,7 +129,11 @@ export default function App() {
   const onTabMove = (e: React.PointerEvent) => {
     if (tabDrag === null) return
     tabMoved.current = true
-    setTabDrag(tabFrac(e.clientX))
+    const f = tabFrac(e.clientX)
+    setTabDrag(f)
+    // changement d'onglet en temps réel pendant le glissement
+    const target = TABS[Math.round(f)]
+    if (target && target.id !== tab) setTab(target.id)
   }
   const onTabUp = () => {
     if (tabDrag === null) return
@@ -188,7 +193,7 @@ export default function App() {
 
   return (
     <UiContext.Provider value={ui}>
-      <div className={cls}>
+      <div className={cls} style={{ ['--tint' as any]: accentColor(state.settings.accent) }}>
         {updateAvailable && (
           <div className="update-banner" role="status">
             <span style={{ flex: 1, fontSize: 15 }}>Nouvelle version de Cap disponible.</span>

@@ -180,13 +180,17 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
   const onMove = (e: React.PointerEvent) => {
     if (drag === null) return
     moved.current = true
-    setDrag(fracFor(e.clientX))
+    const f = fracFor(e.clientX)
+    setDrag(f)
+    // application en temps réel : la valeur change pendant le glissement
+    const target = options[Math.round(f)]
+    if (target && target.value !== value) onChange(target.value)
   }
   const onUp = () => {
     if (drag === null) return
     const target = options[Math.round(drag)]
     setDrag(null)
-    if (target) onChange(target.value)
+    if (target && target.value !== value) onChange(target.value)
   }
 
   const shown = drag ?? (idx >= 0 ? idx : null)

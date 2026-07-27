@@ -10,6 +10,7 @@ import { BackHeader } from './Plan'
 import { DateField, TimeField } from '../ui/pickers'
 import { BarChart, HBarChart, Heatmap } from '../ui/charts'
 import { dailyCompletion } from '../domain/habits'
+import { ACCENTS } from '../ui/accents'
 import { computeInsights, notEnoughDataMessage } from '../domain/insights'
 import { exportBackup, validateImport, mergeStates, type ImportPreview } from '../domain/backup'
 import { defaultState, APP_VERSION } from '../domain/types'
@@ -868,6 +869,26 @@ function SettingsView() {
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
           Clair : palette officielle iOS. Verre : cartes profondes et capsule flottante
           façon Apple Music, en nuit ou en jour.
+        </p>
+
+        <span className="field-label">Couleur d'accent</span>
+        <div className="accent-row" role="group" aria-label="Couleur d'accent">
+          {ACCENTS.map(a => (
+            <button
+              key={a.id}
+              type="button"
+              className="accent-dot"
+              style={{ background: a.color, color: '#fff', ['--ring' as any]: a.color }}
+              aria-label={a.name}
+              aria-pressed={state.settings.accent === a.id}
+              onClick={() => update(s => ({ ...s, settings: { ...s.settings, accent: a.id } }))}
+            >
+              {state.settings.accent === a.id && <Icon name="check" size={16} />}
+            </button>
+          ))}
+        </div>
+        <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10 }}>
+          La teinte s'applique partout, immédiatement : boutons, bulle, graphiques, heatmaps.
         </p>
       </div>
 
