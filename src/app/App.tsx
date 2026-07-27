@@ -23,10 +23,9 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Raccourcis personnalisables sur l\'accueil : « Modifier » pour choisir tes actions (Tâche, Focus, Calendrier, Recherche…)',
-  'Bouton + Tâche directement sur l\'accueil et bien visible dans Plan',
-  'Calendrier repensé : jour sélectionné en cercle plein, bouton Aujourd\'hui, glisser à gauche/droite pour changer de mois, heures dans la liste du jour',
-  'Corrigé : taper Durée estimée ou Note dans une fiche ne renvoie plus le curseur au Titre'
+  'Corrigé : la fiche de tâche ne saute plus dans tous les sens quand tu choisis une date ou une heure',
+  'Design affiné : icônes en pastilles colorées façon Réglages iOS dans Plan et Moi, tuiles colorées sur l\'accueil',
+  'Raccourcis personnalisables sur l\'accueil (« Modifier ») et bouton + Tâche partout'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

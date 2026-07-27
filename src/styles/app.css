@@ -137,6 +137,18 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
 .theme-light .icon-btn { background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.04); }
 .theme-glass-light .icon-btn { background: rgba(255, 255, 255, 0.75); }
 
+/* Pastille d'icône colorée façon Réglages iOS */
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7.5px;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 2px rgba(0, 0, 0, 0.18);
+}
+.theme-light .icon-chip { box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.35), 0 0.5px 1.5px rgba(0, 0, 0, 0.12); }
+
 /* Capsule d'ajout bien visible (en-têtes d'écrans et de sections) */
 .btn-add-pill {
   display: inline-flex;

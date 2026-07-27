@@ -4,7 +4,7 @@
 import React, { useMemo, useState } from 'react'
 import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
-import { Icon } from '../ui/Icon'
+import { Icon, IconChip } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/Sheet'
 import { DateField, TimeField } from '../ui/pickers'
 import { HabitsView } from './Habits'
@@ -95,11 +95,9 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           <Icon name="plus" size={17} /> Tâche
         </button>
       </div>
-      <p className="subtitle-context">Ce qui existe, quand, et pourquoi.</p>
-
-      <div className="list-group">
+      <div className="list-group" style={{ marginTop: 8 }}>
         <button className="list-row" onClick={() => ui.setSub('plan', 'calendar')}>
-          <Icon name="plan" size={22} className="chevron" />
+          <IconChip name="plan" color="#ff453a" />
           <span className="row-main">
             <span className="row-title">Calendrier</span>
             <span className="row-sub">Le mois en un coup d'œil, couleurs par catégorie</span>
@@ -107,13 +105,13 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'inbox')}>
-          <Icon name="inbox" size={22} className="chevron" />
+          <IconChip name="inbox" color="#0a84ff" />
           <span className="row-main"><span className="row-title">Inbox</span></span>
           {inboxCount > 0 && <span className="badge-count">{inboxCount}</span>}
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'habits')}>
-          <Icon name="check" size={22} className="chevron" />
+          <IconChip name="check" color="#30d158" />
           <span className="row-main">
             <span className="row-title">Habitudes</span>
             <span className="row-sub">Suivi quotidien, séries et graphiques</span>
@@ -122,7 +120,7 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'notes')}>
-          <Icon name="book" size={22} className="chevron" />
+          <IconChip name="book" color="#ff9f0a" />
           <span className="row-main">
             <span className="row-title">Notes</span>
             <span className="row-sub">Fiches et idées durables</span>
@@ -131,28 +129,28 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'projects')}>
-          <Icon name="flag" size={22} className="chevron" />
+          <IconChip name="flag" color="#bf5af2" />
           <span className="row-main"><span className="row-title">Projets</span></span>
           <span className="row-detail">{state.projects.filter(p => p.status === 'actif').length}</span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'goals')}>
-          <Icon name="bolt" size={22} className="chevron" />
+          <IconChip name="bolt" color="#64d2ff" />
           <span className="row-main"><span className="row-title">Objectifs</span></span>
           <span className="row-detail">{state.goals.filter(g => !g.done).length}</span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.navigate('me', 'weekly')}>
-          <Icon name="plan" size={22} className="chevron" />
+          <IconChip name="today" color="#5e5ce6" />
           <span className="row-main"><span className="row-title">Revue hebdomadaire</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
       </div>
 
-      <SectionHeader action="Nouvelle tâche" onAction={() => setEditing('new')}>Tâches</SectionHeader>
+      <SectionHeader>Tâches</SectionHeader>
       <Segmented label="Filtre des tâches" value={section} onChange={setSection}
         options={[
-          { value: 'today', label: "Aujourd'hui" },
+          { value: 'today', label: 'Auj.' },
           { value: 'upcoming', label: 'À venir' },
           { value: 'someday', label: 'Un jour' },
           { value: 'done', label: 'Faites' }

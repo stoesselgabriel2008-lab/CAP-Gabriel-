@@ -60,37 +60,49 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
   }, [])
 
   // Remontée au-dessus du clavier, mesurée sur la sheet elle-même
-  // (getBoundingClientRect vs visualViewport). Sur iOS plein écran,
-  // window.innerHeight surestime le clavier et collait la sheet tout en
-  // haut de l'écran : ici elle ne monte que du strict nécessaire.
+  // (getBoundingClientRect vs visualViewport). Deux garde-fous contre les
+  // sauts : on ne remonte que si un champ de CETTE sheet est focalisé
+  // (une sheet empilée sans champ ne bouge jamais), et on ne mesure
+  // jamais pendant une animation (ouverture, transition) — la position
+  // serait fausse et la sheet partait « dans tous les sens ».
   const [lift, setLift] = React.useState(0)
   const liftRef = useRef(0)
   useEffect(() => {
     const vv = window.visualViewport
     if (!vv) return
-    let timer: number | undefined
+    let timers: number[] = []
+    const clear = () => { timers.forEach(t => window.clearTimeout(t)); timers = [] }
+    const later = (ms: number) => { timers.push(window.setTimeout(measure, ms)) }
     const measure = () => {
       const el = ref.current
       if (!el) return
-      const kbTop = vv.offsetTop + vv.height // haut du clavier, coordonnées layout
-      const naturalBottom = el.getBoundingClientRect().bottom + liftRef.current
-      const needed = Math.max(0, naturalBottom - kbTop + 10)
-      const next = needed > 24 ? Math.round(needed) : 0
-      if (Math.abs(next - liftRef.current) > 2) { liftRef.current = next; setLift(next) }
+      if (el.getAnimations?.().some(a => a.playState === 'running')) { later(140); return }
+      const ae = document.activeElement
+      const editing = ae instanceof HTMLElement && el.contains(ae) && ae.matches('input, textarea, select')
+      let next = 0
+      if (editing) {
+        const kbTop = vv.offsetTop + vv.height // haut du clavier, coordonnées layout
+        const naturalBottom = el.getBoundingClientRect().bottom + liftRef.current
+        const needed = Math.max(0, naturalBottom - kbTop + 10)
+        next = needed > 24 ? Math.round(needed) : 0
+      }
+      if (Math.abs(next - liftRef.current) > 8) { liftRef.current = next; setLift(next) }
     }
-    const onChange = () => {
-      measure()
-      // re-mesure après l'animation d'ouverture / le défilement du clavier
-      window.clearTimeout(timer)
-      timer = window.setTimeout(measure, 450)
-    }
+    const onChange = () => { clear(); measure(); later(450) }
+    // au blur, attendre : le focus peut passer à un autre champ juste après
+    const onFocusOut = () => { clear(); later(120); later(500) }
+    const el = ref.current
     onChange()
     vv.addEventListener('resize', onChange)
     vv.addEventListener('scroll', onChange)
+    el?.addEventListener('focusin', onChange)
+    el?.addEventListener('focusout', onFocusOut)
     return () => {
-      window.clearTimeout(timer)
+      clear()
       vv.removeEventListener('resize', onChange)
       vv.removeEventListener('scroll', onChange)
+      el?.removeEventListener('focusin', onChange)
+      el?.removeEventListener('focusout', onFocusOut)
     }
   }, [])
 

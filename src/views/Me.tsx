@@ -4,7 +4,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { useApp } from '../state/store'
 import { useUi } from '../app/ui-context'
-import { Icon } from '../ui/Icon'
+import { Icon, IconChip } from '../ui/Icon'
 import { Sheet, Segmented, SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader } from './Plan'
 import { DateField, TimeField } from '../ui/pickers'
@@ -44,40 +44,40 @@ function MeHome() {
       </p>
 
       <div className="list-group">
-        <button className="list-row" onClick={() => ui.setSub('me', 'guide')}>
-          <Icon name="book" size={22} className="chevron" />
-          <span className="row-main"><span className="row-title">Guide d'utilisation</span>
-            <span className="row-sub">Tout ce que Cap sait faire, expliqué pas à pas</span></span>
+        <button className="list-row" onClick={() => ui.setSub('me', 'settings')}>
+          <IconChip name="settings" color="#8e8e93" />
+          <span className="row-main"><span className="row-title">Réglages</span>
+            <span className="row-sub">Apparence, profil, engagement, confidentialité</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'stats')}>
-          <Icon name="body" size={22} className="chevron" />
+          <IconChip name="body" color="#bf5af2" />
           <span className="row-main"><span className="row-title">Statistiques</span>
             <span className="row-sub">Heatmaps de focus et d'habitudes, énergie, matières</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'weekly')}>
-          <Icon name="plan" size={22} className="chevron" />
+          <IconChip name="today" color="#5e5ce6" />
           <span className="row-main"><span className="row-title">Revue de la semaine</span>
             <span className="row-sub">5 étapes, moins de 10 minutes</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
+        <button className="list-row" onClick={() => ui.setSub('me', 'guide')}>
+          <IconChip name="book" color="#0a84ff" />
+          <span className="row-main"><span className="row-title">Guide d'utilisation</span>
+            <span className="row-sub">Tout ce que Cap sait faire, expliqué pas à pas</span></span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'science')}>
-          <Icon name="info" size={22} className="chevron" />
+          <IconChip name="info" color="#64d2ff" />
           <span className="row-main"><span className="row-title">Science et mythes</span>
             <span className="row-sub">Ce qui est solide, probable, limité ou non démontré</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'data')}>
-          <Icon name="export" size={22} className="chevron" />
+          <IconChip name="export" color="#30d158" />
           <span className="row-main"><span className="row-title">Données</span>
             <span className="row-sub">Export, import, confidentialité, suppression</span></span>
-          <Icon name="chevronRight" size={16} className="chevron" />
-        </button>
-        <button className="list-row" onClick={() => ui.setSub('me', 'settings')}>
-          <Icon name="settings" size={22} className="chevron" />
-          <span className="row-main"><span className="row-title">Réglages</span>
-            <span className="row-sub">Apparence, profil, engagement, confidentialité</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
       </div>

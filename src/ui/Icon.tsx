@@ -56,3 +56,16 @@ export function Icon({ name, size = 22, className, filled }: {
     </svg>
   )
 }
+
+/** Pastille d'icône colorée façon Réglages iOS (fond plein, icône blanche). */
+export function IconChip({ name, color, size = 29 }: {
+  name: keyof typeof PATHS | string
+  color: string
+  size?: number
+}) {
+  return (
+    <span className="icon-chip" style={{ background: color, width: size, height: size }} aria-hidden="true">
+      <Icon name={name} size={Math.round(size * 0.6)} />
+    </span>
+  )
+}

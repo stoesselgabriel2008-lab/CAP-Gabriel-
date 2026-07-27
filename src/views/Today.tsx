@@ -129,12 +129,12 @@ export function Today() {
       {/* Tuiles d'un coup d'œil (façon Apple Fitness) */}
       <div className="tile-grid">
         <button className="card tile" onClick={() => ui.navigate('review', null)}>
-          <span className="tile-label"><Icon name="review" size={16} /> Révisions</span>
+          <span className="tile-label"><span style={{ color: '#0a84ff', display: 'flex' }}><Icon name="review" size={16} /></span> Révisions</span>
           <span className="tile-value">{due.length}</span>
           <span className="tile-sub">{due.length > 0 ? `due${due.length > 1 ? 's' : ''} aujourd'hui` : 'rien de dû'}</span>
         </button>
         <button className="card tile" onClick={() => ui.openTimerStart()}>
-          <span className="tile-label"><Icon name="timer" size={16} /> Focus</span>
+          <span className="tile-label"><span style={{ color: '#ff9f0a', display: 'flex' }}><Icon name="timer" size={16} /></span> Focus</span>
           <span className="tile-value">
             {focusGoal > 0 ? `${focusMinToday}/${focusGoal}` : focusMinToday > 0 ? `${focusMinToday} min` : '—'}
           </span>
@@ -147,12 +147,12 @@ export function Today() {
           )}
         </button>
         <button className="card tile" onClick={() => ui.navigate('plan', 'habits')}>
-          <span className="tile-label"><Icon name="check" size={16} /> Habitudes</span>
+          <span className="tile-label"><span style={{ color: '#30d158', display: 'flex' }}><Icon name="check" size={16} /></span> Habitudes</span>
           <span className="tile-value">{habitsDue.length > 0 ? `${habitsDone}/${habitsDue.length}` : '—'}</span>
           <span className="tile-sub">{habitsDue.length > 0 ? 'faites ce jour' : 'en créer une'}</span>
         </button>
         <button className="card tile" onClick={() => ui.navigate('coach', 'control')}>
-          <span className="tile-label"><Icon name="sos" size={16} /> Engagement</span>
+          <span className="tile-label"><span style={{ color: '#ff453a', display: 'flex' }}><Icon name="sos" size={16} /></span> Engagement</span>
           <span className="tile-value">{streak} j</span>
           <span className="tile-sub">série en cours</span>
         </button>
