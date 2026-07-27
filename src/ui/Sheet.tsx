@@ -126,6 +126,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
   // Fermeture en tirant la sheet vers le bas (depuis la poignée / l'en-tête)
   const [dy, setDy] = React.useState(0)
   const dragging = useRef<{ startY: number } | null>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
   const onHeadDown = (e: React.PointerEvent) => {
     // ne pas voler le clic des boutons du header (Fermer, OK…)
     if ((e.target as Element).closest('button')) return
@@ -140,9 +141,52 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
     if (!dragging.current) return
     const closing = dy > 110
     dragging.current = null
-    if (closing) onClose()
+    if (closing) onCloseRef.current()
     else setDy(0)
   }
+  const headUpRef = useRef(onHeadUp)
+  headUpRef.current = onHeadUp
+
+  // Tirer le CONTENU vers le bas ferme aussi la sheet — uniquement quand le
+  // défilement est déjà tout en haut (sinon, défilement normal). Touch events
+  // non passifs : c'est le seul moyen de reprendre le geste au rubber-band iOS.
+  useEffect(() => {
+    const body = bodyRef.current
+    if (!body) return
+    let startY = 0, tracking = false, active = false
+    const onStart = (e: TouchEvent) => {
+      tracking = body.scrollTop <= 0
+      active = false
+      startY = e.touches[0].clientY
+    }
+    const onMove = (e: TouchEvent) => {
+      if (!tracking) return
+      const d = e.touches[0].clientY - startY
+      if (!active) {
+        if (d < 0) { tracking = false; return } // vers le haut : défilement
+        if (d <= 10) return
+        if (body.scrollTop > 0) { tracking = false; return }
+        active = true
+        dragging.current = { startY }
+      }
+      e.preventDefault()
+      setDy(Math.max(0, d))
+    }
+    const onEnd = () => {
+      if (active) headUpRef.current()
+      tracking = false; active = false
+    }
+    body.addEventListener('touchstart', onStart, { passive: true })
+    body.addEventListener('touchmove', onMove, { passive: false })
+    body.addEventListener('touchend', onEnd)
+    body.addEventListener('touchcancel', onEnd)
+    return () => {
+      body.removeEventListener('touchstart', onStart)
+      body.removeEventListener('touchmove', onMove)
+      body.removeEventListener('touchend', onEnd)
+      body.removeEventListener('touchcancel', onEnd)
+    }
+  }, [])
 
   return (
     <>
@@ -178,7 +222,7 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
             </button>
           </div>
         </div>
-        <div className="sheet-body">{children}</div>
+        <div className="sheet-body" ref={bodyRef}>{children}</div>
       </div>
     </>
   )

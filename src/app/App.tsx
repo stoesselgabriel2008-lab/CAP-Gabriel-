@@ -23,9 +23,9 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Tout est plus fluide : les onglets glissent en place, chaque ligne répond au doigt, les coches font un petit rebond',
-  'La bascule Sombre / Clair se fait en fondu, l\'anneau du jour a une lueur douce',
-  'Carte Maintenant compacte : l\'essentiel de l\'accueil tient à l\'écran sans défiler'
+  'Glisse depuis le bord gauche pour revenir en arrière — l\'écran suit ton doigt, comme partout sur iOS',
+  'Tire une fenêtre vers le bas pour la fermer, depuis son contenu aussi (plus besoin de viser la poignée)',
+  'Le bouton Retour et le bouton Fermer restent là — les gestes s\'ajoutent, rien ne se perd'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

@@ -100,6 +100,8 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
 .screen {
   flex: 1;
   width: 100%;
+  /* le vertical reste natif, l'horizontal va au geste retour */
+  touch-action: pan-y;
   max-width: 680px;
   margin: 0 auto;
   padding: calc(var(--sat) + 8px) calc(16px + var(--sar))

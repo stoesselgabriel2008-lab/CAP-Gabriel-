@@ -567,8 +567,65 @@ export function BackHeader({ title, onBack, action, onAction }: {
   action?: string
   onAction?: () => void
 }) {
+  const headRef = React.useRef<HTMLDivElement>(null)
+  const onBackRef = React.useRef(onBack)
+  onBackRef.current = onBack
+
+  // Glisser depuis le bord gauche pour revenir (geste iOS natif).
+  // L'écran suit le doigt ; relâcher au-delà de 90 px déclenche le retour.
+  React.useEffect(() => {
+    const screen = headRef.current?.closest('.screen') as HTMLElement | null
+    if (!screen) return
+    let startX = 0, startY = 0, armed = false, moved = false
+    const reset = (animate: boolean) => {
+      screen.style.transition = animate ? 'transform 240ms var(--ease-spring)' : ''
+      screen.style.transform = ''
+      if (animate) window.setTimeout(() => { screen.style.transition = '' }, 260)
+    }
+    const onDown = (e: PointerEvent) => {
+      if (e.clientX > 28 || screen.offsetParent === null) return
+      // sheet ou recherche ouverte (elles verrouillent le défilement) : pas de geste retour
+      if (document.body.style.overflow === 'hidden') return
+      armed = true; moved = false; startX = e.clientX; startY = e.clientY
+    }
+    const onMove = (e: PointerEvent) => {
+      if (!armed) return
+      const dx = e.clientX - startX, dy = e.clientY - startY
+      if (!moved) {
+        if (Math.abs(dx) < 12) return
+        if (Math.abs(dy) > Math.abs(dx)) { armed = false; return } // défilement vertical
+        moved = true
+        screen.style.transition = 'none'
+      }
+      screen.style.transform = `translateX(${Math.max(0, dx)}px)`
+    }
+    const onUp = (e: PointerEvent) => {
+      if (!armed) return
+      const dx = e.clientX - startX
+      armed = false
+      if (moved && dx > 90) {
+        reset(false)
+        onBackRef.current()
+      } else if (moved) {
+        reset(true)
+      }
+      moved = false
+    }
+    const onCancel = () => { if (moved) reset(true); armed = false; moved = false }
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('pointermove', onMove)
+    document.addEventListener('pointerup', onUp)
+    document.addEventListener('pointercancel', onCancel)
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('pointermove', onMove)
+      document.removeEventListener('pointerup', onUp)
+      document.removeEventListener('pointercancel', onCancel)
+    }
+  }, [])
+
   return (
-    <div className="back-header">
+    <div className="back-header" ref={headRef}>
       <button className="btn-plain" onClick={onBack} style={{ display: 'flex', alignItems: 'center', minHeight: 44, marginLeft: -8, justifySelf: 'start' }}>
         <Icon name="chevronLeft" size={22} /> Retour
       </button>
