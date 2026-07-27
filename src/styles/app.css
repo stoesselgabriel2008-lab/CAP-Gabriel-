@@ -786,6 +786,36 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
 }
 .timer-goal { color: var(--secondary-label); font-size: 16px; }
 
+/* ─── En-tête compact au scroll (comme les grands titres iOS) ────── */
+.compact-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 38;
+  height: calc(var(--sat) + 46px);
+  padding-top: var(--sat);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 600;
+  background: var(--glass-fill);
+  border-bottom: 0.5px solid var(--glass-stroke);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 220ms ease, transform 220ms var(--ease-spring);
+  pointer-events: none;
+}
+.compact-header.visible { opacity: 1; transform: none; }
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .compact-header {
+    -webkit-backdrop-filter: blur(24px) saturate(1.7);
+    backdrop-filter: blur(24px) saturate(1.7);
+  }
+}
+.reduced-transparency .compact-header { background: var(--secondary-system-background); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
 /* ─── Recherche plein écran (ancrée en haut, façon Spotlight) ────── */
 .search-overlay {
   position: fixed;
@@ -1194,6 +1224,7 @@ input[type="range"] {
   /* Tab bar et barre d'action : verre sombre (le layout capsule vient
      de .theme-capsule, partagé avec le verre clair) */
   .theme-glass .tab-bar {
+    border: none;
     background:
       linear-gradient(118deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03) 45%),
       rgba(255, 255, 255, 0.05);
@@ -1206,6 +1237,7 @@ input[type="range"] {
     backdrop-filter: blur(30px) saturate(2) brightness(1.12);
   }
   .theme-glass .action-bar {
+    border: none;
     background:
       linear-gradient(118deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03) 45%),
       rgba(255, 255, 255, 0.05);
@@ -1219,7 +1251,16 @@ input[type="range"] {
   }
 }
 
-/* ─── Capsule flottante (layout partagé verre sombre / verre clair) ─ */
+/* ─── Capsule flottante (layout commun à tous les thèmes) ──────────── */
+/* Matériau par défaut (thèmes Sombre / Clair) — les thèmes verre surchargent */
+.theme-capsule .tab-bar {
+  border: 0.5px solid var(--glass-stroke);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+.theme-light.theme-capsule .tab-bar {
+  box-shadow: 0 8px 28px rgba(30, 40, 70, 0.14);
+}
+.theme-capsule .action-bar { border: 0.5px solid var(--glass-stroke); }
 .theme-capsule .tab-bar {
   left: 50%;
   right: auto;
@@ -1227,14 +1268,13 @@ input[type="range"] {
   bottom: calc(var(--sab) + 10px);
   width: min(calc(100% - 24px), 480px);
   padding-bottom: 0;
-  border: none;
+  border-top: none;
   border-radius: var(--radius-pill);
 }
 .theme-capsule .tab-bar::before { display: none; }
 .theme-capsule .tab-bar-inner { height: 56px; }
 .theme-capsule .action-bar {
   bottom: calc(var(--tab-bar-height) + var(--sab) + 30px);
-  border: none;
 }
 .theme-capsule .action-bar::after { display: none; }
 .theme-capsule .screen {
@@ -1406,6 +1446,7 @@ input[type="range"] {
   }
   .theme-glass-light .tab-bar,
   .theme-glass-light .action-bar {
+    border: none;
     background: rgba(255, 255, 255, 0.55);
     box-shadow:
       inset 0 0 0 0.5px rgba(255, 255, 255, 0.9),

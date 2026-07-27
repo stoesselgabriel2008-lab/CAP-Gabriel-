@@ -12,7 +12,19 @@ interface Cmd {
   title: string
   sub?: string
   icon: string
+  keywords?: string // synonymes et mots proches, séparés par des espaces
   run: () => void
+}
+
+/** Correspondance sur les synonymes : mots entiers, préfixes, inclusion (≥3 lettres). */
+function keywordHit(query: string, keywords?: string): boolean {
+  if (!keywords) return false
+  const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  const q = norm(query).trim()
+  if (q.length < 2) return false
+  return norm(keywords).split(/\s+/).some(w =>
+    w.startsWith(q) || (q.length >= 3 && w.includes(q)) || (w.length >= 4 && q.includes(w))
+  )
 }
 
 /** Correspondance floue simple : sous-séquence insensible aux accents/casse. */
@@ -55,29 +67,31 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
   const commands = useMemo<Cmd[]>(() => {
     const go = (fn: () => void) => () => { onClose(); fn() }
     const list: Cmd[] = [
-      { id: 'a-timer', group: 'Actions', title: 'Lancer un minuteur', icon: 'timer', run: go(() => ui.openTimerStart()) },
-      { id: 'a-capture', group: 'Actions', title: 'Capturer une idée ou une tâche', icon: 'capture', run: go(() => ui.openCapture()) },
-      { id: 'a-checkin', group: 'Actions', title: 'Faire un check-in', icon: 'bolt', run: go(() => ui.openCheckIn()) },
-      { id: 'a-sos', group: 'Actions', title: 'Lancer le SOS', icon: 'sos', run: go(() => ui.openSOS()) },
-      { id: 'a-evening', group: 'Actions', title: 'Fermeture du soir', icon: 'moon', run: go(() => ui.openEvening()) },
-      { id: 'p-today', group: 'Pages', title: "Aujourd'hui", icon: 'today', run: go(() => ui.navigate('today', null)) },
-      { id: 'p-plan', group: 'Pages', title: 'Plan', icon: 'plan', run: go(() => ui.navigate('plan', null)) },
-      { id: 'p-inbox', group: 'Pages', title: 'Inbox', icon: 'inbox', run: go(() => ui.navigate('plan', 'inbox')) },
-      { id: 'p-habits', group: 'Pages', title: 'Habitudes', icon: 'check', run: go(() => ui.navigate('plan', 'habits')) },
-      { id: 'p-notes', group: 'Pages', title: 'Notes', icon: 'book', run: go(() => ui.navigate('plan', 'notes')) },
-      { id: 'p-review', group: 'Pages', title: 'Révisions dues', icon: 'review', run: go(() => ui.navigate('review', null)) },
-      { id: 'p-errors', group: 'Pages', title: "Journal d'erreurs", icon: 'flag', run: go(() => ui.navigate('review', 'errors')) },
-      { id: 'p-coach', group: 'Pages', title: 'Coach', icon: 'coach', run: go(() => ui.navigate('coach', null)) },
-      { id: 'p-sleep', group: 'Pages', title: 'Sommeil', icon: 'moon', run: go(() => ui.navigate('coach', 'sleep')) },
-      { id: 'p-control', group: 'Pages', title: 'Contrôle et engagement', icon: 'sos', run: go(() => ui.navigate('coach', 'control')) },
-      { id: 'p-weekly', group: 'Pages', title: 'Revue hebdomadaire', icon: 'plan', run: go(() => ui.navigate('me', 'weekly')) },
-      { id: 'p-science', group: 'Pages', title: 'Science et mythes', icon: 'info', run: go(() => ui.navigate('me', 'science')) },
-      { id: 'p-guide', group: 'Pages', title: 'Guide d\'utilisation', icon: 'book', run: go(() => ui.navigate('me', 'guide')) },
-      { id: 'p-stats', group: 'Pages', title: 'Statistiques', icon: 'body', run: go(() => ui.navigate('me', 'stats')) },
-      { id: 'p-data', group: 'Pages', title: 'Export / import des données', icon: 'export', run: go(() => ui.navigate('me', 'data')) },
-      { id: 'p-settings', group: 'Pages', title: 'Réglages', icon: 'settings', run: go(() => ui.navigate('me', 'settings')) },
-      { id: 'p-theme', group: 'Pages', title: 'Apparence · thème (sombre, clair, verre)', icon: 'settings', run: go(() => ui.navigate('me', 'settings')) },
-      { id: 'p-profile', group: 'Pages', title: 'Modifier mon profil (prénom, dates)', icon: 'me', run: go(() => ui.navigate('me', 'settings')) }
+      { id: 'a-timer', group: 'Actions', title: 'Lancer un minuteur', icon: 'timer', keywords: 'timer chrono chronometre pomodoro session concentration travailler bosser etudier demarrer commencer 25 50 90', run: go(() => ui.openTimerStart()) },
+      { id: 'a-capture', group: 'Actions', title: 'Capturer une idée ou une tâche', icon: 'capture', keywords: 'ajouter noter ecrire idee pense-bete memo rapide vite creer nouvelle', run: go(() => ui.openCapture()) },
+      { id: 'a-checkin', group: 'Actions', title: 'Faire un check-in', icon: 'bolt', keywords: 'humeur energie forme etat moral fatigue stress bilan matin comment ca va', run: go(() => ui.openCheckIn()) },
+      { id: 'a-sos', group: 'Actions', title: 'Lancer le SOS', icon: 'sos', keywords: 'envie craquer urgence crise aide pulsion tentation resister vague secours', run: go(() => ui.openSOS()) },
+      { id: 'a-evening', group: 'Actions', title: 'Fermeture du soir', icon: 'moon', keywords: 'soir soiree coucher preparer demain routine nuit ranger fermer journee', run: go(() => ui.openEvening()) },
+      { id: 'p-today', group: 'Pages', title: "Aujourd'hui", icon: 'today', keywords: 'accueil maintenant jour home top3 priorites', run: go(() => ui.navigate('today', null)) },
+      { id: 'p-plan', group: 'Pages', title: 'Plan', icon: 'plan', keywords: 'taches tache todo a faire liste agenda organiser planifier calendrier', run: go(() => ui.navigate('plan', null)) },
+      { id: 'p-inbox', group: 'Pages', title: 'Inbox', icon: 'inbox', keywords: 'trier boite vrac entrees clarifier ranger', run: go(() => ui.navigate('plan', 'inbox')) },
+      { id: 'p-habits', group: 'Pages', title: 'Habitudes', icon: 'check', keywords: 'habitude routine streak serie regularite quotidien cocher suivre suivi', run: go(() => ui.navigate('plan', 'habits')) },
+      { id: 'p-notes', group: 'Pages', title: 'Notes', icon: 'book', keywords: 'fiche memo note ecrit texte document idees', run: go(() => ui.navigate('plan', 'notes')) },
+      { id: 'p-review', group: 'Pages', title: 'Révisions dues', icon: 'review', keywords: 'reviser revision apprendre etudier cours chapitre matiere memoriser par coeur qcm anki lecon examen', run: go(() => ui.navigate('review', null)) },
+      { id: 'p-errors', group: 'Pages', title: "Journal d'erreurs", icon: 'flag', keywords: 'erreur faute correction rater trompe retest', run: go(() => ui.navigate('review', 'errors')) },
+      { id: 'p-coach', group: 'Pages', title: 'Coach', icon: 'coach', keywords: 'soutien aide accompagnement conseils', run: go(() => ui.navigate('coach', null)) },
+      { id: 'p-sleep', group: 'Pages', title: 'Sommeil', icon: 'moon', keywords: 'dormir dodo nuit coucher lit insomnie reveil fatigue sieste repos endormir', run: go(() => ui.navigate('coach', 'sleep')) },
+      { id: 'p-control', group: 'Pages', title: 'Contrôle et engagement', icon: 'sos', keywords: 'compteur jours abstinence nofap rechute ecart declencheur serie si alors masturbation porno', run: go(() => ui.navigate('coach', 'control')) },
+      { id: 'p-mental', group: 'Pages', title: 'Mental', icon: 'mind', keywords: 'stress anxiete angoisse respirer respiration calme meditation pensees journal emotions decision', run: go(() => ui.navigate('coach', 'mental')) },
+      { id: 'p-body', group: 'Pages', title: 'Corps', icon: 'body', keywords: 'sport muscu musculation seance entrainement exercice courir marche physique', run: go(() => ui.navigate('coach', 'body')) },
+      { id: 'p-social', group: 'Pages', title: 'Social', icon: 'social', keywords: 'parler filles amis timide timidite confiance aisance conversation rencontrer', run: go(() => ui.navigate('coach', 'social')) },
+      { id: 'p-weekly', group: 'Pages', title: 'Revue hebdomadaire', icon: 'plan', keywords: 'bilan semaine dimanche hebdo recap retrospective', run: go(() => ui.navigate('me', 'weekly')) },
+      { id: 'p-science', group: 'Pages', title: 'Science et mythes', icon: 'info', keywords: 'mythe dopamine preuve verite testosterone hormones vrai faux etudes', run: go(() => ui.navigate('me', 'science')) },
+      { id: 'p-guide', group: 'Pages', title: 'Guide d\'utilisation', icon: 'book', keywords: 'aide tuto tutoriel comment mode emploi explication apprendre utiliser', run: go(() => ui.navigate('me', 'guide')) },
+      { id: 'p-stats', group: 'Pages', title: 'Statistiques', icon: 'body', keywords: 'stats graphiques chiffres progression heatmap courbes donnees resultats', run: go(() => ui.navigate('me', 'stats')) },
+      { id: 'p-data', group: 'Pages', title: 'Export / import des données', icon: 'export', keywords: 'sauvegarde backup export import transfert telecharger restaurer supprimer donnees', run: go(() => ui.navigate('me', 'data')) },
+      { id: 'p-settings', group: 'Pages', title: 'Réglages', icon: 'settings', keywords: 'parametres settings options configuration preferences profil prenom date', run: go(() => ui.navigate('me', 'settings')) },
+      { id: 'p-theme', group: 'Pages', title: 'Apparence · thème', icon: 'settings', keywords: 'theme couleur mode sombre clair verre glass style design nuit jour', run: go(() => ui.navigate('me', 'settings')) }
     ]
     for (const t of state.tasks.filter(t => !t.done && !t.deletedAt).slice(-60)) {
       list.push({ id: `t-${t.id}`, group: 'Tâches', title: t.title, sub: t.plannedDate ?? undefined, icon: 'check', run: go(() => ui.navigate('plan', null)) })
@@ -106,7 +120,7 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
 
   const results = useMemo(() => {
     const filtered = query
-      ? commands.filter(c => fuzzyMatch(query, c.title + ' ' + (c.sub ?? '') + ' ' + c.group))
+      ? commands.filter(c => fuzzyMatch(query, c.title + ' ' + (c.sub ?? '') + ' ' + c.group) || keywordHit(query, c.keywords))
       : commands.filter(c => c.group === 'Actions' || c.group === 'Pages')
     const groups = new Map<string, Cmd[]>()
     for (const c of filtered) {

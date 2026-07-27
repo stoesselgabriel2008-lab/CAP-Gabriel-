@@ -22,10 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Engrenage Réglages en haut à droite de l\'accueil — là où tu le cherches',
-  'Bouton + en haut de Plan (nouvelle tâche) et de Réviser (nouvelle matière)',
-  'Réglages réorganisés : l\'Apparence en premier, et Données/Guide accessibles depuis les réglages',
-  'La recherche trouve maintenant « Réglages », « Apparence », « Profil »…'
+  'La recherche comprend les mots proches : tape « dormir » ou « dodo » → Sommeil, « nofap » → Contrôle, « pomodoro » → minuteur, « muscu » → Corps…',
+  'La barre d\'onglets en capsule flottante dans les 4 thèmes',
+  'Un en-tête compact apparaît en haut quand tu scrolles, comme dans les apps Apple',
+  'Nouvelles entrées de recherche : Mental, Corps, Social'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -71,6 +71,19 @@ export default function App() {
     const onUpdate = () => setUpdateAvailable(true)
     window.addEventListener('cap-update-available', onUpdate)
     return () => window.removeEventListener('cap-update-available', onUpdate)
+  }, [])
+
+  // En-tête compact quand on a scrollé au-delà du grand titre
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    let raf = 0
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setScrolled(window.scrollY > 52))
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf) }
   }, [])
 
   // Popup « Quoi de neuf » après une mise à jour
@@ -163,11 +176,12 @@ export default function App() {
   const timer = state.activeTimer
   const reduced = state.settings.reducedTransparency
   const appearance = state.settings.appearance
-  const cls = 'app-shell'
+  // La capsule flottante est le layout de tous les thèmes ; seuls les matériaux changent.
+  const cls = 'app-shell theme-capsule'
     + (reduced ? ' reduced-transparency' : '')
-    + (appearance === 'glass' && !reduced ? ' theme-glass theme-capsule' : '')
+    + (appearance === 'glass' && !reduced ? ' theme-glass' : '')
     + (appearance === 'clair' ? ' theme-light' : '')
-    + (appearance === 'glass-clair' ? (reduced ? ' theme-light' : ' theme-light theme-glass-light theme-capsule') : '')
+    + (appearance === 'glass-clair' ? (reduced ? ' theme-light' : ' theme-light theme-glass-light') : '')
   const dueCount = computeDueQueue(state, today).length
   const inboxCount = state.captures.filter(c => !c.processedAt).length
   const tabBadges: Partial<Record<TabId, number>> = { review: dueCount, plan: inboxCount }
@@ -198,6 +212,13 @@ export default function App() {
           <div role="alert" className="card" style={{ margin: 16, borderLeft: '3px solid var(--danger)', display: 'flex', gap: 12, alignItems: 'center' }}>
             <span style={{ flex: 1 }}>Cap n'a pas pu enregistrer cette modification.</span>
             <button className="btn btn-secondary" onClick={retrySave}>Réessayer</button>
+          </div>
+        )}
+
+        {/* En-tête compact (racines d'onglets uniquement) */}
+        {!sub[tab] && (
+          <div className={`compact-header${scrolled ? ' visible' : ''}`} aria-hidden="true">
+            {TABS.find(t => t.id === tab)?.label}
           </div>
         )}
 

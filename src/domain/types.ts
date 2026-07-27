@@ -328,7 +328,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '2.5.0'
+export const APP_VERSION = '2.6.0'
 
 export function defaultState(): AppState {
   return {
