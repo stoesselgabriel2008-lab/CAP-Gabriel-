@@ -48,7 +48,12 @@ function ReviewHome() {
 
   return (
     <div className="screen">
-      <h1 className="large-title">Réviser</h1>
+      <div className="root-header">
+        <h1 className="large-title">Réviser</h1>
+        <button className="icon-btn" aria-label="Nouvelle matière" onClick={() => setNewSubject(true)}>
+          <Icon name="plus" size={21} />
+        </button>
+      </div>
       <p className="subtitle-context">
         {due.length > 0
           ? `${due.length} révision${due.length > 1 ? 's' : ''} due${due.length > 1 ? 's' : ''}${lowEnergy ? ' · énergie basse : sessions courtes conseillées' : ''}`

@@ -77,7 +77,12 @@ export function Today() {
 
   return (
     <div className="screen">
-      <h1 className="large-title">Aujourd'hui</h1>
+      <div className="root-header">
+        <h1 className="large-title">Aujourd'hui</h1>
+        <button className="icon-btn" aria-label="Réglages" onClick={() => ui.navigate('me', 'settings')}>
+          <Icon name="settings" size={21} />
+        </button>
+      </div>
       <p className="subtitle-context">
         {greeting} {state.profile.firstName} · {formatCivilLong(today)}
       </p>

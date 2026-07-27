@@ -22,10 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'La recherche est maintenant plein écran, ancrée en haut comme Spotlight — le clavier ne la fait plus sauter',
-  'Toutes les fenêtres de saisie remontent proprement au-dessus du clavier (fini les boutons cachés)',
-  'Le champ en cours d\'écriture se recentre automatiquement à l\'écran',
-  'Fermer la recherche : bouton Annuler à côté du champ, comme dans les apps Apple'
+  'Engrenage Réglages en haut à droite de l\'accueil — là où tu le cherches',
+  'Bouton + en haut de Plan (nouvelle tâche) et de Réviser (nouvelle matière)',
+  'Réglages réorganisés : l\'Apparence en premier, et Données/Guide accessibles depuis les réglages',
+  'La recherche trouve maintenant « Réglages », « Apparence », « Profil »…'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

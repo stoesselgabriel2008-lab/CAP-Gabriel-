@@ -57,7 +57,12 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
 
   return (
     <div className="screen">
-      <h1 className="large-title">Plan</h1>
+      <div className="root-header">
+        <h1 className="large-title">Plan</h1>
+        <button className="icon-btn" aria-label="Nouvelle tâche" onClick={() => setEditing('new')}>
+          <Icon name="plus" size={21} />
+        </button>
+      </div>
       <p className="subtitle-context">Ce qui existe, quand, et pourquoi.</p>
 
       <div className="list-group">

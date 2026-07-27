@@ -74,7 +74,10 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
       { id: 'p-science', group: 'Pages', title: 'Science et mythes', icon: 'info', run: go(() => ui.navigate('me', 'science')) },
       { id: 'p-guide', group: 'Pages', title: 'Guide d\'utilisation', icon: 'book', run: go(() => ui.navigate('me', 'guide')) },
       { id: 'p-stats', group: 'Pages', title: 'Statistiques', icon: 'body', run: go(() => ui.navigate('me', 'stats')) },
-      { id: 'p-data', group: 'Pages', title: 'Export / import des données', icon: 'export', run: go(() => ui.navigate('me', 'data')) }
+      { id: 'p-data', group: 'Pages', title: 'Export / import des données', icon: 'export', run: go(() => ui.navigate('me', 'data')) },
+      { id: 'p-settings', group: 'Pages', title: 'Réglages', icon: 'settings', run: go(() => ui.navigate('me', 'settings')) },
+      { id: 'p-theme', group: 'Pages', title: 'Apparence · thème (sombre, clair, verre)', icon: 'settings', run: go(() => ui.navigate('me', 'settings')) },
+      { id: 'p-profile', group: 'Pages', title: 'Modifier mon profil (prénom, dates)', icon: 'me', run: go(() => ui.navigate('me', 'settings')) }
     ]
     for (const t of state.tasks.filter(t => !t.done && !t.deletedAt).slice(-60)) {
       list.push({ id: `t-${t.id}`, group: 'Tâches', title: t.title, sub: t.plannedDate ?? undefined, icon: 'check', run: go(() => ui.navigate('plan', null)) })

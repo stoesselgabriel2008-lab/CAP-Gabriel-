@@ -75,7 +75,8 @@ function MeHome() {
         </button>
         <button className="list-row" onClick={() => ui.setSub('me', 'settings')}>
           <Icon name="settings" size={22} className="chevron" />
-          <span className="row-main"><span className="row-title">Profil et réglages</span></span>
+          <span className="row-main"><span className="row-title">Réglages</span>
+            <span className="row-sub">Apparence, profil, engagement, confidentialité</span></span>
           <Icon name="chevronRight" size={16} className="chevron" />
         </button>
       </div>
@@ -850,16 +851,7 @@ function SettingsView() {
     <div className="screen">
       <BackHeader title="Réglages" onBack={() => ui.setSub('me', null)} />
 
-      <SectionHeader>Profil</SectionHeader>
-      <div className="card">
-        <label className="field-label" htmlFor="st-name" style={{ marginTop: 0 }}>Prénom</label>
-        <input id="st-name" className="field" value={firstName} onChange={e => setFirstName(e.target.value)} />
-        <DateField label="Date de naissance" value={birthDate} onChange={setBirthDate} allowNone={false} quick={false} />
-        <TimeField label="Heure de lever cible" value={wakeTarget} onChange={setWakeTarget} allowNone={false} />
-        <DateField label="Départ de l'engagement" value={startDate} onChange={setStartDate} allowNone={false} quick={false} />
-        <button className="btn btn-primary btn-block" style={{ marginTop: 16 }} onClick={save}>Enregistrer</button>
-      </div>
-
+      {/* L'apparence d'abord : c'est le réglage le plus cherché */}
       <SectionHeader>Apparence</SectionHeader>
       <div className="card">
         <Segmented
@@ -874,10 +866,19 @@ function SettingsView() {
           ]}
         />
         <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
-          Clair : palette officielle iOS. Verre sombre : cartes profondes et capsule
-          flottante façon Apple Music de nuit. Verre clair : la même chose en mode jour,
-          surfaces blanches translucides.
+          Clair : palette officielle iOS. Verre : cartes profondes et capsule flottante
+          façon Apple Music, en nuit ou en jour.
         </p>
+      </div>
+
+      <SectionHeader>Profil</SectionHeader>
+      <div className="card">
+        <label className="field-label" htmlFor="st-name" style={{ marginTop: 0 }}>Prénom</label>
+        <input id="st-name" className="field" value={firstName} onChange={e => setFirstName(e.target.value)} />
+        <DateField label="Date de naissance" value={birthDate} onChange={setBirthDate} allowNone={false} quick={false} />
+        <TimeField label="Heure de lever cible" value={wakeTarget} onChange={setWakeTarget} allowNone={false} />
+        <DateField label="Départ de l'engagement" value={startDate} onChange={setStartDate} allowNone={false} quick={false} />
+        <button className="btn btn-primary btn-block" style={{ marginTop: 16 }} onClick={save}>Enregistrer</button>
       </div>
 
       <SectionHeader>Confidentialité et confort</SectionHeader>
@@ -897,8 +898,22 @@ function SettingsView() {
       </div>
       <p style={{ color: 'var(--tertiary-label)', fontSize: 13, margin: '4px 4px 0', lineHeight: 1.5 }}>
         Les données ne sont pas chiffrées : elles sont simplement locales à ce navigateur.
-        Le mode sombre suit le réglage du système.
       </p>
+
+      <SectionHeader>Aussi dans Moi</SectionHeader>
+      <div className="list-group">
+        <button className="list-row" onClick={() => ui.setSub('me', 'data')}>
+          <Icon name="export" size={20} className="chevron" />
+          <span className="row-main"><span className="row-title">Données et sauvegarde</span>
+            <span className="row-sub">Export, import, suppression</span></span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
+        <button className="list-row" onClick={() => ui.setSub('me', 'guide')}>
+          <Icon name="book" size={20} className="chevron" />
+          <span className="row-main"><span className="row-title">Guide d'utilisation</span></span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
+      </div>
     </div>
   )
 }
