@@ -186,16 +186,16 @@ export function Today() {
       <SectionHeader>Raccourcis</SectionHeader>
       <div className="shortcut-grid">
         <button className="shortcut" onClick={() => ui.openTimerStart()}>
-          <Icon name="timer" size={26} /> Focus
+          <span className="shortcut-circle"><Icon name="timer" size={26} /></span> Focus
         </button>
         <button className="shortcut" onClick={ui.openCapture}>
-          <Icon name="capture" size={26} /> Capturer
+          <span className="shortcut-circle"><Icon name="capture" size={26} /></span> Capturer
         </button>
         <button className="shortcut sos" onClick={ui.openSOS}>
-          <Icon name="sos" size={26} /> SOS
+          <span className="shortcut-circle"><Icon name="sos" size={26} /></span> SOS
         </button>
         <button className="shortcut" onClick={ui.openCheckIn}>
-          <Icon name="bolt" size={26} /> Check-in
+          <span className="shortcut-circle"><Icon name="bolt" size={26} /></span> Check-in
         </button>
       </div>
 

@@ -22,11 +22,10 @@ import { APP_VERSION } from '../domain/types'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Bulle de verre coulissante dans la barre d\'onglets : elle glisse d\'un onglet à l\'autre avec un ressort fluide',
-  'Tous les sélecteurs (énergie, durée, apparence…) ont maintenant une pastille qui coulisse, comme les contrôles iOS',
-  'Boutons redessinés : dégradé subtil, reflet supérieur, enfoncement au toucher',
-  'Re-taper l\'onglet actif ramène à sa racine (convention des grandes apps)',
-  'Typographie et espacements affinés partout'
+  'La bulle d\'onglets et les pastilles de sélection se font maintenant glisser au doigt — pose, glisse, relâche',
+  'Les fenêtres se ferment en les tirant vers le bas, comme partout sur iOS',
+  'Refonte visuelle : en-têtes gras façon Apple Fitness, cartes épurées sans bordures, grands boutons en pilule, raccourcis en cercles',
+  '« Dupliquer la tâche » en un bouton dans chaque tâche'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -99,6 +98,31 @@ export default function App() {
       return t
     })
   }, [])
+
+  // Bulle d'onglets draggable : le doigt la fait glisser, relâcher sélectionne.
+  const tabBox = useRef<HTMLDivElement>(null)
+  const [tabDrag, setTabDrag] = useState<number | null>(null)
+  const tabMoved = useRef(false)
+  const tabFrac = (clientX: number) => {
+    const r = tabBox.current!.getBoundingClientRect()
+    return Math.max(0, Math.min(TABS.length - 1, ((clientX - r.left) / Math.max(1, r.width)) * TABS.length - 0.5))
+  }
+  const onTabDown = (e: React.PointerEvent) => {
+    tabMoved.current = false
+    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+    setTabDrag(tabFrac(e.clientX))
+  }
+  const onTabMove = (e: React.PointerEvent) => {
+    if (tabDrag === null) return
+    tabMoved.current = true
+    setTabDrag(tabFrac(e.clientX))
+  }
+  const onTabUp = () => {
+    if (tabDrag === null) return
+    const target = TABS[Math.round(tabDrag)]
+    setTabDrag(null)
+    if (target) { setTab(target.id); setOverlay(null) }
+  }
 
   const setSub = useCallback((t: TabId, s: string | null) => {
     setSubState(prev => ({ ...prev, [t]: s }))
@@ -239,11 +263,22 @@ export default function App() {
 
         {/* Tab bar */}
         <nav className="tab-bar" aria-label="Navigation principale">
-          <div className="tab-bar-inner" style={{ position: 'relative' }}>
+          <div
+            ref={tabBox}
+            className="tab-bar-inner"
+            style={{ position: 'relative' }}
+            onPointerDown={onTabDown}
+            onPointerMove={onTabMove}
+            onPointerUp={onTabUp}
+            onPointerCancel={() => setTabDrag(null)}
+          >
             <span
               className="tab-thumb"
               aria-hidden="true"
-              style={{ transform: `translateX(${TABS.findIndex(t => t.id === tab) * 100}%)` }}
+              style={{
+                transform: `translateX(${(tabDrag ?? TABS.findIndex(t => t.id === tab)) * 100}%)`,
+                transition: tabDrag !== null ? 'none' : undefined
+              }}
             />
             {TABS.map(t => {
               const badge = tabBadges[t.id] ?? 0
@@ -253,7 +288,7 @@ export default function App() {
                   className="tab-item"
                   aria-current={tab === t.id ? 'page' : undefined}
                   aria-label={badge > 0 ? `${t.label}, ${badge} en attente` : undefined}
-                  onClick={() => { setTab(t.id); setOverlay(null) }}
+                  onClick={() => { if (!tabMoved.current) { setTab(t.id); setOverlay(null) } }}
                 >
                   <span style={{ position: 'relative', display: 'flex' }}>
                     <Icon name={t.icon} size={24} filled={false} />

@@ -53,9 +53,31 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
     }
   }, [onClose])
 
+  // Fermeture en tirant la sheet vers le bas (depuis la poignée / l'en-tête)
+  const [dy, setDy] = React.useState(0)
+  const dragging = useRef<{ startY: number } | null>(null)
+  const onHeadDown = (e: React.PointerEvent) => {
+    // ne pas voler le clic des boutons du header (Fermer, OK…)
+    if ((e.target as Element).closest('button')) return
+    dragging.current = { startY: e.clientY }
+    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+  }
+  const onHeadMove = (e: React.PointerEvent) => {
+    if (!dragging.current) return
+    setDy(Math.max(0, e.clientY - dragging.current.startY))
+  }
+  const onHeadUp = () => {
+    if (!dragging.current) return
+    const closing = dy > 110
+    dragging.current = null
+    if (closing) onClose()
+    else setDy(0)
+  }
+
   return (
     <>
-      <div className="sheet-backdrop" onClick={onClose} aria-hidden="true" />
+      <div className="sheet-backdrop" onClick={onClose} aria-hidden="true"
+        style={dy > 0 ? { opacity: Math.max(0.3, 1 - dy / 400) } : undefined} />
       <div
         ref={ref}
         role="dialog"
@@ -63,13 +85,25 @@ export function Sheet({ title, onClose, children, full, closeLabel = 'Fermer' }:
         aria-label={title}
         tabIndex={-1}
         className={`sheet${full ? ' sheet-full' : ''}`}
+        style={{
+          transform: dy > 0 ? `translateY(${dy}px)` : undefined,
+          transition: dragging.current ? 'none' : 'transform 320ms var(--ease-spring)'
+        }}
       >
-        <div className="sheet-grabber" aria-hidden="true" />
-        <div className="sheet-header">
-          <span className="sheet-title">{title}</span>
-          <button className="btn-plain-bold sheet-close" onClick={onClose} style={{ minHeight: 44, minWidth: 44 }}>
-            {closeLabel}
-          </button>
+        <div
+          className="sheet-drag-zone"
+          onPointerDown={onHeadDown}
+          onPointerMove={onHeadMove}
+          onPointerUp={onHeadUp}
+          onPointerCancel={onHeadUp}
+        >
+          <div className="sheet-grabber" aria-hidden="true" />
+          <div className="sheet-header">
+            <span className="sheet-title">{title}</span>
+            <button className="btn-plain-bold sheet-close" onClick={onClose} style={{ minHeight: 44, minWidth: 44 }}>
+              {closeLabel}
+            </button>
+          </div>
         </div>
         <div className="sheet-body">{children}</div>
       </div>
@@ -85,13 +119,53 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
 }) {
   const idx = options.findIndex(o => o.value === value)
   const n = options.length
+  const box = useRef<HTMLDivElement>(null)
+  const [drag, setDrag] = React.useState<number | null>(null) // index fractionnaire pendant le glissement
+  const moved = useRef(false)
+
+  const fracFor = (clientX: number) => {
+    const r = box.current!.getBoundingClientRect()
+    const f = ((clientX - r.left - 2) / Math.max(1, r.width - 4)) * n - 0.5
+    return Math.max(0, Math.min(n - 1, f))
+  }
+  const onDown = (e: React.PointerEvent) => {
+    moved.current = false
+    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+    setDrag(fracFor(e.clientX))
+  }
+  const onMove = (e: React.PointerEvent) => {
+    if (drag === null) return
+    moved.current = true
+    setDrag(fracFor(e.clientX))
+  }
+  const onUp = () => {
+    if (drag === null) return
+    const target = options[Math.round(drag)]
+    setDrag(null)
+    if (target) onChange(target.value)
+  }
+
+  const shown = drag ?? (idx >= 0 ? idx : null)
   return (
-    <div className="segmented" role="group" aria-label={label}>
-      {idx >= 0 && (
+    <div
+      ref={box}
+      className="segmented"
+      role="group"
+      aria-label={label}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={() => setDrag(null)}
+    >
+      {shown !== null && (
         <span
           className="segmented-thumb"
           aria-hidden="true"
-          style={{ width: `calc((100% - 4px) / ${n})`, transform: `translateX(${idx * 100}%)` }}
+          style={{
+            width: `calc((100% - 4px) / ${n})`,
+            transform: `translateX(${shown * 100}%)`,
+            transition: drag !== null ? 'none' : undefined
+          }}
         />
       )}
       {options.map(o => (
@@ -99,7 +173,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
           key={o.value}
           type="button"
           aria-pressed={value === o.value}
-          onClick={() => onChange(o.value)}
+          onClick={() => { if (!moved.current) onChange(o.value) }}
         >
           {o.label}
         </button>

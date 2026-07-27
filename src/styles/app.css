@@ -119,38 +119,36 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
   margin-bottom: var(--sp-4);
 }
 
+/* En-têtes gras façon Apple Fitness / Music — plus de petites capitales web */
 .section-header {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--secondary-label);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: var(--sp-6) var(--sp-1) var(--sp-2);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--label);
+  letter-spacing: -0.01em;
+  text-transform: none;
+  margin: 28px var(--sp-1) 10px;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
 .section-header .section-action {
-  text-transform: none;
-  letter-spacing: 0;
   color: var(--tint);
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 /* ─── Cartes et listes ───────────────────────────────────────────── */
 .card {
   background: var(--secondary-system-grouped-background);
-  border-radius: var(--radius-card);
-  border: 0.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
   padding: var(--sp-4);
   margin-bottom: var(--sp-3);
 }
 
 .list-group {
   background: var(--secondary-system-grouped-background);
-  border-radius: var(--radius-card);
-  border: 0.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
   overflow: hidden;
   margin-bottom: var(--sp-3);
 }
@@ -228,7 +226,7 @@ button.list-row:active { background: var(--tertiary-system-background); }
 .btn-plain { color: var(--tint); font-weight: 400; padding: 0 var(--sp-2); }
 .btn-plain-bold { color: var(--tint); font-weight: 600; padding: 0 var(--sp-2); }
 .btn-block { width: 100%; }
-.btn-large { min-height: 50px; font-size: 17px; border-radius: 14px; }
+.btn-large { min-height: 50px; font-size: 17px; border-radius: var(--radius-pill); }
 .btn:disabled { opacity: 0.4; pointer-events: none; }
 
 /* ─── Segmented control : pastille coulissante ───────────────────── */
@@ -238,7 +236,10 @@ button.list-row:active { background: var(--tertiary-system-background); }
   background: var(--tertiary-system-background);
   border-radius: 10px;
   padding: 2px;
+  touch-action: pan-y;
 }
+.tab-bar-inner { touch-action: pan-y; }
+.sheet-drag-zone { touch-action: none; cursor: grab; }
 .segmented-thumb {
   position: absolute;
   top: 2px;
@@ -595,14 +596,12 @@ textarea.field { resize: vertical; min-height: 80px; line-height: 1.4; }
   pointer-events: none;
 }
 .now-card .now-kicker {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--tint);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   margin-bottom: var(--sp-1);
 }
-.now-card .now-title { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+.now-card .now-title { font-size: 24px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 2px; }
 .now-card .now-sub { color: var(--secondary-label); font-size: 15px; margin-bottom: var(--sp-3); }
 .now-card .now-why {
   color: var(--secondary-label);
@@ -638,21 +637,31 @@ button.check-btn { min-width: 44px; min-height: 44px; display: flex; align-items
   grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-3);
 }
+/* Raccourcis en cercles, façon Apple Wallet / Raccourcis */
 .shortcut {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-2);
-  background: var(--secondary-system-grouped-background);
-  border-radius: var(--radius-card);
-  padding: var(--sp-4) var(--sp-2);
+  gap: 7px;
+  background: none;
+  padding: 4px 0;
   font-size: 12px;
   font-weight: 500;
   color: var(--label);
   transition: transform 140ms var(--ease-spring);
   min-height: 44px;
 }
-.shortcut:active { transform: scale(0.95); }
+.shortcut:active { transform: scale(0.93); }
+.shortcut-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--secondary-system-grouped-background);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.07), inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.25);
+}
 .shortcut svg { color: var(--tint); }
 .shortcut.sos svg { color: var(--danger); }
 
@@ -1056,7 +1065,6 @@ input[type="range"] {
    flottantes — c'est ce que fait Apple : une carte statique n'a rien à réfracter). */
 .theme-glass .card,
 .theme-glass .list-group,
-.theme-glass .shortcut,
 .theme-glass .now-card,
 .theme-glass .toast,
 .theme-glass .update-banner {
@@ -1070,7 +1078,13 @@ input[type="range"] {
 }
 .theme-glass .now-card { border-radius: 24px; }
 .theme-glass .now-card::before { display: none; }
-.theme-glass .shortcut { border-radius: 20px; }
+.theme-glass .shortcut-circle {
+  background: linear-gradient(180deg, #1e1e21, #151518);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.09),
+    inset 0 1px 0.5px -0.5px rgba(255, 255, 255, 0.3),
+    0 6px 16px rgba(0, 0, 0, 0.4);
+}
 
 /* Contrôles : relief discret */
 .theme-glass .segmented,
@@ -1172,7 +1186,7 @@ input[type="range"] {
 /* Réduction de transparence système : le thème verre redevient opaque */
 @media (prefers-reduced-transparency: reduce) {
   .theme-glass .card, .theme-glass .list-group, .theme-glass .now-card,
-  .theme-glass .shortcut, .theme-glass .sheet, .theme-glass .tab-bar,
+  .theme-glass .shortcut-circle, .theme-glass .sheet, .theme-glass .tab-bar,
   .theme-glass .action-bar, .theme-glass .toast, .theme-glass .update-banner {
     background: var(--secondary-system-background);
     -webkit-backdrop-filter: none;
@@ -1215,11 +1229,14 @@ input[type="range"] {
 }
 
 .theme-light .card,
-.theme-light .list-group,
-.theme-light .shortcut {
+.theme-light .list-group {
   background: #ffffff;
   border: none;
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+.theme-light .shortcut-circle {
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
 }
 .theme-light .now-card {
   background: #ffffff;
@@ -1293,7 +1310,7 @@ input[type="range"] {
 
 .theme-glass-light .card,
 .theme-glass-light .list-group,
-.theme-glass-light .shortcut,
+.theme-glass-light .shortcut-circle,
 .theme-glass-light .now-card,
 .theme-glass-light .toast,
 .theme-glass-light .update-banner {
@@ -1309,7 +1326,7 @@ input[type="range"] {
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .theme-glass-light .card,
   .theme-glass-light .list-group,
-  .theme-glass-light .shortcut,
+  .theme-glass-light .shortcut-circle,
   .theme-glass-light .now-card,
   .theme-glass-light .toast,
   .theme-glass-light .update-banner {

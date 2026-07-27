@@ -342,6 +342,22 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       </button>
 
       <button className="btn btn-primary btn-block btn-large" style={{ marginTop: 20 }} onClick={save}>Enregistrer</button>
+      {task && (
+        <button className="btn btn-secondary btn-block" style={{ marginTop: 8 }} onClick={() => {
+          update(s => ({
+            ...s,
+            tasks: [...s.tasks, {
+              ...task, id: newId('task'), title: `${task.title} (copie)`,
+              done: false, completedAt: null, top3Rank: null, top3Date: null,
+              createdAt: nowISO(), deletedAt: null
+            }]
+          }))
+          toast('Tâche dupliquée.')
+          onClose()
+        }}>
+          Dupliquer la tâche
+        </button>
+      )}
       {task && !task.done && (
         <button className="btn btn-secondary btn-block" style={{ marginTop: 8 }} onClick={() => {
           const tomorrow = addDays(todayISO(state.profile.timezone), 1)
