@@ -74,6 +74,7 @@ export function CommandCenter({ onClose }: { onClose: () => void }) {
       { id: 'a-evening', group: 'Actions', title: 'Fermeture du soir', icon: 'moon', keywords: 'soir soiree coucher preparer demain routine nuit ranger fermer journee', run: go(() => ui.openEvening()) },
       { id: 'p-today', group: 'Pages', title: "Aujourd'hui", icon: 'today', keywords: 'accueil maintenant jour home top3 priorites', run: go(() => ui.navigate('today', null)) },
       { id: 'p-plan', group: 'Pages', title: 'Plan', icon: 'plan', keywords: 'taches tache todo a faire liste agenda organiser planifier calendrier', run: go(() => ui.navigate('plan', null)) },
+      { id: 'p-calendar', group: 'Pages', title: 'Calendrier', icon: 'plan', keywords: 'calendrier agenda mois google planning semaine dates vue', run: go(() => ui.navigate('plan', 'calendar')) },
       { id: 'p-inbox', group: 'Pages', title: 'Inbox', icon: 'inbox', keywords: 'trier boite vrac entrees clarifier ranger', run: go(() => ui.navigate('plan', 'inbox')) },
       { id: 'p-habits', group: 'Pages', title: 'Habitudes', icon: 'check', keywords: 'habitude routine streak serie regularite quotidien cocher suivre suivi', run: go(() => ui.navigate('plan', 'habits')) },
       { id: 'p-notes', group: 'Pages', title: 'Notes', icon: 'book', keywords: 'fiche memo note ecrit texte document idees', run: go(() => ui.navigate('plan', 'notes')) },

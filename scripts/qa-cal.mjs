@@ -1,0 +1,38 @@
+// Vérifie le calendrier mensuel + catégories colorées.
+import { chromium } from 'playwright-core'
+import { spawn } from 'node:child_process'
+const preview = spawn('npx', ['vite', 'preview', '--port', '4181'], { stdio: 'pipe' })
+await new Promise(r => setTimeout(r, 2500))
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' })
+const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'dark', locale: 'fr-FR', timezoneId: 'Europe/Paris' })).newPage()
+const errors = []
+page.on('pageerror', e => errors.push(e.message))
+page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()) })
+await page.goto('http://localhost:4181/CAP-Gabriel-/', { waitUntil: 'networkidle' })
+await page.getByRole('button', { name: 'Commencer' }).click()
+await page.getByRole('button', { name: 'Continuer' }).click()
+await page.getByRole('button', { name: 'Continuer' }).click()
+await page.getByRole('button', { name: "C'est parti" }).click()
+await page.waitForTimeout(300)
+// créer une tâche DST via le calendrier
+await page.getByLabel('Navigation principale').getByRole('button', { name: 'Plan' }).click()
+await page.getByRole('button', { name: /^Calendrier/ }).click()
+await page.getByRole('button', { name: '+ Ce jour' }).click()
+await page.getByLabel('Titre').fill('DST de maths')
+await page.getByRole('button', { name: /DST/ }).click()
+await page.getByRole('button', { name: 'Haute' }).click()
+await page.getByRole('button', { name: 'Enregistrer' }).click()
+await page.waitForTimeout(400)
+const dot = await page.locator('.month-day-dots > span').first().evaluate(el => getComputedStyle(el).backgroundColor)
+console.log('pastille jour =', dot, dot === 'rgb(255, 69, 58)' ? 'OK (rouge DST)' : '')
+const inList = await page.getByText('DST de maths').count()
+console.log('tâche listée sous le jour :', inList > 0 ? 'OK' : 'ÉCHEC')
+if (inList === 0) errors.push('tâche absente de la liste du jour')
+await page.screenshot({ path: 'qa-shots/v32-calendar.png' })
+// éditeur de date : titre court
+await page.locator('main > div:not([hidden]) .list-row .row-main').last().click()
+await page.getByRole('button', { name: /Échéance réelle/ }).click()
+await page.waitForTimeout(300)
+await page.screenshot({ path: 'qa-shots/v32-datepicker.png' })
+console.log(errors.length ? 'ERREURS: ' + errors.join('; ') : 'CALENDRIER OK')
+await browser.close(); preview.kill(); process.exit(errors.length ? 1 : 0)

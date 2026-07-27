@@ -45,6 +45,7 @@ export interface Task {
   durationMin: number | null
   energy: Energy | null
   priority: Priority
+  category?: string | null // id de catégorie colorée (domain/categories.ts)
   projectId: ID | null
   subjectId: ID | null
   someday: boolean
@@ -330,7 +331,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '3.1.0'
+export const APP_VERSION = '3.2.0'
 
 export function defaultState(): AppState {
   return {

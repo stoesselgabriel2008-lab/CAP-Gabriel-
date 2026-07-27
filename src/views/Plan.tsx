@@ -9,6 +9,8 @@ import { Sheet, Segmented, SectionHeader, EmptyState, ChoiceChips } from '../ui/
 import { DateField, TimeField } from '../ui/pickers'
 import { HabitsView } from './Habits'
 import { NotesView } from './Notes'
+import { CalendarView } from './CalendarView'
+import { TASK_CATEGORIES, taskColor, categoryOf } from '../domain/categories'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Task, Capture, Project, Goal } from '../domain/types'
@@ -24,6 +26,7 @@ export function Plan() {
   if (sub === 'goals') return <GoalsView />
   if (sub === 'habits') return <HabitsView />
   if (sub === 'notes') return <NotesView />
+  if (sub === 'calendar') return <CalendarView />
 
   return <PlanHome inboxCount={inboxCount} />
 }
@@ -49,6 +52,29 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
     toast(label)
   }
 
+  const taskRow = (t: Task) => (
+    <div key={t.id} className="list-row">
+      {!t.done ? (
+        <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => complete(t)}>
+          <span className="check-circle"><Icon name="check" size={14} /></span>
+        </button>
+      ) : (
+        <span className="check-circle checked" style={{ marginRight: 0 }}><Icon name="check" size={14} /></span>
+      )}
+      <span className="cat-bar" style={{ background: taskColor(t.category, t.priority) }} aria-hidden="true" />
+      <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => setEditing(t)}>
+        <span className="row-title" style={{ display: 'block', textDecoration: t.done ? 'line-through' : 'none', color: t.done ? 'var(--secondary-label)' : undefined }}>{t.title}</span>
+        <span className="row-sub">
+          {categoryOf(t.category) && `${categoryOf(t.category)!.label} · `}
+          {t.plannedDate && `prévu ${relativeLabel(t.plannedDate, today)}`}
+          {t.deadline && `${t.plannedDate ? ' · ' : ''}échéance ${relativeLabel(t.deadline, today)}`}
+          {t.projectId && ` · ${state.projects.find(p => p.id === t.projectId)?.name ?? ''}`}
+        </span>
+      </button>
+      <Icon name="chevronRight" size={16} className="chevron" />
+    </div>
+  )
+
   const complete = (t: Task) => {
     updateUndoable(`« ${t.title} » terminée.`, s => ({
       ...s, tasks: s.tasks.map(x => x.id === t.id ? { ...x, done: true, completedAt: nowISO() } : x)
@@ -66,6 +92,14 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
       <p className="subtitle-context">Ce qui existe, quand, et pourquoi.</p>
 
       <div className="list-group">
+        <button className="list-row" onClick={() => ui.setSub('plan', 'calendar')}>
+          <Icon name="plan" size={22} className="chevron" />
+          <span className="row-main">
+            <span className="row-title">Calendrier</span>
+            <span className="row-sub">Le mois en un coup d'œil, couleurs par catégorie</span>
+          </span>
+          <Icon name="chevronRight" size={16} className="chevron" />
+        </button>
         <button className="list-row" onClick={() => ui.setSub('plan', 'inbox')}>
           <Icon name="inbox" size={22} className="chevron" />
           <span className="row-main"><span className="row-title">Inbox</span></span>
@@ -159,28 +193,31 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
             </EmptyState>
           </div>
         ) : (
-          <div className="list-group">
-            {lists[section].map(t => (
-              <div key={t.id} className="list-row">
-                {!t.done ? (
-                  <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => complete(t)}>
-                    <span className="check-circle"><Icon name="check" size={14} /></span>
-                  </button>
-                ) : (
-                  <span className="check-circle checked" style={{ marginRight: 0 }}><Icon name="check" size={14} /></span>
-                )}
-                <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => setEditing(t)}>
-                  <span className="row-title" style={{ display: 'block', textDecoration: t.done ? 'line-through' : 'none', color: t.done ? 'var(--secondary-label)' : undefined }}>{t.title}</span>
-                  <span className="row-sub">
-                    {t.plannedDate && `prévu ${relativeLabel(t.plannedDate, today)}`}
-                    {t.deadline && `${t.plannedDate ? ' · ' : ''}échéance ${relativeLabel(t.deadline, today)}`}
-                    {t.projectId && ` · ${state.projects.find(p => p.id === t.projectId)?.name ?? ''}`}
-                  </span>
-                </button>
-                <Icon name="chevronRight" size={16} className="chevron" />
-              </div>
-            ))}
-          </div>
+          section === 'today' ? (
+            <>
+              {([
+                ['haute', 'Priorité haute', 'var(--danger)'],
+                ['normale', 'Priorité normale', 'var(--tint)'],
+                ['basse', 'Priorité basse', 'var(--secondary-label)']
+              ] as const).map(([p, label, color]) => {
+                const items = lists.today.filter(t => t.priority === p)
+                if (items.length === 0) return null
+                return (
+                  <div key={p}>
+                    <h3 className="section-header" style={{ marginTop: 14, fontSize: 15 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, color }}>
+                        <span className="cat-dot" style={{ background: color }} />
+                        {label} · {items.length}
+                      </span>
+                    </h3>
+                    <div className="list-group">{items.map(t => taskRow(t))}</div>
+                  </div>
+                )
+              })}
+            </>
+          ) : (
+            <div className="list-group">{lists[section].map(t => taskRow(t))}</div>
+          )
         )}
       </div>
 
@@ -226,6 +263,7 @@ function UpcomingAgenda({ tasks, today, onEdit, onComplete }: {
                 <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => onComplete(t)}>
                   <span className="check-circle"><Icon name="check" size={14} /></span>
                 </button>
+                <span className="cat-bar" style={{ background: taskColor(t.category, t.priority) }} aria-hidden="true" />
                 <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => onEdit(t)}>
                   <span className="row-title" style={{ display: 'block' }}>{t.title}</span>
                   {(t.plannedTime || t.deadline) && (
@@ -260,6 +298,7 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
   const [deadline, setDeadline] = useState(task?.deadline ?? '')
   const [durationMin, setDurationMin] = useState(task?.durationMin ? String(task.durationMin) : '')
   const [priority, setPriority] = useState<Task['priority']>(task?.priority ?? 'normale')
+  const [category, setCategory] = useState(task?.category ?? '')
   const [someday, setSomeday] = useState(task?.someday ?? false)
   const [projectId, setProjectId] = useState(task?.projectId ?? '')
   const [subjectId, setSubjectId] = useState(task?.subjectId ?? '')
@@ -273,7 +312,8 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       plannedDate: plannedDate || null, plannedTime: plannedTime || null,
       deadline: deadline || null,
       durationMin: durationMin ? Math.max(1, parseInt(durationMin, 10) || 0) : null,
-      priority, someday, projectId: projectId || null, subjectId: subjectId || null
+      priority, category: category || null, someday,
+      projectId: projectId || null, subjectId: subjectId || null
     }
     if (task) {
       update(s => ({ ...s, tasks: s.tasks.map(t => t.id === task.id ? { ...t, ...fields } : t) }))
@@ -307,6 +347,19 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       <DateField label="Je veux la faire le… (facultatif)" value={plannedDate} onChange={setPlannedDate} />
       <TimeField label="Heure (facultatif, pour la timeline)" value={plannedTime} onChange={setPlannedTime} />
       <DateField label="Échéance réelle — doit être fini avant (facultatif)" value={deadline} onChange={setDeadline} />
+
+      <span className="field-label">Catégorie</span>
+      <div className="chip-row" role="group" aria-label="Catégorie">
+        <button type="button" className="chip" aria-pressed={!category} onClick={() => setCategory('')}>Aucune</button>
+        {TASK_CATEGORIES.map(c => (
+          <button key={c.id} type="button" className="chip" aria-pressed={category === c.id}
+            onClick={() => setCategory(category === c.id ? '' : c.id)}
+            style={category === c.id ? { background: c.color, color: '#fff' } : undefined}>
+            <span className="cat-dot" style={{ background: category === c.id ? '#fff' : c.color, marginRight: 6 }} />
+            {c.label}
+          </button>
+        ))}
+      </div>
 
       <label className="field-label">Priorité</label>
       <Segmented label="Priorité" value={priority} onChange={setPriority}

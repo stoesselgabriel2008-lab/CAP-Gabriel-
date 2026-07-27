@@ -1143,6 +1143,71 @@ mark {
   font-weight: 700;
 }
 
+/* ─── Calendrier mensuel (façon Google Agenda) ───────────────────── */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  justify-items: stretch;
+}
+.month-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 52px;
+  padding: 5px 0 4px;
+  border-radius: 12px;
+  transition: background 140ms, transform 140ms var(--ease-spring);
+}
+.month-day:active { transform: scale(0.94); }
+.month-day-num {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  min-width: 26px;
+  border-radius: 13px;
+}
+.month-day.today .month-day-num { color: var(--tint); font-weight: 700; }
+.month-day.selected { background: var(--tertiary-system-background); }
+.month-day.selected.today .month-day-num,
+.month-day.selected .month-day-num { font-weight: 700; }
+.month-day.today.selected .month-day-num { background: var(--tint); color: #fff; }
+.month-day-dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  min-height: 7px;
+}
+.month-day-dots > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.month-day-more {
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  background: none !important;
+  font-size: 9px;
+  color: var(--secondary-label);
+  font-variant-numeric: tabular-nums;
+}
+.cat-bar {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin: 4px 0;
+}
+.cat-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
 .time-preview {
   text-align: center;
   font-size: 40px;

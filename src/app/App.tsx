@@ -23,10 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Audit visuel complet sur deux tailles d\'iPhone : libellés tronqués corrigés (« Verre nuit / Verre jour »), zéro débordement vérifié écran par écran',
-  'Les notifications passagères disparaissent plus vite (3 s) pour ne plus masquer le contenu',
-  'Cap rouvre sur ton dernier onglet utilisé',
-  'Coach : le bouton dit désormais ce qu\'il ouvre (« Ouvrir Contrôle », « Ouvrir Sommeil »…)'
+  'Vrai calendrier mensuel (Plan → Calendrier) : le mois en un coup d\'œil avec pastilles colorées, tap sur un jour → ses tâches, ajout direct sur une date',
+  'Catégories de tâches colorées : Devoir, DST, Cours, Révision, Perso, Admin — choisis-les dans la fiche, la couleur suit partout (listes, calendrier)',
+  'Plan → Aujourd\'hui : tâches séparées par priorité avec en-têtes colorés (haute en rouge)',
+  'Bug corrigé : le titre du sélecteur de date n\'écrase plus le bouton Fermer'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [

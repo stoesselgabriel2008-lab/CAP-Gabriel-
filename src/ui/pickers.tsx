@@ -23,6 +23,8 @@ export function DateField({ label, value, onChange, allowNone = true, quick = tr
   const [open, setOpen] = useState(false)
   const today = todayISO()
   const display = value && isValidCivil(value) ? formatCivilLong(value) : allowNone ? 'Aucune' : 'Choisir…'
+  // titre court pour l'en-tête de la sheet (le libellé long écrasait le bouton Fermer)
+  const sheetTitle = label.split(' — ')[0].split(' (')[0]
 
   const nextMonday = (() => {
     const wd = isoWeekday(today)
@@ -39,7 +41,7 @@ export function DateField({ label, value, onChange, allowNone = true, quick = tr
         <Icon name="plan" size={18} className="chevron" />
       </button>
       {open && (
-        <Sheet title={label} onClose={() => setOpen(false)}>
+        <Sheet title={sheetTitle} onClose={() => setOpen(false)}>
           {quick && (
             <div className="chip-row" style={{ marginBottom: 16 }}>
               <button type="button" className="chip" aria-pressed={value === today} onClick={() => pick(today)}>Aujourd'hui</button>
@@ -148,7 +150,7 @@ export function TimeField({ label, value, onChange, allowNone = true }: {
         <Icon name="timer" size={18} className="chevron" />
       </button>
       {open && (
-        <Sheet title={label} onClose={() => setOpen(false)} closeLabel="OK">
+        <Sheet title={label.split(' — ')[0].split(' (')[0]} onClose={() => setOpen(false)} closeLabel="OK">
           <p className="time-preview" aria-live="polite">{valid ? `${h}:${mn}` : '—'}</p>
           <span className="field-label">Heure</span>
           <div className="time-grid" role="group" aria-label="Heure">
