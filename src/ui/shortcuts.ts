@@ -21,7 +21,8 @@ export const SHORTCUT_DEFS: ShortcutDef[] = [
   { id: 'notes', label: 'Notes', icon: 'book' },
   { id: 'search', label: 'Recherche', icon: 'search' },
   { id: 'evening', label: 'Bilan du soir', icon: 'moon' },
-  { id: 'resist', label: 'Résistances', icon: 'flag' }
+  { id: 'resist', label: 'Résistances', icon: 'flag' },
+  { id: 'ai', label: 'Coach IA', icon: 'mind' }
 ]
 
 export const DEFAULT_SHORTCUTS = ['task', 'capture', 'checkin', 'sos']

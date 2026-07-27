@@ -23,8 +23,9 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Finitions : boutons avec relief subtil, cartes cerclées d\'un filet lumineux, champs avec anneau bleu au focus, sélecteurs profilés',
-  'Compteurs de résistance (Coach → Résistances) : jours tenus, couleur au choix, phrase du jour, paliers et record — « J\'ai craqué » garde le record et enchaîne sur le SOS'
+  'Coach IA (Coach → Coach IA) : discute avec Claude directement dans Cap — il connaît ta journée (tâches, révisions, engagement, compteurs) et répond en direct',
+  'Il faut une clé API Anthropic (guide pas à pas dans l\'écran) — elle reste sur ton téléphone, jamais dans tes exports',
+  'Modèle au choix dans les réglages du coach : Opus 5 (conseillé), Sonnet 5, Haiku 4.5'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
