@@ -23,10 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Accueil repensé : 4 tuiles d\'un coup d\'œil (Révisions, Focus du jour, Habitudes, Engagement) — chacune ouvre son écran',
-  'Carte « Maintenant » condensée : le pourquoi se déplie seulement si tu le demandes',
-  'Top 3 vide : une simple ligne « Choisir mes 3 priorités » au lieu d\'un gros bloc',
-  'Date mise en avant au-dessus du titre, raccourcis resserrés'
+  'Barre d\'onglets : la bulle et les couleurs suivent ton doigt en direct, mais l\'écran ne s\'ouvre qu\'au relâchement — comme tu l\'as demandé',
+  'Objectif de focus quotidien (Réglages) : la tuile Focus affiche ta progression avec une barre',
+  'Réviser : compte à rebours J-X vers ton prochain examen, avec rappel des erreurs à retester',
+  'Fiche de tâche : actions (reporter, dupliquer, supprimer) regroupées en liste propre'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -129,11 +129,8 @@ export default function App() {
   const onTabMove = (e: React.PointerEvent) => {
     if (tabDrag === null) return
     tabMoved.current = true
-    const f = tabFrac(e.clientX)
-    setTabDrag(f)
-    // changement d'onglet en temps réel pendant le glissement
-    const target = TABS[Math.round(f)]
-    if (target && target.id !== tab) setTab(target.id)
+    // la bulle et les couleurs suivent le doigt ; l'écran ne change qu'au relâchement
+    setTabDrag(tabFrac(e.clientX))
   }
   const onTabUp = () => {
     if (tabDrag === null) return
@@ -306,13 +303,14 @@ export default function App() {
                 transition: tabDrag !== null ? 'none' : undefined
               }}
             />
-            {TABS.map(t => {
+            {TABS.map((t, i) => {
               const badge = tabBadges[t.id] ?? 0
+              const activeIdx = tabDrag !== null ? Math.round(tabDrag) : TABS.findIndex(x => x.id === tab)
               return (
                 <button
                   key={t.id}
                   className="tab-item"
-                  aria-current={tab === t.id ? 'page' : undefined}
+                  aria-current={i === activeIdx ? 'page' : undefined}
                   aria-label={badge > 0 ? `${t.label}, ${badge} en attente` : undefined}
                   onClick={() => { if (!tabMoved.current) { setTab(t.id); setOverlay(null) } }}
                 >

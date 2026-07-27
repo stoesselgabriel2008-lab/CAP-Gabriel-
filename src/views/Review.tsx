@@ -60,6 +60,29 @@ function ReviewHome() {
           : "Rien n'est dû aujourd'hui. Tu peux avancer un chapitre ou t'arrêter là."}
       </p>
 
+      {(() => {
+        const upcoming = state.subjects
+          .filter(s => s.examDate && daysBetween(today, s.examDate!) >= 0)
+          .sort((a, b) => a.examDate!.localeCompare(b.examDate!))[0]
+        if (!upcoming) return null
+        const inDays = daysBetween(today, upcoming.examDate!)
+        return (
+          <button className="card" style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14 }}
+            onClick={() => ui.setSub('review', `subject:${upcoming.id}`)}>
+            <span style={{ fontSize: 30, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: inDays <= 7 ? 'var(--danger)' : 'var(--tint)' }}>
+              {inDays === 0 ? 'J-0' : `J-${inDays}`}
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontWeight: 600 }}>Examen · {upcoming.name}</span>
+              <span style={{ display: 'block', fontSize: 13, color: 'var(--secondary-label)' }}>
+                {relativeLabel(upcoming.examDate!, today)}{inDays <= 10 && untested > 0 ? ` · ${untested} erreur${untested > 1 ? 's' : ''} à retester` : ''}
+              </span>
+            </span>
+            <Icon name="chevronRight" size={16} className="chevron" />
+          </button>
+        )
+      })()}
+
       {/* File due */}
       {due.length > 0 && (
         <>

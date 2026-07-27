@@ -32,6 +32,7 @@ export function Today() {
   const habitsDue = state.routines.filter(r => !r.archived && isScheduled(r, today))
   const habitsDone = habitsDue.filter(r => isDone(state.routineLogs, r.id, today)).length
   const streak = currentStreak(state.commitment, today)
+  const focusGoal = state.settings.dailyFocusGoalMin
 
   const top3 = state.tasks
     .filter(t => !t.deletedAt && t.top3Date === today && !t.done)
@@ -125,8 +126,16 @@ export function Today() {
         </button>
         <button className="card tile" onClick={() => ui.openTimerStart()}>
           <span className="tile-label"><Icon name="timer" size={16} /> Focus</span>
-          <span className="tile-value">{focusMinToday > 0 ? `${focusMinToday} min` : '—'}</span>
-          <span className="tile-sub">{focusMinToday > 0 ? "aujourd'hui" : 'lancer une session'}</span>
+          <span className="tile-value">
+            {focusGoal > 0 ? `${focusMinToday}/${focusGoal}` : focusMinToday > 0 ? `${focusMinToday} min` : '—'}
+          </span>
+          {focusGoal > 0 ? (
+            <span className="tile-bar" aria-hidden="true">
+              <span style={{ width: `${Math.min(100, (focusMinToday / focusGoal) * 100)}%` }} />
+            </span>
+          ) : (
+            <span className="tile-sub">{focusMinToday > 0 ? "aujourd'hui" : 'lancer une session'}</span>
+          )}
         </button>
         <button className="card tile" onClick={() => ui.navigate('plan', 'habits')}>
           <span className="tile-label"><Icon name="check" size={16} /> Habitudes</span>

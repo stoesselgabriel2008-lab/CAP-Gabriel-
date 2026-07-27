@@ -892,6 +892,23 @@ function SettingsView() {
         </p>
       </div>
 
+      <SectionHeader>Objectif de focus</SectionHeader>
+      <div className="card">
+        <span className="field-label" style={{ marginTop: 0 }}>Minutes de focus visées par jour</span>
+        <div className="chip-row">
+          {[0, 60, 90, 120, 180].map(m => (
+            <button key={m} type="button" className="chip"
+              aria-pressed={state.settings.dailyFocusGoalMin === m}
+              onClick={() => update(s => ({ ...s, settings: { ...s.settings, dailyFocusGoalMin: m } }))}>
+              {m === 0 ? 'Désactivé' : `${m} min`}
+            </button>
+          ))}
+        </div>
+        <p style={{ color: 'var(--tertiary-label)', fontSize: 13, marginTop: 10 }}>
+          La tuile Focus de l'accueil affiche ta progression vers cet objectif.
+        </p>
+      </div>
+
       <SectionHeader>Profil</SectionHeader>
       <div className="card">
         <label className="field-label" htmlFor="st-name" style={{ marginTop: 0 }}>Prénom</label>

@@ -19,6 +19,7 @@ export interface Settings {
   lastSeenVersion: string // dernière version dont les nouveautés ont été vues
   appearance: 'sobre' | 'clair' | 'glass' | 'glass-clair' // sombre, clair iOS, verre sombre, verre clair
   accent: string // id de couleur d'accent (voir ui/accents.ts)
+  dailyFocusGoalMin: number // objectif de focus quotidien en minutes (0 = désactivé)
 }
 
 export type CaptureKind = 'task' | 'note' | 'idea' | 'question' | 'error' | 'trigger' | 'event'
@@ -329,7 +330,7 @@ export interface AppState {
 }
 
 export const SCHEMA_VERSION = 1
-export const APP_VERSION = '2.8.0'
+export const APP_VERSION = '3.0.0'
 
 export function defaultState(): AppState {
   return {
@@ -349,7 +350,8 @@ export function defaultState(): AppState {
       hintsDismissed: [],
       lastSeenVersion: '',
       appearance: 'sobre',
-      accent: 'bleu'
+      accent: 'bleu',
+      dailyFocusGoalMin: 0
     },
     captures: [],
     tasks: [],
