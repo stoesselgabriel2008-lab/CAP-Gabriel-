@@ -8,7 +8,7 @@ import { Icon } from '../ui/Icon'
 import { SectionHeader, EmptyState } from '../ui/Sheet'
 import { BackHeader, TaskEditor } from './Plan'
 import { todayISO, addDays, isoWeekday, relativeLabel, nowISO } from '../lib/dates'
-import { taskColor, categoryOf } from '../domain/categories'
+import { taskColor, categoryOf, categoryBarColor, priorityColor } from '../domain/categories'
 import type { Task } from '../domain/types'
 
 const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
@@ -104,7 +104,10 @@ export function CalendarView() {
                 <span className="month-day-num">{day}</span>
                 <span className="month-day-dots" aria-hidden="true">
                   {tasks.slice(0, 3).map(t => (
-                    <span key={t.id} style={{ background: taskColor(t.category, t.priority) }} />
+                    <span key={t.id} style={{
+                      background: taskColor(t.category, t.priority),
+                      boxShadow: t.priority === 'haute' ? '0 0 0 1.5px var(--danger)' : undefined
+                    }} />
                   ))}
                   {tasks.length > 3 && <span className="month-day-more">+{tasks.length - 3}</span>}
                 </span>
@@ -129,14 +132,20 @@ export function CalendarView() {
               <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => complete(t)}>
                 <span className="check-circle"><Icon name="check" size={14} /></span>
               </button>
-              <span className="cat-bar" style={{ background: taskColor(t.category, t.priority) }} aria-hidden="true" />
+              <span className="cat-bar" style={{ background: categoryBarColor(t.category) }} aria-hidden="true" />
               <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => setEditing(t)}>
                 <span className="row-title" style={{ display: 'block' }}>{t.title}</span>
                 <span className="row-sub">
                   {t.plannedTime ? `${t.plannedTime} · ` : ''}
-                  {categoryOf(t.category)?.label ?? (t.priority === 'haute' ? 'Priorité haute' : '')}
+                  {categoryOf(t.category)?.label ?? ''}
                 </span>
               </button>
+              {t.priority !== 'normale' && (
+                <span aria-label={t.priority === 'haute' ? 'Priorité haute' : 'Priorité basse'}
+                  style={{ color: priorityColor(t.priority), display: 'flex', flexShrink: 0 }}>
+                  <Icon name={t.priority === 'haute' ? 'flag' : 'down'} size={16} />
+                </span>
+              )}
               <Icon name="chevronRight" size={16} className="chevron" />
             </div>
           ))}

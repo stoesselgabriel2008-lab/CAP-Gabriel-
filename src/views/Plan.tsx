@@ -10,7 +10,7 @@ import { DateField, TimeField } from '../ui/pickers'
 import { HabitsView } from './Habits'
 import { NotesView } from './Notes'
 import { CalendarView } from './CalendarView'
-import { TASK_CATEGORIES, taskColor, categoryOf } from '../domain/categories'
+import { TASK_CATEGORIES, taskColor, categoryOf, categoryBarColor, priorityColor } from '../domain/categories'
 import { todayISO, addDays, relativeLabel, nowISO, daysBetween } from '../lib/dates'
 import { newId } from '../lib/id'
 import type { Task, Capture, Project, Goal } from '../domain/types'
@@ -61,7 +61,7 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
       ) : (
         <span className="check-circle checked" style={{ marginRight: 0 }}><Icon name="check" size={14} /></span>
       )}
-      <span className="cat-bar" style={{ background: taskColor(t.category, t.priority) }} aria-hidden="true" />
+      <span className="cat-bar" style={{ background: categoryBarColor(t.category) }} aria-hidden="true" />
       <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => setEditing(t)}>
         <span className="row-title" style={{ display: 'block', textDecoration: t.done ? 'line-through' : 'none', color: t.done ? 'var(--secondary-label)' : undefined }}>{t.title}</span>
         <span className="row-sub">
@@ -71,6 +71,12 @@ function PlanHome({ inboxCount }: { inboxCount: number }) {
           {t.projectId && ` · ${state.projects.find(p => p.id === t.projectId)?.name ?? ''}`}
         </span>
       </button>
+      {t.priority !== 'normale' && !t.done && (
+        <span aria-label={t.priority === 'haute' ? 'Priorité haute' : 'Priorité basse'}
+          style={{ color: priorityColor(t.priority), display: 'flex', flexShrink: 0 }}>
+          <Icon name={t.priority === 'haute' ? 'flag' : 'down'} size={16} />
+        </span>
+      )}
       <Icon name="chevronRight" size={16} className="chevron" />
     </div>
   )
@@ -263,16 +269,24 @@ function UpcomingAgenda({ tasks, today, onEdit, onComplete }: {
                 <button className="check-btn" aria-label={`Terminer « ${t.title} »`} onClick={() => onComplete(t)}>
                   <span className="check-circle"><Icon name="check" size={14} /></span>
                 </button>
-                <span className="cat-bar" style={{ background: taskColor(t.category, t.priority) }} aria-hidden="true" />
+                <span className="cat-bar" style={{ background: categoryBarColor(t.category) }} aria-hidden="true" />
                 <button className="row-main" style={{ textAlign: 'left', minHeight: 44 }} onClick={() => onEdit(t)}>
                   <span className="row-title" style={{ display: 'block' }}>{t.title}</span>
-                  {(t.plannedTime || t.deadline) && (
+                  {(t.plannedTime || t.deadline || categoryOf(t.category)) && (
                     <span className="row-sub">
+                      {categoryOf(t.category) ? `${categoryOf(t.category)!.label}` : ''}
+                      {categoryOf(t.category) && (t.plannedTime || t.deadline) ? ' · ' : ''}
                       {t.plannedTime ?? ''}{t.plannedTime && t.deadline ? ' · ' : ''}
                       {t.deadline ? `échéance ${relativeLabel(t.deadline, today)}` : ''}
                     </span>
                   )}
                 </button>
+                {t.priority !== 'normale' && (
+                  <span aria-label={t.priority === 'haute' ? 'Priorité haute' : 'Priorité basse'}
+                    style={{ color: priorityColor(t.priority), display: 'flex', flexShrink: 0 }}>
+                    <Icon name={t.priority === 'haute' ? 'flag' : 'down'} size={16} />
+                  </span>
+                )}
                 <Icon name="chevronRight" size={16} className="chevron" />
               </div>
             ))}
@@ -344,10 +358,6 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
       <label className="field-label" htmlFor="te-title">Titre</label>
       <input id="te-title" className="field" value={title} onChange={e => setTitle(e.target.value)} autoFocus={!task} />
 
-      <DateField label="Je veux la faire le… (facultatif)" value={plannedDate} onChange={setPlannedDate} />
-      <TimeField label="Heure (facultatif, pour la timeline)" value={plannedTime} onChange={setPlannedTime} />
-      <DateField label="Échéance réelle — doit être fini avant (facultatif)" value={deadline} onChange={setDeadline} />
-
       <span className="field-label">Catégorie</span>
       <div className="chip-row" role="group" aria-label="Catégorie">
         <button type="button" className="chip" aria-pressed={!category} onClick={() => setCategory('')}>Aucune</button>
@@ -360,6 +370,10 @@ export function TaskEditor({ task, onClose, defaults, onSaved }: {
           </button>
         ))}
       </div>
+
+      <DateField label="Je veux la faire le… (facultatif)" value={plannedDate} onChange={setPlannedDate} />
+      <TimeField label="Heure (facultatif, pour la timeline)" value={plannedTime} onChange={setPlannedTime} />
+      <DateField label="Échéance réelle — doit être fini avant (facultatif)" value={deadline} onChange={setDeadline} />
 
       <label className="field-label">Priorité</label>
       <Segmented label="Priorité" value={priority} onChange={setPriority}

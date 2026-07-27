@@ -23,10 +23,10 @@ import { accentColor } from '../ui/accents'
 
 // Nouveautés annoncées après chaque mise à jour (popup « Quoi de neuf »).
 const WHATS_NEW: string[] = [
-  'Vrai calendrier mensuel (Plan → Calendrier) : le mois en un coup d\'œil avec pastilles colorées, tap sur un jour → ses tâches, ajout direct sur une date',
-  'Catégories de tâches colorées : Devoir, DST, Cours, Révision, Perso, Admin — choisis-les dans la fiche, la couleur suit partout (listes, calendrier)',
-  'Plan → Aujourd\'hui : tâches séparées par priorité avec en-têtes colorés (haute en rouge)',
-  'Bug corrigé : le titre du sélecteur de date n\'écrase plus le bouton Fermer'
+  'Catégorie ET priorité visibles en même temps : barre colorée de catégorie + drapeau rouge (haute) ou flèche grise (basse) sur chaque tâche',
+  'Calendrier : les pastilles des tâches priorité haute sont cerclées de rouge',
+  'Bulle d\'onglets affinée : un tap simple ne la fait plus sauter — seul un vrai glissement la déplace',
+  'Fiche de tâche : la catégorie se choisit juste sous le titre'
 ]
 
 const TABS: Array<{ id: TabId; label: string; icon: string }> = [
@@ -128,14 +128,19 @@ export default function App() {
     const r = tabBox.current!.getBoundingClientRect()
     return Math.max(0, Math.min(TABS.length - 1, ((clientX - r.left) / Math.max(1, r.width)) * TABS.length - 0.5))
   }
+  const tabStartX = useRef(0)
   const onTabDown = (e: React.PointerEvent) => {
     tabMoved.current = false
-    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
-    setTabDrag(tabFrac(e.clientX))
+    tabStartX.current = e.clientX
   }
   const onTabMove = (e: React.PointerEvent) => {
-    if (tabDrag === null) return
-    tabMoved.current = true
+    if (e.buttons === 0) return // survol : jamais de glissement sans appui
+    // seuil de 8 px : un tap simple ne fait pas sauter la bulle ni voler le clic
+    if (!tabMoved.current && Math.abs(e.clientX - tabStartX.current) < 8) return
+    if (!tabMoved.current) {
+      tabMoved.current = true
+      ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+    }
     // la bulle et les couleurs suivent le doigt ; l'écran ne change qu'au relâchement
     setTabDrag(tabFrac(e.clientX))
   }

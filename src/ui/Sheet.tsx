@@ -172,13 +172,18 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
     const f = ((clientX - r.left - 2) / Math.max(1, r.width - 4)) * n - 0.5
     return Math.max(0, Math.min(n - 1, f))
   }
+  const startX = useRef(0)
   const onDown = (e: React.PointerEvent) => {
     moved.current = false
-    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
-    setDrag(fracFor(e.clientX))
+    startX.current = e.clientX
   }
   const onMove = (e: React.PointerEvent) => {
-    if (drag === null) return
+    if (e.buttons === 0) return // survol : jamais de glissement sans appui
+    // seuil de 8 px : un tap simple ne déclenche pas le mode glissement
+    if (!moved.current && Math.abs(e.clientX - startX.current) < 8) return
+    if (!moved.current) {
+      ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+    }
     moved.current = true
     const f = fracFor(e.clientX)
     setDrag(f)
